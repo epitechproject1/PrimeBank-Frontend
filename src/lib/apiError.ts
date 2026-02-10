@@ -1,4 +1,9 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+
+type ErrorResponseData = {
+    detail?: string;
+    message?: string;
+};
 
 export type ApiError = {
     status: number;
@@ -6,20 +11,31 @@ export type ApiError = {
     details?: unknown;
 };
 
+function extractErrorMessage(error: AxiosError): string {
+    const data = error.response?.data as ErrorResponseData | undefined;
+
+    if (data?.detail) {
+        return data.detail;
+    }
+
+    if (data?.message) {
+        return data.message;
+    }
+
+    return "Erreur serveur";
+}
+
 export function normalizeApiError(error: unknown): ApiError {
-    if (axios.isAxiosError(error)) {
+    if (!axios.isAxiosError(error)) {
         return {
-            status: error.response?.status ?? 0,
-            message:
-                (error.response?.data as any)?.detail ||
-                (error.response?.data as any)?.message ||
-                "Erreur serveur",
-            details: error.response?.data,
+            status: 0,
+            message: "Erreur inconnue",
         };
     }
 
     return {
-        status: 0,
-        message: "Erreur inconnue",
+        status: error.response?.status ?? 0,
+        message: extractErrorMessage(error),
+        details: error.response?.data,
     };
 }

@@ -28,12 +28,12 @@ export function useLogin(): UseLoginResult {
             await login(payload);
 
             messageApi.success("Connexion réussie");
-        } catch (err: any) {
-            const errorMessage =
-                err?.message || "Erreur lors de la connexion";
-
-            setError(errorMessage);
-            messageApi.error(errorMessage);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError("Erreur inconnue");
+            }
         } finally {
             setIsLoading(false);
         }

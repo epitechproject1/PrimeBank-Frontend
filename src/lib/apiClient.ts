@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosInstance } from "axios";
+import axios, {AxiosError, AxiosInstance, InternalAxiosRequestConfig} from "axios";
 import { authTokens } from "./authTokens";
 import { normalizeApiError } from "./apiError";
 
@@ -45,7 +45,9 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
-        const originalRequest: any = error.config;
+        const originalRequest = error.config as InternalAxiosRequestConfig & {
+            _retry?: boolean;
+        };
 
         if (
             error.response?.status === 401 &&

@@ -1,9 +1,10 @@
-import { Card, Button, Input, Typography, Space } from "antd";
+import { Card, Button, Typography, Space } from "antd";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { loginSchema, LoginFormValues } from "../schemas/login.schema";
 import { useLogin } from "../hooks/useLogin";
+import { LoginFields } from "./LoginFields";
 
 const { Title, Text, Link } = Typography;
 
@@ -35,34 +36,11 @@ export function LoginForm() {
                     <Title level={3}>Connexion</Title>
 
                     <form onSubmit={handleSubmit(onSubmit)}>
-                        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-                            {/* EMAIL */}
-                            <div>
-                                <Input
-                                    {...register("email")}
-                                    placeholder="email@exemple.com"
-                                    status={errors.email ? "error" : ""}
-                                />
-                                {errors.email && (
-                                    <Text type="danger">{errors.email.message}</Text>
-                                )}
-                            </div>
+                        <LoginFields register={register} errors={errors} />
 
-                            {/* PASSWORD */}
-                            <div>
-                                <Input.Password
-                                    {...register("password")}
-                                    placeholder="••••••••"
-                                    status={errors.password ? "error" : ""}
-                                />
-                                {errors.password && (
-                                    <Text type="danger">{errors.password.message}</Text>
-                                )}
-                            </div>
+                        {error && <Text type="danger">{error}</Text>}
 
-                            {/* BACKEND ERROR */}
-                            {error && <Text type="danger">{error}</Text>}
-
+                        <Space direction="vertical" style={{ width: "100%" }}>
                             <Link href="/forgot-password">
                                 Mot de passe oublié ?
                             </Link>
