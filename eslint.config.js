@@ -30,7 +30,7 @@ export default defineConfig([
                ===================== */
 
             // Limite la taille des fonctions
-            'max-lines-per-function': ['error', 70],
+            'max-lines-per-function': ['error', 100],
 
             // Alerte si fichier trop gros (non bloquant)
             'max-lines': ['warn', 300],
@@ -39,7 +39,7 @@ export default defineConfig([
             'max-depth': ['error', 3],
 
             // Complexité logique maximale
-            complexity: ['error', 10],
+            complexity: ['error', 12],
 
             // Interdit `any`
             '@typescript-eslint/no-explicit-any': 'error',

@@ -1,24 +1,27 @@
-import 'antd/dist/reset.css'
+import "antd/dist/reset.css";
 
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-import App from './App'
-import { queryClient } from './lib/react-query'
+import App from "./App";
+import { queryClient } from "./lib/react-query";
 
-const rootElement = document.getElementById('root')
+const rootElement = document.getElementById("root");
 
 if (!rootElement) {
-    throw new Error('Root element #root not found')
+    throw new Error("Root element #root not found");
 }
 
 ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
-        <QueryClientProvider client={queryClient}>
-            <App />
+        <BrowserRouter>
+            <QueryClientProvider client={queryClient}>
+                <App />
                 <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
+            </QueryClientProvider>
+        </BrowserRouter>
     </React.StrictMode>
-)
+);
