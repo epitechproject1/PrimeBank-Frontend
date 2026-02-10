@@ -8,36 +8,31 @@ on:
 
 jobs:
   quality:
-    name: Code Quality & SonarCloud
     runs-on: ubuntu-latest
 
     steps:
-      # 📥 Checkout du code
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # nécessaire pour SonarCloud
+          fetch-depth: 0
 
-      # 🟢 Setup Node
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: npm
 
-      # 📦 Install deps
       - name: Install dependencies
         run: npm ci
+        env:
+          HUSKY: 0
 
-      # 🧹 ESLint (qualité de code)
       - name: Lint
         run: npm run lint
 
-      # 🏗️ Build (vérifie TypeScript + bundling)
       - name: Build
         run: npm run build
 
-      # 🔍 SonarCloud Scan
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@v2
         env:
