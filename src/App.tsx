@@ -52,7 +52,7 @@ function App() {
                             Bienvenue sur le frontend de PrimeBank.
                             Cette page confirme que <strong>Ant Design</strong>,
                             <strong> TanStack Query</strong> et la configuration globale
-                            fonctionnent.
+                            fonctin.
                         </Paragraph>
 
                         <Paragraph>
