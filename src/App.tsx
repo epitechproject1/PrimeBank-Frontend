@@ -1,35 +1,79 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Typography, Button, Card, Space, message } from 'antd'
+import { useQuery } from '@tanstack/react-query'
+
+const { Title, Paragraph } = Typography
+
+// 🔹 Fake query pour tester TanStack Query
+const fetchHealthCheck = async (): Promise<string> => {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve('PrimeBank API is reachable 🚀')
+        }, 800)
+    })
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [messageApi, contextHolder] = message.useMessage()
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    const { data, isLoading } = useQuery({
+        queryKey: ['health-check'],
+        queryFn: fetchHealthCheck,
+    })
+
+    const showSuccessToast = () => {
+        messageApi.success('Welcome to PrimeBank Frontend 👋')
+    }
+
+    const showErrorToast = () => {
+        messageApi.error('Something went wrong ❌')
+    }
+
+    return (
+        <>
+            {contextHolder}
+
+            <div
+                style={{
+                    minHeight: '100vh',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    background: '#f5f7fa',
+                }}
+            >
+                <Card
+                    style={{ width: 420 }}
+                    bordered={false}
+                >
+                    <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                        <Title level={2}>🏦 PrimeBank Frontend</Title>
+
+                        <Paragraph>
+                            Bienvenue sur le frontend de PrimeBank.
+                            Cette page confirme que <strong>Ant Design</strong>,
+                            <strong> TanStack Query</strong> et la configuration globale
+                            fonctionnent correctement.
+                        </Paragraph>
+
+                        <Paragraph>
+                            <strong>Status :</strong>{' '}
+                            {isLoading ? 'Checking…' : data}
+                        </Paragraph>
+
+                        <Space>
+                            <Button type="primary" onClick={showSuccessToast}>
+                                Show Success Toast
+                            </Button>
+
+                            <Button danger onClick={showErrorToast}>
+                                Show Error Toast
+                            </Button>
+                        </Space>
+                    </Space>
+                </Card>
+            </div>
+        </>
+    )
 }
 
 export default App
