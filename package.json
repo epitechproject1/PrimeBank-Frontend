@@ -3,29 +3,19 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-
-    // Husky ne doit PAS casser la CI
     "prepare": "husky || true"
   },
-
-  /**
-   * lint-staged : qualité locale RAPIDE
-   * → uniquement les fichiers modifiés
-   * → le CI reste l'autorité globale
-   */
   "lint-staged": {
     "*.{ts,tsx}": [
       "eslint --fix",
       "prettier --write"
     ]
   },
-
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@tanstack/react-query": "^5.90.20",
@@ -35,7 +25,6 @@
     "react-hook-form": "^7.71.1",
     "zod": "^4.3.6"
   },
-
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@tanstack/react-query-devtools": "^5.91.3",

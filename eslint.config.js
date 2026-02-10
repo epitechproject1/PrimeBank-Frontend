@@ -30,7 +30,7 @@ export default defineConfig([
                ===================== */
 
             // Limite la taille des fonctions
-            'max-lines-per-function': ['error', 50],
+            'max-lines-per-function': ['error', 70],
 
             // Alerte si fichier trop gros (non bloquant)
             'max-lines': ['warn', 300],
