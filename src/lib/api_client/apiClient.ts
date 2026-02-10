@@ -1,6 +1,6 @@
 import axios, {AxiosError, AxiosInstance, InternalAxiosRequestConfig} from "axios";
-import { authTokens } from "./authTokens";
-import { normalizeApiError } from "./apiError";
+import { authTokens } from "./authTokens.ts";
+import { normalizeApiError } from "./apiError.ts";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 

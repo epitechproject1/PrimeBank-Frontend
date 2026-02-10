@@ -1,36 +1,56 @@
 import { Input, Typography, Space } from "antd";
-import { FieldErrors, UseFormRegister } from "react-hook-form";
+import { Control, Controller, FieldErrors } from "react-hook-form";
 import { LoginFormValues } from "../schemas/login.schema";
 
 const { Text } = Typography;
 
 type Props = {
-    register: UseFormRegister<LoginFormValues>;
+    control: Control<LoginFormValues>; // On utilise Control ici
     errors: FieldErrors<LoginFormValues>;
 };
 
-export function LoginFields({ register, errors }: Props) {
+export function LoginFields({ control, errors }: Props) {
     return (
         <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+            {/* Champ Email */}
             <div>
-                <Input
-                    {...register("email")}
-                    placeholder="email@exemple.com"
-                    status={errors.email ? "error" : ""}
+                <Controller
+                    name="email"
+                    control={control}
+                    render={({ field }) => (
+                        <Input
+                            {...field}
+                            placeholder="email@exemple.com"
+                            status={errors.email ? "error" : ""}
+                            size="large"
+                        />
+                    )}
                 />
                 {errors.email && (
-                    <Text type="danger">{errors.email.message}</Text>
+                    <Text type="danger" style={{ fontSize: 13 }}>
+                        {errors.email.message}
+                    </Text>
                 )}
             </div>
 
+            {/* Champ Mot de passe */}
             <div>
-                <Input.Password
-                    {...register("password")}
-                    placeholder="••••••••"
-                    status={errors.password ? "error" : ""}
+                <Controller
+                    name="password"
+                    control={control}
+                    render={({ field }) => (
+                        <Input.Password
+                            {...field}
+                            placeholder="••••••••"
+                            status={errors.password ? "error" : ""}
+                            size="large"
+                        />
+                    )}
                 />
                 {errors.password && (
-                    <Text type="danger">{errors.password.message}</Text>
+                    <Text type="danger" style={{ fontSize: 13 }}>
+                        {errors.password.message}
+                    </Text>
                 )}
             </div>
         </Space>
