@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // 1. Pages & Layouts
+import TeamsPage from "./features/teams/pages/TeamsPage.tsx"
 import LoginPage from "./features/auth/login/pages/LoginPage";
 import { DashboardLayout } from "./layouts/DashboardLayout";
 import {RequireAuth} from "./features/auth/login/components/RequireAuth.tsx";
@@ -37,6 +38,7 @@ function App() {
 
                     {/* Route par défaut du dashboard */}
                     <Route path="/dashboard" element={<DashboardHome />} />
+                    <Route path="/teams" element={<TeamsPage />} />
 
                     {/* Ajouter tes futures pages ici : */}
                     {/* <Route path="/accounts" element={<AccountsPage />} /> */}
