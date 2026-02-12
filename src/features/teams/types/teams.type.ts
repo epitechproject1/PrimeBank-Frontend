@@ -7,6 +7,8 @@ export type TeamType = {
     description: string | null;
     owner: UserProfile;
     department: DepartmentType;
+    members_count : number;
+    members_preview :UserProfile [];
     created_at: string;
     updated_at: string;
 };
