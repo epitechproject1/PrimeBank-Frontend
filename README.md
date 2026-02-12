@@ -292,3 +292,7 @@ Si tu veux, je peux aussi :
 * t’aider à écrire un **CONTRIBUTING.md**
 * préparer un **README plus orienté onboarding**
 * ou documenter l’architecture frontend en détail
+
+Installer Yup
+*npm install yup
+*npm install -D @types/yup
