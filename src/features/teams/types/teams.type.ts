@@ -1,12 +1,12 @@
 import {UserProfile} from "../../users/types/user.type.ts";
-import {department} from "../../departments/types/departments.type.ts";
+import {DepartmentType} from "../../departments/types/departments.type.ts";
 
 export type TeamType = {
     id: number;
     name: string;
     description: string | null;
     owner: UserProfile;
-    department: department;
+    department: DepartmentType;
     created_at: string;
     updated_at: string;
 };
