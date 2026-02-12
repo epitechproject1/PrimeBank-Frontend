@@ -11,7 +11,7 @@ type UserFormValues = {
     email: string;
     phone_number?: string;
     password?: string;
-    role: "ADMIN" | "MANAGER" | "USER";
+    role: "admin" | "manager" | "user";
 };
 
 type Props = {
@@ -55,7 +55,7 @@ export default function UserForm({ open, onClose, onSubmit, user, loading }: Pro
                 form={form}
                 layout="vertical"
                 onFinish={handleFinish}
-                initialValues={user || { role: "USER" }}
+                initialValues={user || { role: "user" }}
             >
                 <Form.Item
                     name="first_name"
@@ -94,9 +94,9 @@ export default function UserForm({ open, onClose, onSubmit, user, loading }: Pro
                     rules={[{ required: true, message: "Le role est requis" }]}
                 >
                     <Select placeholder="Selectionnez un role">
-                        <Option value="ADMIN">Administrateur</Option>
-                        <Option value="MANAGER">Manager</Option>
-                        <Option value="USER">Utilisateur</Option>
+                        <Option value="admin">Administrateur</Option>
+                        <Option value="manager">Manager</Option>
+                        <Option value="user">Utilisateur</Option>
                     </Select>
                 </Form.Item>
 

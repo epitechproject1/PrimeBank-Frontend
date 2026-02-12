@@ -1,16 +1,21 @@
-import {apiClient} from "../../../lib/api_client/apiClient.ts";
-import {User, CreateUserDTO, UpdateUserDTO, UserProfile} from "../types/user.type.ts";
+﻿import { apiClient } from "../../../lib/api_client/apiClient.ts";
+import { User, CreateUserDTO, UpdateUserDTO, UserProfile } from "../types/user.type.ts";
 
 export async function getMe() {
-    // Note: L'URL doit correspondre à celle de ton ViewSet ('users/me/')
+    // Note: L'URL doit correspondre a celle de ton ViewSet ('users/me/')
     const { data } = await apiClient.get<UserProfile>("/users/me/");
     return data;
+}
+
+function normalizeRole<T extends { role?: string }>(payload: T): T {
+    if (!payload.role) return payload;
+    return { ...payload, role: payload.role.toUpperCase() };
 }
 
 export const userService = {
     /**
      * GET /users/
-     * Récupère tous les utilisateurs
+     * Recupere tous les utilisateurs
      */
     getAll: async (): Promise<User[]> => {
         const { data } = await apiClient.get<User[]>("/users/");
@@ -19,7 +24,7 @@ export const userService = {
 
     /**
      * GET /users/{id}/
-     * Récupère un utilisateur par son ID
+     * Recupere un utilisateur par son ID
      */
     getById: async (id: string): Promise<User> => {
         const { data } = await apiClient.get<User>(`/users/${id}/`);
@@ -28,19 +33,19 @@ export const userService = {
 
     /**
      * POST /users/
-     * Crée un nouvel utilisateur
+     * Cree un nouvel utilisateur
      */
     create: async (payload: CreateUserDTO): Promise<User> => {
-        const { data } = await apiClient.post<User>("/users/", payload);
+        const { data } = await apiClient.post<User>("/users/", normalizeRole(payload));
         return data;
     },
 
     /**
      * PUT /users/{id}/
-     * Met à jour un utilisateur
+     * Met a jour un utilisateur
      */
     update: async (id: string, payload: UpdateUserDTO): Promise<User> => {
-        const { data } = await apiClient.put<User>(`/users/${id}/`, payload);
+        const { data } = await apiClient.put<User>(`/users/${id}/`, normalizeRole(payload));
         return data;
     },
 
@@ -54,10 +59,10 @@ export const userService = {
 
     /**
      * PATCH /users/{id}/toggle_status/
-     * Active/Désactive un utilisateur
+     * Active/Desactive un utilisateur
      */
     toggleStatus: async (id: string, is_active: boolean): Promise<User> => {
         const { data } = await apiClient.patch<User>(`/users/${id}/toggle_status/`, { is_active });
         return data;
-    }
+    },
 };
