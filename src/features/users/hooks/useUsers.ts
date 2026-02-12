@@ -1,4 +1,4 @@
-// src/features/users/hooks/useUsers.ts
+﻿// src/features/users/hooks/useUsers.ts
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";
@@ -27,14 +27,14 @@ export const useUsers = () => {
         mutationFn: (payload: CreateUserDTO) => userService.create(payload),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
-            message.success("Utilisateur créé avec succès");
+            message.success("Utilisateur cree avec succes");
         },
         onError: (error: unknown) => {
             const err = error as { response?: { data?: { email?: string[] } } };
             if (err.response?.data?.email) {
-                message.error("Cet email est déjà utilisé");
+                message.error("Cet email est deja utilise");
             } else {
-                message.error("Erreur lors de la création");
+                message.error("Erreur lors de la creation");
             }
         },
     });
@@ -43,7 +43,7 @@ export const useUsers = () => {
         mutationFn: ({ id, data }: UpdateUserParams) => userService.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
-            message.success("Utilisateur modifié avec succès");
+            message.success("Utilisateur modifie avec succes");
         },
         onError: () => {
             message.error("Erreur lors de la modification");
@@ -54,7 +54,7 @@ export const useUsers = () => {
         mutationFn: (id: string) => userService.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
-            message.success("Utilisateur supprimé avec succès");
+            message.success("Utilisateur supprime avec succes");
         },
         onError: () => {
             message.error("Erreur lors de la suppression");
@@ -62,11 +62,11 @@ export const useUsers = () => {
     });
 
     const toggleUserStatus = useMutation({
-        mutationFn: ({ id, is_active }: ToggleStatusParams) => 
+        mutationFn: ({ id, is_active }: ToggleStatusParams) =>
             userService.toggleStatus(id, is_active),
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
-            message.success(`Utilisateur ${data.is_active ? 'activé' : 'désactivé'}`);
+            message.success(`Utilisateur ${data.is_active ? "active" : "desactive"}`);
         },
         onError: () => {
             message.error("Erreur lors du changement de statut");
@@ -79,6 +79,7 @@ export const useUsers = () => {
         isLoading: usersQuery.isLoading,
         isError: usersQuery.isError,
         error: usersQuery.error,
+        refetch: usersQuery.refetch,
         createUser,
         updateUser,
         deleteUser,

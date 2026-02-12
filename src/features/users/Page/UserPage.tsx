@@ -1,105 +1,81 @@
-// src/features/users/pages/UsersPage.tsx
+﻿// src/features/users/pages/UserPage.tsx
 
-import { Button, Card, Space, Typography } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
-import { useState } from "react";
-import UserTable from "../components/UserTable";
+import { Flex, Grid, Spin, theme } from "antd";
 import UserForm from "../components/UserForm";
-import { useUsers } from "../hooks/useUsers";
-import { User, UpdateUserDTO, CreateUserDTO } from "../types/user.type";
+import { UsersHeader } from "../components/UsersHeader";
+import { UsersStats } from "../components/UsersStats";
+import { UsersToolbar } from "../components/UsersToolbar";
+import { UsersContent } from "../components/UsersContent";
+import { useUsersPageState } from "../hooks/useUsersPageState";
 
-const { Title } = Typography;
+const { useBreakpoint } = Grid;
 
 export default function UsersPage() {
-    const { 
-        users = [], isLoading, createUser, updateUser, deleteUser,toggleUserStatus 
-    } = useUsers();
-
-    const [open, setOpen] = useState(false);
-    const [editingUser, setEditingUser] = useState<User | null>(null);
-
-    const handleSubmit = async (values: CreateUserDTO | UpdateUserDTO) => {
-        try {
-            if (editingUser) {
-                await updateUser.mutateAsync({ 
-                    id: editingUser.id, 
-                    data: values as UpdateUserDTO
-                });
-            } else {
-                await createUser.mutateAsync(values as CreateUserDTO);
-            }
-            setOpen(false);
-            setEditingUser(null);
-        } catch (error) {
-            console.error("Error submitting user form:", error);
-        }
-    };
-
-    const handleDelete = (id: string) => deleteUser.mutate(id);
-    
-    const handleToggleStatus = (id: string, is_active: boolean) => 
-        toggleUserStatus.mutate({ id, is_active });
-
-    const handleEdit = (user: User) => {
-        setEditingUser(user);
-        setOpen(true);
-    };
+    const screens = useBreakpoint();
+    const { token } = theme.useToken();
+    const state = useUsersPageState();
 
     return (
-        <div style={{ padding: 24 }}>
-            <Card style={{ marginBottom: 16, borderRadius: 12 }}>
-                <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
-                    <Space>
-                        <div style={{ 
-                            width: 48, height: 48, borderRadius: 12, background: '#e6f4ff',
-                            display: 'flex',alignItems: 'center', justifyContent: 'center', fontSize: 24
-                        }}>
-                            👥
-                        </div>
-                        <div>
-                            <Title level={3} style={{ margin: 0 }}>
-                                Gestion des utilisateurs
-                            </Title>
-                            <Typography.Text type="secondary">
-                                {users.length} utilisateur{users.length > 1 ? 's' : ''}
-                            </Typography.Text>
-                        </div>
-                    </Space>
-                    
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => {
-                            setEditingUser(null);
-                            setOpen(true);
-                        }}
-                        size="large"
-                    >
-                        Nouvel utilisateur
-                    </Button>
-                </Space>
-            </Card>
-
-            <Card style={{ borderRadius: 12 }}>
-                <UserTable
-                    data={users}
-                    loading={isLoading}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    onToggleStatus={handleToggleStatus}
+        <>
+            <Flex
+                vertical
+                style={{
+                    minHeight: "100vh",
+                    padding: screens.md ? "32px 40px" : "16px",
+                }}
+            >
+                <UsersHeader
+                    onAdd={state.openAdd}
+                    screens={screens}
+                    primaryColor={token.colorPrimary}
+                    totalUsers={state.users.length}
                 />
-            </Card>
+
+                <UsersStats
+                    totalUsers={state.users.length}
+                    activeUsers={state.activeCount}
+                    thisMonthCount={state.thisMonthCount}
+                    colors={{
+                        primary: token.colorPrimary,
+                        success: token.colorSuccess,
+                        warning: token.colorWarning,
+                    }}
+                />
+
+                <UsersToolbar
+                    search={state.search}
+                    onSearchChange={state.setSearch}
+                    onRefresh={() => state.refetch()}
+                    loading={state.isLoading}
+                    viewMode={state.viewMode}
+                    onViewModeChange={state.setViewMode}
+                    placeholderColor={token.colorTextPlaceholder}
+                    onExport={state.handleExport}
+                />
+
+                <Spin spinning={state.isLoading}>
+                    <UsersContent
+                        loading={state.isLoading}
+                        filtered={state.filtered}
+                        search={state.search}
+                        viewMode={state.viewMode}
+                        columns={state.columns}
+                        onEdit={state.handleEdit}
+                        onDelete={state.handleDelete}
+                        onToggleStatus={state.handleToggleStatus}
+                        onAdd={state.openAdd}
+                        screens={screens}
+                    />
+                </Spin>
+            </Flex>
 
             <UserForm
-                open={open}
-                onClose={() => {
-                    setOpen(false);
-                    setEditingUser(null);
-                }}
-                onSubmit={handleSubmit}
-                user={editingUser}
-                loading={createUser.isPending || updateUser.isPending}
+                open={state.open}
+                onClose={state.closeForm}
+                onSubmit={state.handleSubmit}
+                user={state.editingUser}
+                loading={state.formLoading}
             />
-        </div>
+        </>
     );
 }
