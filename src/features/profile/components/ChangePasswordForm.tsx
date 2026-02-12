@@ -36,7 +36,6 @@ export const ChangePasswordForm = ({
             onCancel={onCancel}
             onOk={handleSubmit}
             confirmLoading={loading}
-            destroyOnClose
         >
             <Form form={form} layout="vertical">
                 <Form.Item

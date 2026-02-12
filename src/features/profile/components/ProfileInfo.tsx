@@ -10,7 +10,7 @@ type Props = {
     profile: User;
 };
 
-export default function ProfileInfo({ profile }: Props) {
+export default function ProfileInfo({ profile }: Readonly<Props>) {
     const roleColor = {
         admin: "red",
         manager: "blue",

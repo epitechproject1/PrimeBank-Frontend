@@ -28,7 +28,6 @@ export const useProfile = () => {
     onSuccess: () => {
       message.success("Compte supprimé");
       localStorage.clear();
-      window.location.href = "/login";
     },
   });
 

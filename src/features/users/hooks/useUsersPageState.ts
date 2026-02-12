@@ -38,20 +38,15 @@ export function useUsersPageState() {
         [toggleUserStatus]
     );
     const handleSubmit = useCallback(
-        async (values: CreateUserDTO | UpdateUserDTO) => {
-            try {
-                if (editingUser) {
-                    await updateUser.mutateAsync({
-                        id: editingUser.id,
-                        data: values as UpdateUserDTO,
-                    });
-                } else {
-                    await createUser.mutateAsync(values as CreateUserDTO);
-                }
-                closeForm();
-            } catch (error) {
-                console.error("Error submitting user form:", error);
+        (values: CreateUserDTO | UpdateUserDTO) => {
+            if (editingUser) {
+                updateUser.mutate(
+                    { id: editingUser.id, data: values as UpdateUserDTO },
+                    { onSuccess: closeForm }
+                );
+                return;
             }
+            createUser.mutate(values as CreateUserDTO, { onSuccess: closeForm });
         },
         [closeForm, createUser, editingUser, updateUser]
     );
@@ -69,6 +64,9 @@ export function useUsersPageState() {
         },
         [filtered]
     );
+    const refresh = useCallback(() => {
+        void refetch();
+    }, [refetch]);
 
     return {
         users,
@@ -89,7 +87,7 @@ export function useUsersPageState() {
         filtered,
         activeCount,
         thisMonthCount,
-        refetch,
+        refresh,
         formLoading: createUser.isPending || updateUser.isPending,
         handleExport,
     };

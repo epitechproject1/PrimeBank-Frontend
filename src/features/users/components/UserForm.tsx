@@ -22,7 +22,7 @@ type Props = {
     loading?: boolean;
 };
 
-export default function UserForm({ open, onClose, onSubmit, user, loading }: Props) {
+export default function UserForm({ open, onClose, onSubmit, user, loading }: Readonly<Props>) {
     const [form] = Form.useForm();
     const isEditing = !!user;
 
@@ -49,7 +49,6 @@ export default function UserForm({ open, onClose, onSubmit, user, loading }: Pro
                     {isEditing ? "Modifier" : "Creer"}
                 </Button>,
             ]}
-            destroyOnClose
         >
             <Form
                 form={form}

@@ -3,7 +3,6 @@ import {
   LogoutOutlined,
   UserOutlined,
   LoadingOutlined,
-  SettingOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -25,12 +24,6 @@ export function UserDropdown() {
       label: "Mon Profil",
       icon: <UserOutlined />,
       onClick: () => navigate("/profile"), // ✅ Navigation réelle
-    },
-    {
-      key: "settings",
-      label: "Paramètres",
-      icon: <SettingOutlined />,
-      onClick: () => navigate("/settings"), // optionnel
     },
     {
       type: "divider",

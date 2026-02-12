@@ -45,7 +45,7 @@ export default function UsersPage() {
                 <UsersToolbar
                     search={state.search}
                     onSearchChange={state.setSearch}
-                    onRefresh={() => state.refetch()}
+                    onRefresh={state.refresh}
                     loading={state.isLoading}
                     viewMode={state.viewMode}
                     onViewModeChange={state.setViewMode}
