@@ -1,79 +1,62 @@
-import { Typography, Button, Card, Space, message } from 'antd'
-import { useQuery } from '@tanstack/react-query'
+import { Routes, Route, Navigate } from "react-router-dom";
 
-const { Title, Paragraph } = Typography
+// 1. Pages & Layouts
+import LoginPage from "./features/auth/login/pages/LoginPage";
+import { DashboardLayout } from "./layouts/DashboardLayout";
+import {RequireAuth} from "./features/auth/login/components/RequireAuth.tsx";
+import {PublicOnlyRoute} from "./features/auth/login/components/PublicOnlyRoute.tsx";
+import UsersPage from "./features/users/Page/UserPage.tsx";
 
-// 🔹 Fake query pour tester TanStack Query
-const fetchHealthCheck = async (): Promise<string> => {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            resolve('PrimeBank API is reachable 🚀')
-        }, 800)
-    })
-}
+// 3. Composant temporaire (Placeholder pour la page d'accueil)
+const DashboardHome = () => (
+    <div>
+        <h1 style={{ fontSize: 24, marginBottom: 16 }}>Vue d'ensemble</h1>
+        <p>Bienvenue sur votre espace bancaire sécurisé.</p>
+    </div>
+);
 
 function App() {
-    const [messageApi, contextHolder] = message.useMessage()
-
-    const { data, isLoading } = useQuery({
-        queryKey: ['health-check'],
-        queryFn: fetchHealthCheck,
-    })
-
-    const showSuccessToast = () => {
-        messageApi.success('Welcome to PrimeBank Frontend 👋')
-    }
-
-    const showErrorToast = () => {
-        messageApi.error('Something went wrong ❌')
-    }
-
     return (
-        <>
-            {contextHolder}
+        <Routes>
+            {/* ========================================
+               ZONE PUBLIQUE (Accessible uniquement si NON connecté)
+               ========================================
+               Si l'utilisateur est déjà connecté, il est redirigé vers /dashboard
+            */}
+            <Route element={<PublicOnlyRoute />}>
+                <Route path="/login" element={<LoginPage />} />
+            </Route>
 
-            <div
-                style={{
-                    minHeight: '100vh',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    background: '#f5f7fa',
-                }}
-            >
-                <Card
-                    style={{ width: 420 }}
-                    bordered={false}
-                >
-                    <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                        <Title level={2}>🏦 PrimeBank Frontend</Title>
+            {/* ========================================
+               ZONE PRIVÉE (Accessible uniquement si connecté)
+               ========================================
+               Si l'utilisateur n'est pas connecté, il est redirigé vers /login
+            */}
+            <Route element={<RequireAuth />}>
+                {/* Une fois le guard passé, on affiche le Layout (Sidebar + Header) */}
+                <Route element={<DashboardLayout />}>
 
-                        <Paragraph>
-                            Bienvenue sur le frontend de PrimeBank.
-                            Cette page confirme que <strong>Ant Design</strong>,
-                            <strong> TanStack Query</strong> et la configuration globale
-                            fonctin.
-                        </Paragraph>
+                    {/* Route par défaut du dashboard */}
+                    <Route path="/dashboard" element={<DashboardHome />} />
+                    <Route path="/users" element={<UsersPage />} />
 
-                        <Paragraph>
-                            <strong>Status :</strong>{' '}
-                            {isLoading ? 'Checking…' : data}
-                        </Paragraph>
+                    {/* Ajouter tes futures pages ici : */}
+                    {/* <Route path="/accounts" element={<AccountsPage />} /> */}
+                    {/* <Route path="/transfers" element={<TransfersPage />} /> */}
 
-                        <Space>
-                            <Button type="primary" onClick={showSuccessToast}>
-                                Show Success Toast
-                            </Button>
+                </Route>
+            </Route>
 
-                            <Button danger onClick={showErrorToast}>
-                                Show Error Toast
-                            </Button>
-                        </Space>
-                    </Space>
-                </Card>
-            </div>
-        </>
-    )
+            {/* ========================================
+               REDIRECTION PAR DÉFAUT (Catch-All)
+               ========================================
+               Si l'URL n'existe pas, on tente d'aller au dashboard.
+               - Si connecté : On voit le dashboard.
+               - Si pas connecté : RequireAuth nous renvoie au Login.
+            */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+    );
 }
 
-export default App
+export default App;
