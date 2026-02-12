@@ -39,3 +39,4 @@ export function normalizeApiError(error: unknown): ApiError {
         details: error.response?.data,
     };
 }
+

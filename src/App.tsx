@@ -6,6 +6,7 @@ import LoginPage from "./features/auth/login/pages/LoginPage";
 import { DashboardLayout } from "./layouts/DashboardLayout";
 import {RequireAuth} from "./features/auth/login/components/RequireAuth.tsx";
 import {PublicOnlyRoute} from "./features/auth/login/components/PublicOnlyRoute.tsx";
+import UsersPage from "./features/users/Page/UserPage.tsx";
 
 // 3. Composant temporaire (Placeholder pour la page d'accueil)
 const DashboardHome = () => (
@@ -38,6 +39,7 @@ function App() {
 
                     {/* Route par défaut du dashboard */}
                     <Route path="/dashboard" element={<DashboardHome />} />
+                    <Route path="/users" element={<UsersPage />} />
                     <Route path="/teams" element={<TeamsPage />} />
 
                     {/* Ajouter tes futures pages ici : */}
