@@ -4,7 +4,7 @@ import {
     DashboardOutlined,
     SettingOutlined,
     UsergroupAddOutlined,
-    SettingOutlined, TeamOutlined,
+     TeamOutlined,
     WalletOutlined
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
