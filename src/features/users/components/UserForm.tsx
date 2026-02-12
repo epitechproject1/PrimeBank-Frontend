@@ -1,4 +1,4 @@
-// src/features/users/components/UserForm.tsx
+﻿// src/features/users/components/UserForm.tsx
 
 import { Button, Form, Input, Modal, Select } from "antd";
 import { User } from "../types/user.type";
@@ -11,7 +11,7 @@ type UserFormValues = {
     email: string;
     phone_number?: string;
     password?: string;
-    role: 'admin' | 'manager' | 'user';
+    role: "admin" | "manager" | "user";
 };
 
 type Props = {
@@ -33,20 +33,20 @@ export default function UserForm({ open, onClose, onSubmit, user, loading }: Pro
 
     return (
         <Modal
-            title={isEditing ? "Modifier l'utilisateur" : "Créer un utilisateur"}
+            title={isEditing ? "Modifier l'utilisateur" : "Creer un utilisateur"}
             open={open}
             onCancel={onClose}
             footer={[
                 <Button key="cancel" onClick={onClose}>
                     Annuler
                 </Button>,
-                <Button 
-                    key="submit" 
-                    type="primary" 
+                <Button
+                    key="submit"
+                    type="primary"
                     loading={loading}
                     onClick={() => form.submit()}
                 >
-                    {isEditing ? "Modifier" : "Créer"}
+                    {isEditing ? "Modifier" : "Creer"}
                 </Button>,
             ]}
             destroyOnClose
@@ -55,12 +55,12 @@ export default function UserForm({ open, onClose, onSubmit, user, loading }: Pro
                 form={form}
                 layout="vertical"
                 onFinish={handleFinish}
-                initialValues={user || { role: 'user' }}
+                initialValues={user || { role: "user" }}
             >
                 <Form.Item
                     name="first_name"
-                    label="Prénom"
-                    rules={[{ required: true, message: "Le prénom est requis" }]}
+                    label="Prenom"
+                    rules={[{ required: true, message: "Le prenom est requis" }]}
                 >
                     <Input placeholder="Jean" />
                 </Form.Item>
@@ -78,31 +78,25 @@ export default function UserForm({ open, onClose, onSubmit, user, loading }: Pro
                     label="Email"
                     rules={[
                         { required: true, message: "L'email est requis" },
-                        { type: 'email', message: "Email invalide" }
+                        { type: "email", message: "Email invalide" },
                     ]}
                 >
-                    <Input 
-                        placeholder="jean.dupont@exemple.com" 
-                        disabled={isEditing}
-                    />
+                    <Input placeholder="jean.dupont@exemple.com" disabled={isEditing} />
                 </Form.Item>
 
-                <Form.Item
-                    name="phone_number"
-                    label="Téléphone"
-                >
+                <Form.Item name="phone_number" label="Telephone">
                     <Input placeholder="+33 6 12 34 56 78" />
                 </Form.Item>
 
                 <Form.Item
                     name="role"
-                    label="Rôle"
-                    rules={[{ required: true, message: "Le rôle est requis" }]}
+                    label="Role"
+                    rules={[{ required: true, message: "Le role est requis" }]}
                 >
-                    <Select placeholder="Sélectionnez un rôle">
-                        <Option value="ADMIN">Administrateur</Option>
-                        <Option value="MANAGER">Manager</Option>
-                        <Option value="USER">Utilisateur</Option>
+                    <Select placeholder="Selectionnez un role">
+                        <Option value="admin">Administrateur</Option>
+                        <Option value="manager">Manager</Option>
+                        <Option value="user">Utilisateur</Option>
                     </Select>
                 </Form.Item>
 
