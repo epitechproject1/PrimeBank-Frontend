@@ -4,6 +4,7 @@ import {
     DashboardOutlined,
     SettingOutlined,
     UsergroupAddOutlined,
+    SettingOutlined, TeamOutlined,
     WalletOutlined
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
@@ -15,4 +16,9 @@ export const SIDEBAR_ITEMS: MenuProps['items'] = [
     { key: "/transactions", icon: <WalletOutlined />, label: "Transactions" },
     { key: "/cards", icon: <CreditCardOutlined />, label: "Cartes" },
     { key: "/settings", icon: <SettingOutlined />, label: "Paramètres" },
+    {
+        key: "/teams",
+        icon: <TeamOutlined />,
+        label: "Gestion des équipes"
+    },
 ];
