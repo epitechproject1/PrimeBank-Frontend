@@ -29,7 +29,7 @@ export function TeamMembersList({
     if (!members || members.length === 0) {
         return (
             <Empty
-                description="Aucun membre dans cette équipe"
+                description="Aucun membre dans cette équipe  "
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                 style={{ padding: "40px 0", border: "1px solid #f0f0f0", borderRadius: 12 }}
             />
