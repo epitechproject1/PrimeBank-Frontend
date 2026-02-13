@@ -1,9 +1,19 @@
 import { apiClient } from "../../../lib/api_client/apiClient.ts";
-import { TeamType, CreateTeamPayload, UpdateTeamPayload, TeamFilters } from "../types/teams.type.ts";
+import {
+    TeamType,
+    CreateTeamPayload,
+    UpdateTeamPayload,
+    TeamFilters,
+    ApiListResponse,
+    ApiSearchResponse
+} from "../types/teams.type.ts";
 
 export const teamService = {
-    getAll: async (filters?: TeamFilters): Promise<TeamType[]> => {
-        const { data } = await apiClient.get<TeamType[]>("/teams/", { params: filters });
+    // ✅ backend: { data, total, query }
+    getAll: async (filters?: TeamFilters): Promise<ApiListResponse<TeamType>> => {
+        const { data } = await apiClient.get<ApiListResponse<TeamType>>("/teams/", {
+            params: filters,
+        });
         return data;
     },
 
@@ -17,7 +27,8 @@ export const teamService = {
         return data;
     },
 
-    update: async (id: number, payload: CreateTeamPayload): Promise<TeamType> => {
+    // ✅ update doit accepter UpdateTeamPayload
+    update: async (id: number, payload: UpdateTeamPayload): Promise<TeamType> => {
         const { data } = await apiClient.put<TeamType>(`/teams/${id}/`, payload);
         return data;
     },
@@ -31,8 +42,17 @@ export const teamService = {
         await apiClient.delete(`/teams/${id}/`);
     },
 
-    getMyTeams: async (): Promise<TeamType[]> => {
-        const { data } = await apiClient.get<TeamType[]>("/teams/my-teams/");
+    // ✅ backend: { data, total }
+    getMyTeams: async (): Promise<ApiListResponse<TeamType>> => {
+        const { data } = await apiClient.get<ApiListResponse<TeamType>>("/teams/my-teams/");
         return data;
-    }
+    },
+
+    // ✅ optionnel mais utile si tu utilises ton endpoint /teams/search/
+    search: async (q: string, page = 1, limit = 20): Promise<ApiSearchResponse<TeamType>> => {
+        const { data } = await apiClient.get<ApiSearchResponse<TeamType>>("/teams/search/", {
+            params: { q, page, limit },
+        });
+        return data;
+    },
 };

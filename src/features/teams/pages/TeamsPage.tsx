@@ -1,16 +1,19 @@
 import { useState, useMemo } from "react";
 import { Flex, Grid, Spin, theme } from "antd";
-import { TeamType } from "../types/teams.type.ts";
-import TeamFormModal from "../components/TeamFormModal.tsx";
-import { TeamsStats } from "../components/TeamsStats.tsx";
-import { TeamsToolbar } from "../components/TeamsToolbar.tsx";
-import { TeamsContent } from "../components/TeamsContent.tsx";
-import { TeamsHeader } from "../components/TeamsHeader.tsx";
-import { getTeamsTableColumns } from "../utils/teams-table-columns.tsx";
-import {useTeamsFilters} from "../hooks/useTeamsFilters.ts";
-import {useTeamsData} from "../hooks/useTeamsData.tsx";
+import { TeamType } from "../types/teams.type";
+import TeamFormModal from "../components/TeamFormModal";
+import { TeamsStats } from "../components/TeamsStats";
+import { TeamsToolbar } from "../components/TeamsToolbar";
+import { TeamsContent } from "../components/TeamsContent";
+import { TeamsHeader } from "../components/TeamsHeader";
+import { getTeamsTableColumns } from "../utils/teams-table-columns";
+import { useTeamsFilters } from "../hooks/useTeamsFilters";
+import { useTeamsData } from "../hooks/useTeamsData";
+import { useTeamsSearch } from "../hooks/useTeamsSearch";
 
 const { useBreakpoint } = Grid;
+
+const USE_BACKEND_SEARCH = false;
 
 export function TeamsPage() {
     const screens = useBreakpoint();
@@ -19,7 +22,20 @@ export function TeamsPage() {
     const { teams, loading, saving, fetchTeams, handleSaved, handleDelete } =
         useTeamsData();
 
-    const [search, setSearch] = useState("");
+    const {
+        search,
+        searching,
+        searchResults,
+        isSearching,
+        enableBackendSearch,
+        handleSearchChange,
+        handleSearchClear,
+    } = useTeamsSearch({
+        searchEndpoint: "/teams/search/",
+        debounceDelay: 500,
+        enableBackendSearch: USE_BACKEND_SEARCH,
+    });
+
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [modalOpen, setModalOpen] = useState(false);
     const [editTeam, setEditTeam] = useState<TeamType | null>(null);
@@ -36,14 +52,28 @@ export function TeamsPage() {
 
     const onSaved = (team: TeamType) => {
         handleSaved(team, Boolean(editTeam));
+        handleSearchClear();
     };
 
-    const { filtered, deptCount, thisMonth } = useTeamsFilters(teams, search);
+    const isBackendSearching = enableBackendSearch && isSearching;
+    const displayedTeams = isBackendSearching ? searchResults : teams;
 
-    const columns = useMemo(
-        () => getTeamsTableColumns(openEdit, handleDelete, saving),
+    const { filtered, deptCount, thisMonth } = useTeamsFilters(
+        displayedTeams,
+        search,
+        isBackendSearching
+    );
+
+    const getColumns = useMemo(
+        () => (onView: (team: TeamType, index: number) => void) =>
+            getTeamsTableColumns(openEdit, handleDelete, onView, saving),
         [saving, handleDelete]
     );
+
+    const handleRefresh = () => {
+        handleSearchClear();
+        fetchTeams();
+    };
 
     return (
         <>
@@ -61,7 +91,7 @@ export function TeamsPage() {
                 />
 
                 <TeamsStats
-                    totalTeams={teams.length}
+                    totalTeams={displayedTeams.length}
                     departmentCount={deptCount}
                     thisMonthCount={thisMonth}
                     colors={{
@@ -73,21 +103,23 @@ export function TeamsPage() {
 
                 <TeamsToolbar
                     search={search}
-                    onSearchChange={setSearch}
-                    onRefresh={fetchTeams}
+                    onSearchChange={handleSearchChange}
+                    onSearchClear={handleSearchClear}
+                    onRefresh={handleRefresh}
                     loading={loading}
+                    searching={searching}
                     viewMode={viewMode}
                     onViewModeChange={setViewMode}
                     placeholderColor={token.colorTextPlaceholder}
                 />
 
-                <Spin spinning={loading}>
+                <Spin spinning={loading || searching}>
                     <TeamsContent
-                        loading={loading}
+                        loading={loading || searching}
                         filtered={filtered}
                         search={search}
                         viewMode={viewMode}
-                        columns={columns}
+                        getColumns={getColumns}
                         onEdit={openEdit}
                         onDelete={handleDelete}
                         onAdd={openAdd}
