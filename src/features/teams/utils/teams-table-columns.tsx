@@ -1,107 +1,83 @@
-import {Space, Avatar, Tag, Tooltip, Button, Popconfirm, Typography} from "antd";
-import {
-    EditOutlined,
-    DeleteOutlined,
-    BankOutlined,
-    UserOutlined,
-} from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import { TeamType } from "../types/teams.type.ts";
-import { AVATAR_COLORS, TAG_COLORS, formatDate, getInitials } from "./teams-constants";
-const {Text} = Typography;
+import type { TeamType } from "../types/teams.type";
+import { formatDate } from "./teams-constants";
+import { Typography } from "antd";
+import {
+    ActionsCell,
+    DepartmentCell,
+    DescriptionCell,
+    MembersCountCell,
+    OwnerCell,
+    TeamNameCell,
+    type TeamsTableHandlers,
+} from "./TeamsTableCells";
+
+const { Text } = Typography;
+
 export function getTeamsTableColumns(
     onEdit: (team: TeamType) => void,
     onDelete: (id: number) => void,
+    onView: (team: TeamType, index: number) => void,
     saving: boolean
 ): ColumnsType<TeamType> {
+    const handlers: TeamsTableHandlers = { onEdit, onDelete, onView, saving };
+
     return [
         {
             title: "Équipe",
             dataIndex: "name",
             key: "name",
-            render: (name: string, _: TeamType, i: number) => (
-                <Space>
-                    <Avatar
-                        size={36}
-                        style={{
-                            backgroundColor: AVATAR_COLORS[i % AVATAR_COLORS.length],
-                            fontWeight: 700,
-                        }}
-                    >
-                        {getInitials(name)}
-                    </Avatar>
-                    <Text strong>{name}</Text>
-                </Space>
-            ),
+            fixed: "left",
+            width: 250,
+            render: (name: string, team: TeamType, index: number) => <TeamNameCell name={name} team={team} index={index} />,
         },
         {
             title: "Description",
             dataIndex: "description",
             key: "description",
-            render: (desc: string) => (
-                <Text type="secondary" ellipsis style={{ maxWidth: 280 }}>
-                    {desc || "—"}
-                </Text>
-            ),
+            width: 300,
+            ellipsis: { showTitle: false },
+            render: (desc: string | null) => <DescriptionCell desc={desc} />,
         },
         {
             title: "Département",
             dataIndex: "department",
             key: "department",
-            render: (dept: TeamType["department"], _: TeamType, i: number) =>
-                dept ? (
-                    <Tag color={TAG_COLORS[i % TAG_COLORS.length]} icon={<BankOutlined />}>
-                        {dept.name ?? `Dept #${dept.id}`}
-                    </Tag>
-                ) : (
-                    <Text type="secondary">—</Text>
-                ),
+            width: 180,
+            render: (dept: TeamType["department"], _team: TeamType, index: number) => <DepartmentCell dept={dept} index={index} />,
         },
         {
             title: "Responsable",
             dataIndex: "owner",
             key: "owner",
-            render: (owner: TeamType["owner"]) =>
-                owner ? (
-                    <Space>
-                        <Avatar size={24} icon={<UserOutlined />} />
-                        <Text>
-                            {owner.first_name} {owner.last_name}
-                        </Text>
-                    </Space>
-                ) : (
-                    <Text type="secondary">—</Text>
-                ),
+            width: 200,
+            render: (owner: TeamType["owner"]) => <OwnerCell owner={owner} />,
+        },
+        {
+            title: "Membres",
+            key: "members_count",
+            width: 100,
+            align: "center",
+            render: (_: unknown, team: TeamType) => <MembersCountCell team={team} />,
         },
         {
             title: "Créé le",
             dataIndex: "created_at",
             key: "created_at",
-            render: (date: string) => <Text type="secondary">{formatDate(date)}</Text>,
+            width: 130,
+            render: (date: string) => (
+                <Text type="secondary" style={{ fontSize: 13 }}>
+                    {formatDate(date)}
+                </Text>
+            ),
         },
         {
             title: "Actions",
             key: "actions",
             align: "right",
-            render: (_: unknown, team: TeamType) => (
-                <Space>
-                    <Tooltip title="Modifier">
-                        <Button type="text" icon={<EditOutlined />} onClick={() => onEdit(team)} />
-                    </Tooltip>
-                    <Popconfirm
-                        title="Supprimer cette équipe ?"
-                        description="Cette action est irréversible."
-                        okText="Supprimer"
-                        cancelText="Annuler"
-                        okButtonProps={{ danger: true, loading: saving }}
-                        onConfirm={() => onDelete(team.id!)}
-                    >
-                        <Tooltip title="Supprimer">
-                            <Button type="text" danger icon={<DeleteOutlined />} />
-                        </Tooltip>
-                    </Popconfirm>
-                </Space>
-            ),
+            fixed: "right",
+            width: 140,
+            render: (_: unknown, team: TeamType, index: number) => <ActionsCell team={team} index={index} handlers={handlers} />,
         },
     ];
 }

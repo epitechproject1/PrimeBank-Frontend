@@ -1,37 +1,53 @@
 import { useMemo } from "react";
-import { TeamType } from "../types/teams.type";
+import type { TeamType } from "../types/teams.type";
 
-export function useTeamsFilters(teams: TeamType[], search: string) {
+type UseTeamsFiltersResult = {
+    filtered: TeamType[];
+    deptCount: number;
+    thisMonth: number;
+};
+
+export function useTeamsFilters(
+    teams: TeamType[],
+    search: string,
+    skipClientSearch: boolean
+): UseTeamsFiltersResult {
+    const normalized = search.trim().toLowerCase();
+
     const filtered = useMemo(() => {
-        const searchLower = search.toLowerCase();
+        if (skipClientSearch) return teams;
+        if (!normalized) return teams;
 
-        return teams.filter((t) =>
-            t.name.toLowerCase().includes(searchLower) ||
-            (t.description ?? "").toLowerCase().includes(searchLower)
-        );
-    }, [teams, search]);
+        return teams.filter((t) => {
+            const ownerName = `${t.owner?.first_name ?? ""} ${t.owner?.last_name ?? ""}`.toLowerCase();
+            const deptName = (t.department?.name ?? "").toLowerCase();
+
+            return (
+                t.name.toLowerCase().includes(normalized) ||
+                (t.description ?? "").toLowerCase().includes(normalized) ||
+                ownerName.includes(normalized) ||
+                deptName.includes(normalized)
+            );
+        });
+    }, [teams, normalized, skipClientSearch]);
 
     const deptCount = useMemo(() => {
-        return new Set(
-            teams
-                .map((t) => t.department?.id)
-                .filter((id): id is number => Boolean(id))
-        ).size;
-    }, [teams]);
+        const set = new Set<number>();
+        filtered.forEach((t) => {
+            if (t.department?.id) set.add(t.department.id);
+        });
+        return set.size;
+    }, [filtered]);
 
     const thisMonth = useMemo(() => {
         const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-
-        return teams.filter((t) => {
-            const created = new Date(t.created_at);
-            return (
-                created.getMonth() === currentMonth &&
-                created.getFullYear() === currentYear
-            );
+        const y = now.getFullYear();
+        const m = now.getMonth();
+        return filtered.filter((t) => {
+            const d = new Date(t.created_at);
+            return d.getFullYear() === y && d.getMonth() === m;
         }).length;
-    }, [teams]);
+    }, [filtered]);
 
     return { filtered, deptCount, thisMonth };
 }

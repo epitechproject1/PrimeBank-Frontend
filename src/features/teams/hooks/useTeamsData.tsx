@@ -1,7 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { message } from "antd";
-import { teamService } from "../services/teams.service.ts";
-import { TeamType } from "../types/teams.type.ts";
+import { teamService } from "../services/teams.service";
+import type { TeamType } from "../types/teams.type";
+type ApiListResponse<T> = {
+    data: T[];
+    total: number;
+    query?: string;
+};
 
 interface UseTeamsDataReturn {
     teams: TeamType[];
@@ -21,11 +26,12 @@ export function useTeamsData(): UseTeamsDataReturn {
     const fetchTeams = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await teamService.getAll();
-            setTeams(data);
+            const payload = (await teamService.getAll()) as unknown as ApiListResponse<TeamType>;
+            setTeams(Array.isArray(payload?.data) ? payload.data : []);
         } catch (error) {
             const err = error as Error;
             messageApi.error(err?.message ?? "Erreur lors du chargement");
+            setTeams([]);
         } finally {
             setLoading(false);
         }
@@ -39,7 +45,7 @@ export function useTeamsData(): UseTeamsDataReturn {
         if (isEdit) {
             setTeams((prev) => prev.map((t) => (t.id === team.id ? team : t)));
         } else {
-            setTeams((prev) => [...prev, team]);
+            setTeams((prev) => [team, ...prev]);
         }
     }, []);
 
@@ -60,12 +66,5 @@ export function useTeamsData(): UseTeamsDataReturn {
         [messageApi]
     );
 
-    return {
-        teams,
-        loading,
-        saving,
-        fetchTeams,
-        handleSaved,
-        handleDelete,
-    };
+    return { teams, loading, saving, fetchTeams, handleSaved, handleDelete };
 }

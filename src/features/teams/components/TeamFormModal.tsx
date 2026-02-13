@@ -1,15 +1,12 @@
 import { useEffect, useMemo } from "react";
 import { Modal, Form, Space, Spin } from "antd";
 import { EditOutlined, PlusOutlined } from "@ant-design/icons";
-import { TeamType } from "../types/teams.type";
+import type { TeamType } from "../types/teams.type";
 import { useTeamFormOptions } from "../hooks/useTeamFormOptions";
 import { useTeamFormSubmit } from "../hooks/useTeamFormSubmit";
 import { TeamFormFields } from "./TeamFormFields";
-import {
-    mapDepartmentsToOptions,
-    mapUsersToOptions,
-} from "../utils/team-form-utils";
-import {formatDepartmentOptions, formatUserOptions} from "../utils/team-select-options.tsx";
+import { mapDepartmentsToOptions, mapUsersToOptions } from "../utils/team-form-utils";
+import { formatDepartmentOptions, formatUserOptions } from "../utils/team-select-options";
 
 interface TeamFormModalProps {
     open: boolean;
@@ -23,17 +20,14 @@ interface TeamFormValues {
     description?: string;
     owner_id: number;
     department_id: number;
+    members_ids?: number[];
 }
 
-export function TeamFormModal({
-                                  open,
-                                  editTeam,
-                                  onClose,
-                                  onSaved,
-                              }: TeamFormModalProps) {
+export function TeamFormModal({ open, editTeam, onClose, onSaved }: TeamFormModalProps) {
     const [form] = Form.useForm<TeamFormValues>();
 
     const { users, departments, loadingOptions } = useTeamFormOptions(open);
+
     const { handleSubmit, saving, contextHolder } = useTeamFormSubmit({
         form,
         editTeam,
@@ -58,11 +52,13 @@ export function TeamFormModal({
             form.setFieldsValue({
                 name: editTeam.name,
                 description: editTeam.description ?? undefined,
-                owner_id: editTeam.owner?.id,
-                department_id: editTeam.department?.id,
+                owner_id: editTeam.owner?.id as number,
+                department_id: editTeam.department?.id as number,
+                members_ids: editTeam.members?.map((m) => m.id) ?? [],
             });
         } else {
             form.resetFields();
+            form.setFieldsValue({ members_ids: [] });
         }
     }, [open, editTeam, form]);
 

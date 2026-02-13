@@ -9,8 +9,10 @@ import {
 interface TeamsToolbarProps {
     search: string;
     onSearchChange: (value: string) => void;
+    onSearchClear: () => void;
     onRefresh: () => void;
     loading: boolean;
+    searching: boolean;
     viewMode: "grid" | "list";
     onViewModeChange: (mode: "grid" | "list") => void;
     placeholderColor: string;
@@ -21,40 +23,48 @@ export function TeamsToolbar({
                                  onSearchChange,
                                  onRefresh,
                                  loading,
+                                 searching,
                                  viewMode,
                                  onViewModeChange,
                                  placeholderColor,
                              }: TeamsToolbarProps) {
     return (
-        <Flex gap={12} style={{ marginBottom: 20 }} wrap="wrap">
-            <Input
+        <Flex gap={12} style={{ marginBottom: 20 }} wrap="wrap" align="center">
+            <Input.Search
                 prefix={<SearchOutlined style={{ color: placeholderColor }} />}
                 placeholder="Rechercher une équipe..."
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
+                onSearch={onSearchChange}
                 allowClear
-                style={{ flex: 1, minWidth: 220 }}
+                loading={searching}
+                style={{ flex: 1, minWidth: 280 }}
+                enterButton
             />
+
             <Button
                 icon={<ReloadOutlined />}
                 onClick={onRefresh}
                 loading={loading}
                 title="Rafraîchir"
-            />
-            <Flex>
+            >
+                Rafraîchir
+            </Button>
+
+            <Button.Group>
                 <Button
                     icon={<AppstoreOutlined />}
                     type={viewMode === "grid" ? "primary" : "default"}
                     onClick={() => onViewModeChange("grid")}
-                    style={{ borderRadius: "6px 0 0 6px" }}
+                    title="Vue grille"
                 />
                 <Button
                     icon={<UnorderedListOutlined />}
                     type={viewMode === "list" ? "primary" : "default"}
                     onClick={() => onViewModeChange("list")}
-                    style={{ borderRadius: "0 6px 6px 0", marginLeft: -1 }}
+                    title="Vue liste"
                 />
-            </Flex>
+            </Button.Group>
         </Flex>
     );
 }
