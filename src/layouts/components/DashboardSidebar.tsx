@@ -1,6 +1,8 @@
-import { Layout, Menu, theme, Typography } from "antd";
+﻿import { Layout, Menu, theme, Typography } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
-import {SIDEBAR_ITEMS} from "../../lib/menuItems.tsx";
+import { SIDEBAR_ITEMS } from "../../lib/menuItems.tsx";
+import { userStorage } from "../../lib/storage/userStorage";
+import { isAdminRole } from "../../lib/auth/role";
 
 const { Sider } = Layout;
 const { Text } = Typography;
@@ -14,6 +16,12 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     const { token } = theme.useToken();
     const navigate = useNavigate();
     const location = useLocation();
+    const user = userStorage.getUser();
+    const isAdmin = isAdminRole(user?.role);
+
+    const menuItems = isAdmin
+        ? SIDEBAR_ITEMS
+        : SIDEBAR_ITEMS.filter((item) => item?.key !== "/users");
 
     return (
         <Sider
@@ -43,14 +51,14 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                     PB
                 </div>
                 {!collapsed && (
-                    <Text strong style={{ fontSize: 18, whiteSpace: 'nowrap' }}>PrimeBank</Text>
+                    <Text strong style={{ fontSize: 18, whiteSpace: "nowrap" }}>PrimeBank</Text>
                 )}
             </div>
 
             <Menu
                 mode="inline"
                 selectedKeys={[location.pathname]}
-                items={SIDEBAR_ITEMS}
+                items={menuItems}
                 onClick={({ key }) => navigate(key)}
                 style={{ borderRight: 0, marginTop: 16 }}
             />

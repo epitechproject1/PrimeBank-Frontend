@@ -1,5 +1,5 @@
 ﻿import { Flex, Typography, Button, Avatar, Grid, Tag } from "antd";
-import { EditOutlined, KeyOutlined, UserOutlined } from "@ant-design/icons";
+import { EditOutlined, UserOutlined } from "@ant-design/icons";
 import type { User } from "../../users/types/user.type";
 
 const { Title, Text } = Typography;
@@ -8,7 +8,6 @@ interface ProfileHeaderProps {
     user: User;
     screens: ReturnType<typeof Grid.useBreakpoint>;
     primaryColor: string;
-    onChangePassword: () => void;
     onEditInfo: () => void;
 }
 
@@ -16,7 +15,6 @@ export function ProfileHeader({
     user,
     screens,
     primaryColor,
-    onChangePassword,
     onEditInfo,
 }: ProfileHeaderProps) {
     const initials = `${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`
@@ -42,14 +40,9 @@ export function ProfileHeader({
                 </div>
             </Flex>
 
-            <Flex gap={8} wrap="wrap">
-                <Button icon={<EditOutlined />} onClick={onEditInfo}>
-                    {screens.sm ? "Modifier profil" : ""}
-                </Button>
-                <Button type="primary" icon={<KeyOutlined />} onClick={onChangePassword}>
-                    {screens.sm ? "Changer mot de passe" : ""}
-                </Button>
-            </Flex>
+            <Button icon={<EditOutlined />} onClick={onEditInfo}>
+                {screens.sm ? "Modifier profil" : ""}
+            </Button>
         </Flex>
     );
 }
