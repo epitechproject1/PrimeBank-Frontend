@@ -1,65 +1,53 @@
 import { useMemo } from "react";
-import { TeamType } from "../types/teams.type";
+import type { TeamType } from "../types/teams.type";
+
+type UseTeamsFiltersResult = {
+    filtered: TeamType[];
+    deptCount: number;
+    thisMonth: number;
+};
 
 export function useTeamsFilters(
-    teams: TeamType[] | any, // Accepter aussi un objet
+    teams: TeamType[],
     search: string,
-    useBackendSearch: boolean = false
-) {
-    // Normaliser teams en tableau
-    const teamsArray = useMemo(() => {
-        if (!teams) return [];
-        if (Array.isArray(teams)) return teams;
-        // Si teams est un objet avec data
-        if (teams.data && Array.isArray(teams.data)) return teams.data;
-        return [];
-    }, [teams]);
+    skipClientSearch: boolean
+): UseTeamsFiltersResult {
+    const normalized = search.trim().toLowerCase();
 
     const filtered = useMemo(() => {
-        if (useBackendSearch) {
-            return teamsArray;
-        }
+        if (skipClientSearch) return teams;
+        if (!normalized) return teams;
 
-        const searchLower = search.toLowerCase().trim();
+        return teams.filter((t) => {
+            const ownerName = `${t.owner?.first_name ?? ""} ${t.owner?.last_name ?? ""}`.toLowerCase();
+            const deptName = (t.department?.name ?? "").toLowerCase();
 
-        if (!searchLower) {
-            return teamsArray;
-        }
-
-        return teamsArray.filter((t: { name: string; description: any; department: { name: any; }; owner: { first_name: any; last_name: any; }; }) =>
-            t.name.toLowerCase().includes(searchLower) ||
-            (t.description ?? "").toLowerCase().includes(searchLower) ||
-            (t.department?.name ?? "").toLowerCase().includes(searchLower) ||
-            (t.owner?.first_name ?? "").toLowerCase().includes(searchLower) ||
-            (t.owner?.last_name ?? "").toLowerCase().includes(searchLower)
-        );
-    }, [teamsArray, search, useBackendSearch]);
+            return (
+                t.name.toLowerCase().includes(normalized) ||
+                (t.description ?? "").toLowerCase().includes(normalized) ||
+                ownerName.includes(normalized) ||
+                deptName.includes(normalized)
+            );
+        });
+    }, [teams, normalized, skipClientSearch]);
 
     const deptCount = useMemo(() => {
-        if (!Array.isArray(teamsArray)) return 0;
-
-        return new Set(
-            teamsArray
-                .map((t) => t.department?.id)
-                .filter((id): id is number => Boolean(id))
-        ).size;
-    }, [teamsArray]);
+        const set = new Set<number>();
+        filtered.forEach((t) => {
+            if (t.department?.id) set.add(t.department.id);
+        });
+        return set.size;
+    }, [filtered]);
 
     const thisMonth = useMemo(() => {
-        if (!Array.isArray(teamsArray)) return 0;
-
         const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-
-        return teamsArray.filter((t) => {
-            const created = new Date(t.created_at);
-            return (
-                created.getMonth() === currentMonth &&
-                created.getFullYear() === currentYear
-            );
+        const y = now.getFullYear();
+        const m = now.getMonth();
+        return filtered.filter((t) => {
+            const d = new Date(t.created_at);
+            return d.getFullYear() === y && d.getMonth() === m;
         }).length;
-    }, [teamsArray]);
+    }, [filtered]);
 
     return { filtered, deptCount, thisMonth };
 }

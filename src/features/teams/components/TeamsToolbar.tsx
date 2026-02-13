@@ -4,7 +4,6 @@ import {
     ReloadOutlined,
     AppstoreOutlined,
     UnorderedListOutlined,
-    CloseCircleOutlined,
 } from "@ant-design/icons";
 
 interface TeamsToolbarProps {
@@ -22,7 +21,6 @@ interface TeamsToolbarProps {
 export function TeamsToolbar({
                                  search,
                                  onSearchChange,
-                                 onSearchClear,
                                  onRefresh,
                                  loading,
                                  searching,

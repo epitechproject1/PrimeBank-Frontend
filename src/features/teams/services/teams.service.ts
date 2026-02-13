@@ -9,7 +9,6 @@ import {
 } from "../types/teams.type.ts";
 
 export const teamService = {
-    // ✅ backend: { data, total, query }
     getAll: async (filters?: TeamFilters): Promise<ApiListResponse<TeamType>> => {
         const { data } = await apiClient.get<ApiListResponse<TeamType>>("/teams/", {
             params: filters,
@@ -27,7 +26,6 @@ export const teamService = {
         return data;
     },
 
-    // ✅ update doit accepter UpdateTeamPayload
     update: async (id: number, payload: UpdateTeamPayload): Promise<TeamType> => {
         const { data } = await apiClient.put<TeamType>(`/teams/${id}/`, payload);
         return data;
@@ -42,13 +40,11 @@ export const teamService = {
         await apiClient.delete(`/teams/${id}/`);
     },
 
-    // ✅ backend: { data, total }
     getMyTeams: async (): Promise<ApiListResponse<TeamType>> => {
         const { data } = await apiClient.get<ApiListResponse<TeamType>>("/teams/my-teams/");
         return data;
     },
 
-    // ✅ optionnel mais utile si tu utilises ton endpoint /teams/search/
     search: async (q: string, page = 1, limit = 20): Promise<ApiSearchResponse<TeamType>> => {
         const { data } = await apiClient.get<ApiSearchResponse<TeamType>>("/teams/search/", {
             params: { q, page, limit },

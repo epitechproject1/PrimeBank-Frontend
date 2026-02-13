@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { Empty, Button, Table } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { TeamType } from "../types/teams.type.ts";
-import { TeamsGridView } from "./TeamsGridView.tsx";
-import { TeamDetailsModal } from "./TeamDetailsModal.tsx";
 import type { ColumnsType } from "antd/es/table";
+import type { TeamType } from "../types/teams.type";
+import { TeamsGridView } from "./TeamsGridView";
 
 interface TeamsContentProps {
     loading: boolean;
@@ -15,6 +13,7 @@ interface TeamsContentProps {
     onEdit: (team: TeamType) => void;
     onDelete: (id: number) => void;
     onAdd: () => void;
+    onView: (team: TeamType, index: number) => void;
     screens: Partial<Record<string, boolean>>;
 }
 
@@ -27,23 +26,9 @@ export function TeamsContent({
                                  onEdit,
                                  onDelete,
                                  onAdd,
+                                 onView,
                                  screens,
                              }: TeamsContentProps) {
-    const [selectedTeam, setSelectedTeam] = useState<TeamType | null>(null);
-    const [selectedTeamIndex, setSelectedTeamIndex] = useState<number>(0);
-    const [detailsModalOpen, setDetailsModalOpen] = useState(false);
-
-    const handleViewTeam = (team: TeamType, index: number) => {
-        setSelectedTeam(team);
-        setSelectedTeamIndex(index);
-        setDetailsModalOpen(true);
-    };
-
-    const handleCloseModal = () => {
-        setDetailsModalOpen(false);
-        setSelectedTeam(null);
-    };
-
     if (!loading && filtered.length === 0) {
         return (
             <Empty
@@ -61,52 +46,29 @@ export function TeamsContent({
 
     if (viewMode === "grid") {
         return (
-            <>
-                <TeamsGridView
-                    teams={filtered}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    onView={handleViewTeam}
-                    screens={screens}
-                />
-
-                <TeamDetailsModal
-                    open={detailsModalOpen}
-                    team={selectedTeam}
-                    onClose={handleCloseModal}
-                    onEdit={onEdit}
-                    colorIndex={selectedTeamIndex}
-                />
-            </>
+            <TeamsGridView
+                teams={filtered}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onView={onView}
+                screens={screens}
+            />
         );
     }
 
     return (
-        <>
-            <Table<TeamType>
-                dataSource={filtered}
-                columns={getColumns(handleViewTeam)}
-                rowKey="id"
-                pagination={{
-                    pageSize: 10,
-                    showSizeChanger: true,
-                    showTotal: (total) => `Total: ${total} équipe${total > 1 ? 's' : ''}`,
-                }}
-                locale={{ emptyText: <Empty description="Aucune équipe" /> }}
-                scroll={{ x: 1200 }}
-                style={{
-                    borderRadius: 12,
-                    overflow: "hidden",
-                }}
-            />
-
-            <TeamDetailsModal
-                open={detailsModalOpen}
-                team={selectedTeam}
-                onClose={handleCloseModal}
-                onEdit={onEdit}
-                colorIndex={selectedTeamIndex}
-            />
-        </>
+        <Table<TeamType>
+            dataSource={filtered}
+            columns={getColumns(onView)}
+            rowKey="id"
+            pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showTotal: (total) => `Total: ${total} équipe${total > 1 ? "s" : ""}`,
+            }}
+            locale={{ emptyText: <Empty description="Aucune équipe" /> }}
+            scroll={{ x: 1200 }}
+            style={{ borderRadius: 12, overflow: "hidden" }}
+        />
     );
 }
