@@ -1,4 +1,4 @@
-import type { UserProfile } from "../../users/types/user.type";
+import type { UserProfile } from "../../users";
 import type { DepartmentType } from "../../departments/types/departments.type";
 
 export type TeamMember = UserProfile;

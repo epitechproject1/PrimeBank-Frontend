@@ -27,14 +27,12 @@ export const teamService = {
     },
 
     update: async (id: number, payload: UpdateTeamPayload): Promise<TeamType> => {
-        const { data } = await apiClient.put<TeamType>(`/teams/${id}/`, payload);
-        return data;
-    },
-
-    partialUpdate: async (id: number, payload: UpdateTeamPayload): Promise<TeamType> => {
         const { data } = await apiClient.patch<TeamType>(`/teams/${id}/`, payload);
         return data;
     },
+
+
+
 
     delete: async (id: number): Promise<void> => {
         await apiClient.delete(`/teams/${id}/`);
