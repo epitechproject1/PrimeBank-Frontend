@@ -28,7 +28,6 @@ export function useTeamFormSubmit({ form, editTeam, onSaved, onClose }: UseTeamF
         try {
             const values = await form.validateFields();
 
-            // ✅ ensure owner is always included in members_ids
             const membersSet = new Set<number>(values.members_ids ?? []);
             if (values.owner_id) membersSet.add(values.owner_id);
 
@@ -44,7 +43,10 @@ export function useTeamFormSubmit({ form, editTeam, onSaved, onClose }: UseTeamF
 
             if (editTeam) {
                 const payload: UpdateTeamPayload = payloadBase;
+                console.log("UPDATE PAYLOAD", payloadBase);
                 saved = await teamService.update(editTeam.id, payload);
+                console.log(" after UPDATE PAYLOAD", saved);
+
             } else {
                 const payload: CreateTeamPayload = payloadBase;
                 saved = await teamService.create(payload);
