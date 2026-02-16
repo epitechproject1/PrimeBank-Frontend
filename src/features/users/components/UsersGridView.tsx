@@ -132,11 +132,13 @@ function UserCard({
                 </Flex>
                 <Switch
                     checked={user.is_active}
-                    onChange={(checked) => onToggleStatus(user.id, checked)}
+                    onChange={(checked, e) => {
+                        e?.stopPropagation();
+                        onToggleStatus(user.id, checked);
+                    }}
                     checkedChildren="Actif"
                     unCheckedChildren="Off"
                     loading={isToggling(user.id)}
-                    onClick={stopPropagation}
                 />
             </Flex>
         </Card>
