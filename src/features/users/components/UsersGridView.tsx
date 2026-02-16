@@ -48,6 +48,10 @@ interface UserCardProps {
     onOpenContract: (user: User) => void;
 }
 
+function stopPropagation(event: React.MouseEvent) {
+    event.stopPropagation();
+}
+
 function UserCard({
     user,
     index,
@@ -70,7 +74,7 @@ function UserCard({
                         type="text"
                         icon={<EditOutlined />}
                         onClick={(e) => {
-                            e.stopPropagation();
+                            stopPropagation(e);
                             onEdit(user);
                         }}
                     />
@@ -88,7 +92,7 @@ function UserCard({
                         type="text"
                         danger
                         icon={<DeleteOutlined />}
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={stopPropagation}
                     />
                 </Popconfirm>,
             ]}
@@ -132,7 +136,7 @@ function UserCard({
                     checkedChildren="Actif"
                     unCheckedChildren="Off"
                     loading={isToggling(user.id)}
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={stopPropagation}
                 />
             </Flex>
         </Card>
