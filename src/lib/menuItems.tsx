@@ -6,10 +6,8 @@
     UsergroupAddOutlined,
      TeamOutlined,
     WalletOutlined,
-    ApartmentOutlined
-    TeamOutlined,
-    WalletOutlined,
- 
+    ApartmentOutlined,
+
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 
@@ -31,6 +29,5 @@ export const SIDEBAR_ITEMS = [
         label: "Gestion des départements"
     },
 
-];
-] satisfies NonNullable<MenuProps["items"]>;
+]satisfies NonNullable<MenuProps["items"]>;
 
