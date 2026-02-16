@@ -8,6 +8,7 @@ import {RequireAuth} from "./features/auth/login/components/RequireAuth.tsx";
 import {PublicOnlyRoute} from "./features/auth/login/components/PublicOnlyRoute.tsx";
 import UsersPage from "./features/users/Page/UserPage.tsx";
 import { ProfilePage } from "./features/profile/index.ts";
+import {DepartmentsPage} from "./features/departments/pages/DepartmentsPage.tsx";
 
 // 3. Composant temporaire (Placeholder pour la page d'accueil)
 const DashboardHome = () => (
@@ -42,6 +43,7 @@ function App() {
                     <Route path="/dashboard" element={<DashboardHome />} />
                     <Route path="/users" element={<UsersPage />} />
                     <Route path="/teams" element={<TeamsPage />} />
+                    <Route path="/departments" element={<DepartmentsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     {/* Ajouter tes futures pages ici : */}
                     {/* <Route path="/accounts" element={<AccountsPage />} /> */}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { apiClient } from "../../../lib/api_client/apiClient";
-import type { TeamType } from "../types/teams.type";
+import { apiClient } from "../../../../lib/api_client/apiClient.ts";
+import type { TeamType } from "../../types/teams.type.ts";
 
 type ApiSearchResponse<T> = {
     data: T[];
@@ -32,7 +32,6 @@ export function useTeamsSearch({
     const [searchResults, setSearchResults] = useState<TeamType[]>([]);
     const [searchError, setSearchError] = useState<string | null>(null);
 
-    // debounce
     useEffect(() => {
         const timer = setTimeout(() => setDebouncedSearch(search), debounceDelay);
         return () => clearTimeout(timer);

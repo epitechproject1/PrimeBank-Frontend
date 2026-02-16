@@ -2,12 +2,12 @@ import { useCallback, useMemo, useState } from "react";
 import { message, theme } from "antd";
 import type { AliasToken } from "antd/es/theme/interface";
 
-import type { TeamType } from "../types/teams.type";
-import { useTeamsData } from "./useTeamsData";
-import { useTeamsSearch } from "./useTeamsSearch";
-import { useTeamsFilters } from "./useTeamsFilters";
-import { teamService } from "../services/teams.service";
-import { getTeamsTableColumns } from "../utils/teams-table-columns";
+import type { TeamType } from "../../types/teams.type.ts";
+import { useTeamsData } from "../data/useTeamsData.tsx";
+import { useTeamsSearch } from "./useTeamsSearch.ts";
+import { useTeamsFilters } from "./useTeamsFilters.ts";
+import { teamService } from "../../services/teams.service.ts";
+import { getTeamsTableColumns } from "../../components/table/TeamsTableColumns.tsx";
 
 type ViewMode = "grid" | "list";
 

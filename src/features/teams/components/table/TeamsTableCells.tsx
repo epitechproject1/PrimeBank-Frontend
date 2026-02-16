@@ -1,7 +1,7 @@
 import { Avatar, Button, Popconfirm, Space, Tag, Tooltip, Typography } from "antd";
 import { BankOutlined, DeleteOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
-import type { TeamType } from "../types/teams.type";
-import { AVATAR_COLORS, TAG_COLORS, getInitials } from "./teams-constants";
+import type { TeamType } from "../../types/teams.type.ts";
+import { AVATAR_COLORS, TAG_COLORS, getInitials } from "../../utils/teams-constants.ts";
 
 const { Text } = Typography;
 
