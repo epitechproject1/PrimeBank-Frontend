@@ -15,10 +15,12 @@ function normalizeRole<T extends { role?: string }>(payload: T): T {
 export const userService = {
     /**
      * GET /users/
-     * Recupere tous les utilisateurs
+     * Recupere tous les utilisateurs (avec recherche backend si `search` fourni)
      */
-    getAll: async (): Promise<User[]> => {
-        const { data } = await apiClient.get<User[]>("/users/");
+    getAll: async (search?: string): Promise<User[]> => {
+        const { data } = await apiClient.get<User[]>("/users/", {
+            params: search ? { search } : undefined,
+        });
         return data;
     },
 

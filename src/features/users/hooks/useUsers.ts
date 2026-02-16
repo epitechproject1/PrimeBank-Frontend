@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";
 import { userService } from "../services/user.service";
 import { CreateUserDTO, UpdateUserDTO } from "../types/user.type";
+import { searchUsers, toggleUserActive, UserSearchFilters } from "../../../services/usersApi";
+import { ApiError } from "../../../lib/api_client/apiError";
 
 interface UpdateUserParams {
     id: string;
@@ -15,12 +17,34 @@ interface ToggleStatusParams {
     is_active: boolean;
 }
 
-export const useUsers = () => {
+type AxiosLikeError = {
+    response?: {
+        status?: number;
+    };
+};
+
+function handleToggleError(error: unknown) {
+    const apiError = error as ApiError;
+    const axiosError = error as AxiosLikeError;
+    const status = apiError?.status ?? axiosError?.response?.status;
+
+    if (status === 403) {
+        message.error("Action reservee aux administrateurs");
+        return;
+    }
+    if (status === 401) {
+        message.error("Session expiree, veuillez vous reconnecter");
+        return;
+    }
+    message.error("Erreur lors du changement de statut");
+}
+
+export const useUsers = (filters: UserSearchFilters) => {
     const queryClient = useQueryClient();
 
     const usersQuery = useQuery({
-        queryKey: ["users"],
-        queryFn: userService.getAll,
+        queryKey: ["users", filters],
+        queryFn: () => searchUsers(filters),
     });
 
     const createUser = useMutation({
@@ -63,19 +87,19 @@ export const useUsers = () => {
 
     const toggleUserStatus = useMutation({
         mutationFn: ({ id, is_active }: ToggleStatusParams) =>
-            userService.toggleStatus(id, is_active),
+            toggleUserActive(id, is_active),
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["users"] });
             message.success(`Utilisateur ${data.is_active ? "active" : "desactive"}`);
         },
-        onError: () => {
-            message.error("Erreur lors du changement de statut");
-        },
+        onError: handleToggleError,
     });
 
     return {
-        data: usersQuery.data,
-        users: usersQuery.data || [],
+        data: usersQuery.data?.data,
+        total: usersQuery.data?.total ?? 0,
+        query: usersQuery.data?.query ?? "",
+        users: usersQuery.data?.data || [],
         isLoading: usersQuery.isLoading,
         isError: usersQuery.isError,
         error: usersQuery.error,

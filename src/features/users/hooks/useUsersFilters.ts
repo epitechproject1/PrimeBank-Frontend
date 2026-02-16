@@ -1,22 +1,10 @@
 ﻿import { useMemo } from "react";
 import { User } from "../types/user.type";
 
-export function useUsersFilters(users: User[], search: string) {
+export function useUsersFilters(users: User[]) {
     return useMemo(() => {
-        const term = search.trim().toLowerCase();
-        const filtered = term
-            ? users.filter((u) => {
-                  const fullName = `${u.first_name} ${u.last_name}`.toLowerCase();
-                  return (
-                      fullName.includes(term) ||
-                      u.email.toLowerCase().includes(term) ||
-                      (u.phone_number || "").toLowerCase().includes(term)
-                  );
-              })
-            : users;
-
         const activeCount = users.filter((u) => u.is_active).length;
-        const adminsCount = users.filter((u) => u.role === "admin").length;
+        const adminsCount = users.filter((u) => u.role === "admin" || u.role === "ADMIN").length;
         const thisMonthCount = users.filter((u) => {
             const created = new Date(u.created_at);
             const now = new Date();
@@ -27,10 +15,10 @@ export function useUsersFilters(users: User[], search: string) {
         }).length;
 
         return {
-            filtered,
+            filtered: users,
             activeCount,
             adminsCount,
             thisMonthCount,
         };
-    }, [users, search]);
+    }, [users]);
 }

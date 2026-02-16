@@ -1,25 +1,31 @@
 ﻿import { useCallback, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useUsers } from "./useUsers";
 import type { User, UpdateUserDTO, CreateUserDTO } from "../types/user.type";
 import { getUsersTableColumns } from "../utils/users-table-columns";
 import { useUsersFilters } from "./useUsersFilters";
-import { exportUsersCsv, exportUsersPdf, exportUsersWord } from "../utils/users-export";
+import { useDebouncedValue } from "./useDebouncedValue";
+import type { UserSearchFilters } from "../../../services/usersApi";
+import { useUsersExport } from "./useUsersExport";
 
-export function useUsersPageState() {
+export function useUsersPageState(filters: UserSearchFilters) {
+    const [open, setOpen] = useState(false);
+    const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+    const [togglingId, setTogglingId] = useState<string | null>(null);
+    const queryClient = useQueryClient();
+    const debouncedFilters = useDebouncedValue(filters, 400);
+    const { exporting, handleExport, exportContextHolder } = useUsersExport(filters);
     const {
         users = [],
+        total,
         isLoading,
         createUser,
         updateUser,
         deleteUser,
         toggleUserStatus,
         refetch,
-    } = useUsers();
-    const [open, setOpen] = useState(false);
-    const [editingUser, setEditingUser] = useState<User | null>(null);
-    const [search, setSearch] = useState("");
-    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-
+    } = useUsers(debouncedFilters);
     const closeForm = useCallback(() => {
         setOpen(false);
         setEditingUser(null);
@@ -34,47 +40,47 @@ export function useUsersPageState() {
     }, []);
     const handleDelete = useCallback((id: string) => deleteUser.mutate(id), [deleteUser]);
     const handleToggleStatus = useCallback(
-        (id: string, is_active: boolean) => toggleUserStatus.mutate({ id, is_active }),
+        (id: string, is_active: boolean) => {
+            setTogglingId(id);
+            toggleUserStatus.mutate(
+                { id, is_active },
+                { onSettled: () => setTogglingId(null) }
+            );
+        },
         [toggleUserStatus]
     );
     const handleSubmit = useCallback(
-        async (values: CreateUserDTO | UpdateUserDTO) => {
-            try {
-                if (editingUser) {
-                    await updateUser.mutateAsync({
-                        id: editingUser.id,
-                        data: values as UpdateUserDTO,
-                    });
-                } else {
-                    await createUser.mutateAsync(values as CreateUserDTO);
-                }
-                closeForm();
-            } catch (error) {
-                console.error("Error submitting user form:", error);
+        (values: CreateUserDTO | UpdateUserDTO) => {
+            if (editingUser) {
+                updateUser.mutate(
+                    { id: editingUser.id, data: values as UpdateUserDTO },
+                    { onSuccess: closeForm }
+                );
+                return;
             }
+            createUser.mutate(values as CreateUserDTO, { onSuccess: closeForm });
         },
         [closeForm, createUser, editingUser, updateUser]
     );
-
-    const { filtered, activeCount, thisMonthCount } = useUsersFilters(users, search);
+    const { filtered, activeCount, thisMonthCount } = useUsersFilters(users);
     const columns = useMemo(
-        () => getUsersTableColumns(handleEdit, handleDelete, handleToggleStatus),
-        [handleDelete, handleEdit, handleToggleStatus]
+        () =>
+            getUsersTableColumns(
+                handleEdit,
+                handleDelete,
+                handleToggleStatus,
+                (id) => id === togglingId
+            ),
+        [handleDelete, handleEdit, handleToggleStatus, togglingId]
     );
-    const handleExport = useCallback(
-        (format: "excel" | "word" | "pdf") => {
-            if (format === "excel") exportUsersCsv(filtered);
-            if (format === "word") exportUsersWord(filtered);
-            if (format === "pdf") exportUsersPdf(filtered);
-        },
-        [filtered]
-    );
-
+    const refresh = useCallback(() => {
+        void queryClient.invalidateQueries({ queryKey: ["users"] });
+        void refetch();
+    }, [queryClient, refetch]);
     return {
         users,
+        total,
         isLoading,
-        search,
-        setSearch,
         viewMode,
         setViewMode,
         open,
@@ -89,8 +95,11 @@ export function useUsersPageState() {
         filtered,
         activeCount,
         thisMonthCount,
-        refetch,
+        refresh,
         formLoading: createUser.isPending || updateUser.isPending,
         handleExport,
+        exporting,
+        exportContextHolder,
+        isToggling: (id: string) => id === togglingId,
     };
 }
