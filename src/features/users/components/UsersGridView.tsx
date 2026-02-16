@@ -82,10 +82,7 @@ function UserCard({
                     okText="Supprimer"
                     cancelText="Annuler"
                     okButtonProps={{ danger: true }}
-                    onConfirm={(e) => {
-                        e?.stopPropagation();
-                        onDelete(user.id);
-                    }}
+                    onConfirm={() => onDelete(user.id)}
                 >
                     <Button
                         type="text"

@@ -10,6 +10,7 @@ type Props = {
     onEdit: (user: User) => void;
     onDelete: (id: string) => void;
     onToggleStatus: (id: string, is_active: boolean) => void;
+    isToggling: (id: string) => boolean;
 };
 
 export default function UserTable({
@@ -18,8 +19,9 @@ export default function UserTable({
     onEdit,
     onDelete,
     onToggleStatus,
+    isToggling,
 }: Props) {
-    const columns = getUsersTableColumns(onEdit, onDelete, onToggleStatus);
+    const columns = getUsersTableColumns(onEdit, onDelete, onToggleStatus, isToggling);
 
     return (
         <Table
