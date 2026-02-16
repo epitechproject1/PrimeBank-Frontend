@@ -1,6 +1,6 @@
 import type { ColumnsType } from "antd/es/table";
-import type { TeamType } from "../types/teams.type";
-import { formatDate } from "./teams-constants";
+import type { TeamType } from "../../types/teams.type.ts";
+import { formatDate } from "../../utils/teams-constants.ts";
 import { Typography } from "antd";
 import {
     ActionsCell,
@@ -10,7 +10,7 @@ import {
     OwnerCell,
     TeamNameCell,
     type TeamsTableHandlers,
-} from "./TeamsTableCells";
+} from "./TeamsTableCells.tsx";
 
 const { Text } = Typography;
 

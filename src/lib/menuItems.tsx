@@ -4,8 +4,12 @@
     DashboardOutlined,
     SettingOutlined,
     UsergroupAddOutlined,
+     TeamOutlined,
+    WalletOutlined,
+    ApartmentOutlined
     TeamOutlined,
     WalletOutlined,
+ 
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 
@@ -21,4 +25,12 @@ export const SIDEBAR_ITEMS = [
         icon: <TeamOutlined />,
         label: "Gestion des equipes",
     },
+    {
+        key: "/departments",
+        icon: <ApartmentOutlined />,
+        label: "Gestion des départements"
+    },
+
+];
 ] satisfies NonNullable<MenuProps["items"]>;
+

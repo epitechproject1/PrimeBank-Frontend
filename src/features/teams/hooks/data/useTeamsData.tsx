@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { message } from "antd";
-import { teamService } from "../services/teams.service";
-import type { TeamType } from "../types/teams.type";
+import { teamService } from "../../services/teams.service.ts";
+import type { TeamType } from "../../types/teams.type.ts";
 type ApiListResponse<T> = {
     data: T[];
     total: number;

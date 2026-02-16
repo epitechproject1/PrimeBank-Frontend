@@ -1,8 +1,8 @@
 import { Flex } from "antd";
-import type { TeamType } from "../types/teams.type";
-import type { Screens } from "../utils/teams-grid.utils";
-import { getGridCardWidth } from "../utils/teams-grid.utils";
-import { TeamGridCard } from "./grid/TeamGridCard";
+import type { TeamType } from "../types/teams.type.ts";
+import type { Screens } from "../utils/teams-grid.utils.ts";
+import { getGridCardWidth } from "../utils/teams-grid.utils.ts";
+import { TeamGridCard } from "../components/TeamGrid/TeamGridCard.tsx";
 
 interface TeamsGridViewProps {
     teams: TeamType[];

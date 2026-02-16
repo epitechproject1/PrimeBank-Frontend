@@ -1,8 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { message } from "antd";
-import { apiClient } from "../../../lib/api_client/apiClient.ts";
-import { UserProfile } from "../../users/types/user.type.ts";
-import { DepartmentType } from "../../departments/types/departments.type.ts";
+import { apiClient } from "../../../../lib/api_client/apiClient";
+import type { UserProfile } from "../../../users";
+import type { DepartmentType } from "../../../departments/types/departments.type";
+
+type DepartmentListResponse =
+    | DepartmentType[]
+    | {
+    data?: DepartmentType[];
+    results?: DepartmentType[];
+};
 
 async function fetchUsers(): Promise<UserProfile[]> {
     const { data } = await apiClient.get<UserProfile[]>("/users/");
@@ -10,8 +17,13 @@ async function fetchUsers(): Promise<UserProfile[]> {
 }
 
 async function fetchDepartments(): Promise<DepartmentType[]> {
-    const { data } = await apiClient.get<DepartmentType[]>("/departments/");
-    return data;
+    const { data } = await apiClient.get<DepartmentListResponse>("/departments/");
+
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.results)) return data.results;
+    if (Array.isArray(data.data)) return data.data;
+
+    return [];
 }
 
 interface UseTeamFormOptionsReturn {
@@ -33,10 +45,13 @@ export function useTeamFormOptions(open: boolean): UseTeamFormOptionsReturn {
                 fetchUsers(),
                 fetchDepartments(),
             ]);
+
             setUsers(usersData);
             setDepartments(deptsData);
         } catch {
-            messageApi.warning("Impossible de charger les utilisateurs ou départements");
+            messageApi.warning(
+                "Impossible de charger les utilisateurs ou départements"
+            );
         } finally {
             setLoadingOptions(false);
         }

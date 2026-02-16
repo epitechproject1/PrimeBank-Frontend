@@ -1,12 +1,14 @@
 import { useEffect, useMemo } from "react";
 import { Modal, Form, Space, Spin } from "antd";
 import { EditOutlined, PlusOutlined } from "@ant-design/icons";
-import type { TeamType } from "../types/teams.type";
-import { useTeamFormOptions } from "../hooks/useTeamFormOptions";
-import { useTeamFormSubmit } from "../hooks/useTeamFormSubmit";
+
+import type { TeamType } from "../../types/teams.type";
+import { useTeamFormOptions } from "../../hooks/form/useTeamFormOptions";
+import { useTeamFormSubmit } from "../../hooks/form/useTeamFormSubmit";
+
 import { TeamFormFields } from "./TeamFormFields";
-import { mapDepartmentsToOptions, mapUsersToOptions } from "../utils/team-form-utils";
-import { formatDepartmentOptions, formatUserOptions } from "../utils/team-select-options";
+import { mapUsersToOptions } from "../../utils/team-form-utils";
+import { formatUserOptions, type SelectOption } from "../form/team-select-options";
 
 interface TeamFormModalProps {
     open: boolean;
@@ -22,6 +24,14 @@ interface TeamFormValues {
     department_id: number;
     members_ids?: number[];
 }
+
+type DepartmentLite = {
+    id: number;
+    name?: string | null;
+    title?: string | null;
+    label?: string | null;
+    code?: string | null;
+};
 
 export function TeamFormModal({ open, editTeam, onClose, onSaved }: TeamFormModalProps) {
     const [form] = Form.useForm<TeamFormValues>();
@@ -40,10 +50,23 @@ export function TeamFormModal({ open, editTeam, onClose, onSaved }: TeamFormModa
         [users]
     );
 
-    const deptOptions = useMemo(
-        () => formatDepartmentOptions(mapDepartmentsToOptions(departments)),
-        [departments]
-    );
+    const deptOptions = useMemo<SelectOption[]>(() => {
+        const list: DepartmentLite[] = Array.isArray(departments)
+            ? (departments as DepartmentLite[])
+            : [];
+
+        return list.map((d) => {
+            const labelText =
+                d.name ?? d.title ?? d.label ?? d.code ?? `Département #${d.id}`;
+
+            return {
+                value: d.id,
+                label: <span>{String(labelText)}</span>,
+                searchLabel: String(labelText).toLowerCase(),
+            };
+        });
+    }, [departments]);
+
 
     useEffect(() => {
         if (!open) return;
@@ -79,7 +102,7 @@ export function TeamFormModal({ open, editTeam, onClose, onSaved }: TeamFormModa
                 okText={editTeam ? "Enregistrer" : "Créer"}
                 cancelText="Annuler"
                 confirmLoading={saving}
-                destroyOnHidden
+                destroyOnClose
                 width={520}
             >
                 <Spin spinning={loadingOptions}>

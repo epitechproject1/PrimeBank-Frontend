@@ -1,9 +1,9 @@
 import { Space, Avatar } from "antd";
 import { UserOutlined, BankOutlined } from "@ant-design/icons";
 import { JSX } from "react";
-import { UserProfile } from "../../users/types/user.type";
+import { UserProfile } from "../../../users";
 import {DefaultOptionType} from "antd/es/select";
-import { BaseSelectOption } from "../utils/team-form-utils";
+import { BaseSelectOption } from "../../utils/team-form-utils.ts";
 export interface SelectOption extends DefaultOptionType {
     value: number;
     label: JSX.Element;

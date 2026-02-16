@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { TeamType } from "../types/teams.type";
+import type { TeamType } from "../../types/teams.type.ts";
 
 type UseTeamsFiltersResult = {
     filtered: TeamType[];

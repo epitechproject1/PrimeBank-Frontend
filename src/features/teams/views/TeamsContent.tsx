@@ -1,8 +1,8 @@
 import { Empty, Button, Table } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import type { TeamType } from "../types/teams.type";
-import { TeamsGridView } from "./TeamsGridView";
+import type { TeamType } from "../types/teams.type.ts";
+import { TeamsGridView } from "./TeamsGridView.tsx";
 
 interface TeamsContentProps {
     loading: boolean;

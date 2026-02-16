@@ -1,12 +1,12 @@
 import { Flex, Grid, Spin } from "antd";
 
-import TeamFormModal from "../components/TeamFormModal";
-import { TeamDetailsModal } from "../components/TeamDetailsModal";
-import { TeamsStats } from "../components/TeamsStats";
-import { TeamsToolbar } from "../components/TeamsToolbar";
-import { TeamsContent } from "../components/TeamsContent";
-import { TeamsHeader } from "../components/TeamsHeader";
-import { useTeamsPage } from "../hooks/useTeamsPage";
+import TeamFormModal from "../components/TeamForm/TeamFormModal.tsx";
+import { TeamDetailsModal } from "../components/TeamDetails/TeamDetailsModal.tsx";
+import { TeamsStats } from "../components/TeamsStats/TeamsStats.tsx";
+import { TeamsToolbar } from "../components/TeamsToolbar/TeamsToolbar.tsx";
+import { TeamsContent } from "../views/TeamsContent.tsx";
+import { TeamsHeader } from "../views/TeamsHeader.tsx";
+import { useTeamsPage } from "../hooks/page/useTeamsPage.ts";
 
 const { useBreakpoint } = Grid;
 

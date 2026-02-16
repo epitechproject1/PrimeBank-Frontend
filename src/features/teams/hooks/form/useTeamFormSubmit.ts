@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import { message } from "antd";
 import type { FormInstance } from "antd/es/form";
-import type { TeamType, CreateTeamPayload, UpdateTeamPayload } from "../types/teams.type";
-import { teamService } from "../services/teams.service";
+import type { TeamType, CreateTeamPayload, UpdateTeamPayload } from "../../types/teams.type.ts";
+import { teamService } from "../../services/teams.service.ts";
 
 type TeamFormValues = {
     name: string;

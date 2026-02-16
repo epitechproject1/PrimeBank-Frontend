@@ -2,11 +2,11 @@ import { Modal, Typography, Descriptions, Space } from "antd";
 import { BankOutlined, CalendarOutlined, ClockCircleOutlined, TeamOutlined } from "@ant-design/icons";
 import { useMemo, useCallback } from "react";
 
-import type { TeamMember, TeamType } from "../types/teams.type";
-import { formatDate } from "../utils/teams-constants";
-import { TeamDetailsHeader } from "./team-details/TeamDetailsHeader";
-import { TeamDetailsStats } from "./team-details/TeamDetailsStats";
-import { TeamMembersList } from "./team-details/TeamMembersList";
+import type { TeamMember, TeamType } from "../../types/teams.type.ts";
+import { formatDate } from "../../utils/teams-constants.ts";
+import { TeamDetailsHeader } from "./TeamDetailsHeader.tsx";
+import { TeamDetailsStats } from "./TeamDetailsStats.tsx";
+import { TeamMembersList } from "./TeamMembersList.tsx";
 
 const { Title, Text } = Typography;
 
