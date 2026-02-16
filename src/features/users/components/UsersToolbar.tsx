@@ -1,4 +1,4 @@
-﻿import { Flex, Input, Button, Dropdown } from "antd";
+﻿import { Flex, Input, Button } from "antd";
 import {
     SearchOutlined,
     ReloadOutlined,
@@ -6,7 +6,6 @@ import {
     UnorderedListOutlined,
     DownloadOutlined,
 } from "@ant-design/icons";
-import type { MenuProps } from "antd";
 
 interface UsersToolbarProps {
     search: string;
@@ -16,7 +15,9 @@ interface UsersToolbarProps {
     viewMode: "grid" | "list";
     onViewModeChange: (mode: "grid" | "list") => void;
     placeholderColor: string;
-    onExport: (format: "excel" | "word" | "pdf") => void;
+    onExportCsv: () => void;
+    onExportPdf: () => void;
+    exporting: boolean;
 }
 
 export function UsersToolbar({
@@ -27,23 +28,21 @@ export function UsersToolbar({
     viewMode,
     onViewModeChange,
     placeholderColor,
-    onExport,
+    onExportCsv,
+    onExportPdf,
+    exporting,
 }: UsersToolbarProps) {
-    const items: MenuProps["items"] = [
-        { key: "excel", label: "Exporter Excel (CSV)" },
-        { key: "word", label: "Exporter Word" },
-        { key: "pdf", label: "Exporter PDF" },
-    ];
+    const exportDisabled = loading || exporting;
 
     return (
         <Flex gap={12} style={{ marginBottom: 20 }} wrap="wrap">
             <Input
                 prefix={<SearchOutlined style={{ color: placeholderColor }} />}
-                placeholder="Rechercher un utilisateur..."
+                placeholder="Recherche globale..."
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
                 allowClear
-                style={{ flex: 1, minWidth: 220 }}
+                style={{ flex: 1, minWidth: 260 }}
             />
             <Button
                 icon={<ReloadOutlined />}
@@ -51,15 +50,20 @@ export function UsersToolbar({
                 loading={loading}
                 title="Rafraichir"
             />
-            <Dropdown
-                menu={{
-                    items,
-                    onClick: ({ key }) => onExport(key as "excel" | "word" | "pdf"),
-                }}
-                placement="bottomRight"
+            <Button
+                icon={<DownloadOutlined />}
+                onClick={onExportCsv}
+                disabled={exportDisabled}
             >
-                <Button icon={<DownloadOutlined />}>Exporter</Button>
-            </Dropdown>
+                Exporter CSV
+            </Button>
+            <Button
+                icon={<DownloadOutlined />}
+                onClick={onExportPdf}
+                disabled={exportDisabled}
+            >
+                Exporter PDF
+            </Button>
             <Flex>
                 <Button
                     icon={<AppstoreOutlined />}

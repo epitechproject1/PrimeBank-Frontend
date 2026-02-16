@@ -13,8 +13,10 @@ interface UsersContentProps {
     onEdit: (user: User) => void;
     onDelete: (id: string) => void;
     onToggleStatus: (id: string, is_active: boolean) => void;
+    isToggling: (id: string) => boolean;
     onAdd: () => void;
     screens: Partial<Record<string, boolean>>;
+    onOpenContract: (user: User) => void;
 }
 
 export function UsersContent({
@@ -26,8 +28,10 @@ export function UsersContent({
     onEdit,
     onDelete,
     onToggleStatus,
+    isToggling,
     onAdd,
     screens,
+    onOpenContract,
 }: UsersContentProps) {
     if (!loading && filtered.length === 0) {
         return (
@@ -53,7 +57,9 @@ export function UsersContent({
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onToggleStatus={onToggleStatus}
+                isToggling={isToggling}
                 screens={screens}
+                onOpenContract={onOpenContract}
             />
         );
     }
@@ -66,6 +72,9 @@ export function UsersContent({
             pagination={{ pageSize: 10, showSizeChanger: false }}
             locale={{ emptyText: <Empty description="Aucun utilisateur" /> }}
             scroll={{ x: true }}
+            onRow={(record) => ({
+                onClick: () => onOpenContract(record),
+            })}
         />
     );
 }
