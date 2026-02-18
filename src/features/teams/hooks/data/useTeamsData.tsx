@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { message } from "antd";
 import { teamService } from "../../services/teams.service.ts";
-import type { TeamType } from "../../types/teams.type.ts";
+import type { TeamType, TeamFilters } from "../../types/teams.type.ts";
+
 type ApiListResponse<T> = {
     data: T[];
     total: number;
@@ -12,7 +13,11 @@ interface UseTeamsDataReturn {
     teams: TeamType[];
     loading: boolean;
     saving: boolean;
-    fetchTeams: () => Promise<void>;
+
+    ordering: TeamFilters["ordering"];
+    setOrdering: (v: TeamFilters["ordering"]) => void;
+
+    fetchTeams: (filters?: TeamFilters) => Promise<void>;
     handleSaved: (team: TeamType, isEdit: boolean) => void;
     handleDelete: (id: number) => Promise<void>;
 }
@@ -23,31 +28,37 @@ export function useTeamsData(): UseTeamsDataReturn {
     const [saving, setSaving] = useState(false);
     const [messageApi] = message.useMessage();
 
-    const fetchTeams = useCallback(async () => {
-        setLoading(true);
-        try {
-            const payload = (await teamService.getAll()) as unknown as ApiListResponse<TeamType>;
-            setTeams(Array.isArray(payload?.data) ? payload.data : []);
-        } catch (error) {
-            const err = error as Error;
-            messageApi.error(err?.message ?? "Erreur lors du chargement");
-            setTeams([]);
-        } finally {
-            setLoading(false);
-        }
-    }, [messageApi]);
+    const [ordering, setOrdering] = useState<TeamFilters["ordering"]>("-created_at");
+
+    const fetchTeams = useCallback(
+        async (filters?: TeamFilters) => {
+            setLoading(true);
+            try {
+                const payload = (await teamService.getAll({
+                    ...(filters ?? {}),
+                    ordering: (filters?.ordering ?? ordering),
+                })) as unknown as ApiListResponse<TeamType>;
+
+                setTeams(Array.isArray(payload?.data) ? payload.data : []);
+            } catch (error) {
+                const err = error as Error;
+                messageApi.error(err?.message ?? "Erreur lors du chargement");
+                setTeams([]);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [messageApi, ordering]
+    );
 
     useEffect(() => {
-        fetchTeams();
-    }, [fetchTeams]);
+        fetchTeams({ ordering });
+    }, [fetchTeams, ordering]);
 
-    const handleSaved = useCallback((team: TeamType, isEdit: boolean) => {
-        if (isEdit) {
-            setTeams((prev) => prev.map((t) => (t.id === team.id ? team : t)));
-        } else {
-            setTeams((prev) => [team, ...prev]);
-        }
-    }, []);
+    const handleSaved = useCallback(async () => {
+        await fetchTeams({ ordering });
+    }, [fetchTeams, ordering]);
+
 
     const handleDelete = useCallback(
         async (id: number) => {
@@ -66,5 +77,5 @@ export function useTeamsData(): UseTeamsDataReturn {
         [messageApi]
     );
 
-    return { teams, loading, saving, fetchTeams, handleSaved, handleDelete };
+    return { teams, loading, saving, ordering, setOrdering, fetchTeams, handleSaved, handleDelete };
 }
