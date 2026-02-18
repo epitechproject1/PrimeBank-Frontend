@@ -1,12 +1,9 @@
-import { Flex, Grid, Spin } from "antd";
+import { Grid } from "antd";
 
-import TeamFormModal from "../components/TeamForm/TeamFormModal.tsx";
-import { TeamDetailsModal } from "../components/TeamDetails/TeamDetailsModal.tsx";
-import { TeamsStats } from "../components/TeamsStats/TeamsStats.tsx";
-import { TeamsToolbar } from "../components/TeamsToolbar/TeamsToolbar.tsx";
-import { TeamsContent } from "../views/TeamsContent.tsx";
-import { TeamsHeader } from "../views/TeamsHeader.tsx";
-import { useTeamsPage } from "../hooks/page/useTeamsPage.ts";
+import TeamFormModal from "../components/TeamForm/TeamFormModal";
+import { TeamDetailsModal } from "../components/TeamDetails/TeamDetailsModal";
+import { useTeamsPage } from "../hooks/page/useTeamsPage";
+import { TeamsPageLayout } from "./TeamsPageLayout";
 
 const { useBreakpoint } = Grid;
 
@@ -18,6 +15,8 @@ export function TeamsPage() {
         colors,
         viewMode,
         setViewMode,
+        onOrderingChange,
+        ordering,
 
         modalOpen,
         editTeam,
@@ -52,43 +51,31 @@ export function TeamsPage() {
         <>
             {contextHolder}
 
-            <Flex vertical style={{ minHeight: "100vh", padding: screens.md ? "32px 40px" : "16px" }}>
-                <TeamsHeader onAdd={openAdd} screens={screens} primaryColor={token.colorPrimary} />
-
-                <TeamsStats
-                    totalTeams={displayedTeams.length}
-                    departmentCount={deptCount}
-                    thisMonthCount={thisMonth}
-                    colors={colors}
-                />
-
-                <TeamsToolbar
-                    search={searchState.search}
-                    onSearchChange={searchState.handleSearchChange}
-                    onSearchClear={searchState.handleSearchClear}
-                    onRefresh={refresh}
-                    loading={loading}
-                    searching={searchState.searching}
-                    viewMode={viewMode}
-                    onViewModeChange={setViewMode}
-                    placeholderColor={token.colorTextPlaceholder}
-                />
-
-                <Spin spinning={spinning}>
-                    <TeamsContent
-                        loading={spinning}
-                        filtered={filtered}
-                        search={searchState.search}
-                        viewMode={viewMode}
-                        getColumns={getColumns}
-                        onEdit={openEdit}
-                        onDelete={handleDelete}
-                        onAdd={openAdd}
-                        onView={(team) => handleView(team)}
-                        screens={screens}
-                    />
-                </Spin>
-            </Flex>
+            <TeamsPageLayout
+                screens={screens}
+                token={token}
+                colors={colors}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                ordering={ordering}
+                onOrderingChange={onOrderingChange}
+                openAdd={openAdd}
+                openEdit={openEdit}
+                displayedTeamsCount={displayedTeams.length}
+                deptCount={deptCount}
+                thisMonth={thisMonth}
+                loading={loading}
+                spinning={spinning}
+                search={searchState.search}
+                searching={searchState.searching}
+                onSearchChange={searchState.handleSearchChange}
+                onSearchClear={searchState.handleSearchClear}
+                refresh={refresh}
+                filtered={filtered}
+                getColumns={getColumns}
+                handleDelete={handleDelete}
+                handleView={handleView}
+            />
 
             <TeamFormModal open={modalOpen} editTeam={editTeam} onClose={closeModal} onSaved={onSaved} />
 

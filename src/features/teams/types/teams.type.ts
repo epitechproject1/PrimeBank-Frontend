@@ -34,12 +34,37 @@ export interface TeamFilters {
     department_id?: number;
     my_teams?: boolean;
     q?: string;
+
+    ordering?:
+        | "name" | "-name"
+        | "created_at" | "-created_at"
+        | "updated_at" | "-updated_at"
+        | "members_count" | "-members_count";
+}
+
+export interface TeamMembersParams {
+    q?: string;
+    page?: number;
+    page_size?: number;
+
+    ordering?: "first_name" | "-first_name" | "last_name" | "-last_name" | "email" | "-email";
 }
 
 export type ApiListResponse<T> = {
     data: T[];
     total: number;
     query?: string;
+};
+
+export type ApiPaginatedResponse<T> = {
+    count: number;
+    next: boolean;
+    previous: boolean;
+    results: T[];
+
+    page: number;
+    page_size: number;
+    total_pages: number;
 };
 
 export type ApiSearchResponse<T> = {
