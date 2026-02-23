@@ -27,7 +27,6 @@ export function TeamsContent({
                                  onDelete,
                                  onAdd,
                                  onView,
-                                 screens,
                              }: TeamsContentProps) {
     if (!loading && filtered.length === 0) {
         return (
@@ -51,7 +50,6 @@ export function TeamsContent({
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onView={onView}
-                screens={screens}
             />
         );
     }
