@@ -38,7 +38,8 @@ export function DepartmentsPage() {
                 onEdit={page.openEdit}
                 onDelete={page.handleDelete}
                 onView={page.handleView}
-
+                ordering={page.ordering}
+                onOrderingChange={page.onOrderingChange}
                 page={page.page}
                 pageSize={page.pageSize}
                 total={page.total}

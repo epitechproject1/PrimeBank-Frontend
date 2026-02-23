@@ -18,50 +18,22 @@ export function TeamGridCardBody({ team, index, onView }: Props) {
     };
 
     return (
-        <div style={{ padding: "20px 24px 24px" }}>
-            {team.description ? (
-                <Text
-                    type="secondary"
-                    style={{
-                        fontSize: 13,
-                        lineHeight: 1.6,
-                        display: "-webkit-box",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        marginBottom: 20,
-                        minHeight: 42,
-                    }}
-                >
-                    {team.description}
+        <div>
+            <div style={{ padding: 16, minHeight: 72 }}>
+                <Text type={team.description ? undefined : "secondary"}>
+                    {team.description || "Aucune description."}
                 </Text>
-            ) : (
-                <Text
-                    type="secondary"
-                    style={{
-                        fontSize: 13,
-                        fontStyle: "italic",
-                        display: "block",
-                        marginBottom: 20,
-                        minHeight: 42,
-                    }}
-                >
-                    Aucune description
-                </Text>
-            )}
+            </div>
 
-            <TeamGridCardStats team={team} />
+            <div style={{ padding: "0 16px 16px" }}>
+                <TeamGridCardStats team={team} />
 
-            <Button
-                type="link"
-                block
-                icon={<EyeOutlined />}
-                onClick={handleView}
-                style={{ marginTop: 16, height: 36, fontWeight: 500, borderRadius: 8 }}
-            >
-                Voir les détails
-            </Button>
+                <div style={{ marginTop: 12, textAlign: "center" }}>
+                    <Button type="link" icon={<EyeOutlined />} onClick={handleView}>
+                        Voir les détails
+                    </Button>
+                </div>
+            </div>
         </div>
     );
 }

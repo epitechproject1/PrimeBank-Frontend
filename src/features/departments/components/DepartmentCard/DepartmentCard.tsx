@@ -190,20 +190,32 @@ export function DepartmentCard({ department, onEdit, onDelete, onView }: Props) 
 
     const name = department.name ?? "-";
     const initialsValue = name.slice(0, 2).toUpperCase();
-    const membersCount = department.employees_count ?? 0;
+    const membersCount = department.teams_count ?? 0;
 
     return (
         <Card
             hoverable
             style={{
                 width: "100%",
-                borderRadius: 12,
+                borderRadius: 18,
                 overflow: "hidden",
-                boxShadow: "0 1px 6px rgba(0,0,0,0.06)",
+                border: "1px solid rgba(0,0,0,0.06)",
+                boxShadow: "0 10px 26px rgba(0,0,0,0.06)",
+                transition: "all 220ms ease",
+                background: "rgba(255,255,255,0.92)",
+            }}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-6px)";
+                e.currentTarget.style.boxShadow = "0 18px 52px rgba(0,0,0,0.10)";
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 10px 26px rgba(0,0,0,0.06)";
             }}
             styles={{ body: { padding: 0 } }}
         >
-            <DepartmentCardHeader
+
+        <DepartmentCardHeader
                 department={department}
                 name={name}
                 initials={initialsValue}

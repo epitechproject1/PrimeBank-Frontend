@@ -1,7 +1,7 @@
 import { Avatar, Flex, Tag, Typography } from "antd";
 import { BankOutlined } from "@ant-design/icons";
 import type { TeamType } from "../../types/teams.type";
-import { getInitials, AVATAR_COLORS, TAG_COLORS } from "../../utils/teams-constants";
+import { getInitials } from "../../utils/teams-constants";
 import { TeamGridCardActions } from "./TeamGridCardActions";
 
 const { Title } = Typography;
@@ -15,66 +15,64 @@ type Props = {
 };
 
 export function TeamGridCardHeader({ team, index, onEdit, onDelete, onView }: Props) {
-    const avatarColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
+    const name = team.name ?? "-";
 
     return (
         <div
             style={{
-                background: `linear-gradient(135deg, ${avatarColor}20 0%, ${avatarColor}08 100%)`,
-                padding: "24px",
-                position: "relative",
+                padding: 16,
+                background:
+                    "linear-gradient(135deg, rgba(22,119,255,0.10), rgba(22,119,255,0.02))",
             }}
         >
-            <TeamGridCardActions team={team} index={index} onEdit={onEdit} onDelete={onDelete} onView={onView} />
-
-            <Flex gap={16} align="flex-start">
-                <Avatar
-                    size={64}
-                    style={{
-                        backgroundColor: avatarColor,
-                        fontWeight: 600,
-                        fontSize: 24,
-                        flexShrink: 0,
-                        boxShadow: `0 8px 16px ${avatarColor}40`,
-                        border: "3px solid white",
-                    }}
-                >
-                    {getInitials(team.name)}
-                </Avatar>
-
-                <Flex vertical style={{ minWidth: 0, flex: 1, paddingTop: 4 }}>
-                    <Title
-                        level={4}
+            <Flex align="start" justify="space-between" gap={12}>
+                <Flex align="center" gap={12} style={{ minWidth: 0 }}>
+                    <Avatar
+                        size={54}
                         style={{
-                            margin: 0,
-                            fontSize: 20,
-                            fontWeight: 600,
-                            lineHeight: 1.3,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
+                            background: "#1677ff",
+                            color: "white",
+                            fontWeight: 700,
+                            fontSize: 18,
+                            boxShadow: "0 6px 18px rgba(22,119,255,0.25)",
+                            flexShrink: 0,
                         }}
                     >
-                        {team.name}
-                    </Title>
+                        {getInitials(name)}
+                    </Avatar>
 
-                    {team.department && (
-                        <Tag
-                            color={TAG_COLORS[index % TAG_COLORS.length]}
-                            icon={<BankOutlined />}
-                            style={{
-                                borderRadius: 6,
-                                marginTop: 10,
-                                border: "none",
-                                fontWeight: 500,
-                                fontSize: 12,
-                                width: "fit-content",
-                            }}
+                    <div style={{ minWidth: 0 }}>
+                        <Title
+                            level={5}
+                            style={{ margin: 0, lineHeight: 1.2 }}
+                            ellipsis={{ tooltip: name }}
                         >
-                            {team.department.name ?? `Dept #${team.department.id}`}
-                        </Tag>
-                    )}
+                            {name}
+                        </Title>
+
+                        {team.department && (
+                            <Tag
+                                icon={<BankOutlined />}
+                                style={{
+                                    marginTop: 6,
+                                    borderRadius: 6,
+                                    border: "none",
+                                    fontWeight: 500,
+                                }}
+                            >
+                                {team.department.name ?? `Dept #${team.department.id}`}
+                            </Tag>
+                        )}
+                    </div>
                 </Flex>
+
+                <TeamGridCardActions
+                    team={team}
+                    index={index}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onView={onView}
+                />
             </Flex>
         </div>
     );

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useDepartmentsQueries } from "./useDepartmentsQueries";
 import { useDepartmentsActions } from "./useDepartmentsActions";
-import {useDepartmentsUiState} from "./useDepartmentsUiState.ts";
+import { useDepartmentsUiState } from "./useDepartmentsUiState";
 
 export type TeamLite = {
     id: number;
@@ -26,6 +26,7 @@ export function useDepartmentsPage() {
         search: ui.search,
         page: ui.page,
         pageSize: ui.pageSize,
+        ordering: ui.ordering,
         deptId,
         detailsOpen: ui.detailsOpen,
     });
@@ -35,6 +36,7 @@ export function useDepartmentsPage() {
         search: ui.search,
         page: ui.page,
         pageSize: ui.pageSize,
+        ordering: ui.ordering,
         detailsOpen: ui.detailsOpen,
     });
 
@@ -80,9 +82,10 @@ export function useDepartmentsPage() {
         pageSize: ui.pageSize,
         total,
         onPageChange: ui.onPageChange,
-
+        ordering: ui.ordering,
+        onOrderingChange: ui.onOrderingChange,
         search: ui.search,
-        setSearch: ui.setSearch,
+        setSearch: ui.onSearchChange,
         onSearchClear: ui.onSearchClear,
         viewMode: ui.viewMode,
         setViewMode: ui.setViewMode,

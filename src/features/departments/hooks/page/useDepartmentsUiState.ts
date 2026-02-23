@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { DepartmentType } from "../../types/departments.type";
+import type {DepartmentOrdering, DepartmentType} from "../../types/departments.type";
 
 export function useDepartmentsUiState() {
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -7,6 +7,8 @@ export function useDepartmentsUiState() {
 
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+
+    const [ordering, setOrdering] = useState<DepartmentOrdering>("-created_at");
 
     const [isModalOpen, setModalOpen] = useState(false);
     const [editDepartment, setEditDepartment] = useState<DepartmentType | null>(null);
@@ -21,6 +23,16 @@ export function useDepartmentsUiState() {
 
     const onSearchClear = useCallback(() => {
         setSearch("");
+        setPage(1);
+    }, []);
+
+    const onSearchChange = useCallback((v: string) => {
+        setSearch(v);
+        setPage(1);
+    }, []);
+
+    const onOrderingChange = useCallback((v: DepartmentOrdering) => {
+        setOrdering(v);
         setPage(1);
     }, []);
 
@@ -57,7 +69,12 @@ export function useDepartmentsUiState() {
 
         search,
         setSearch,
+        onSearchChange,
         onSearchClear,
+
+        ordering,
+        setOrdering,
+        onOrderingChange,
 
         page,
         pageSize,

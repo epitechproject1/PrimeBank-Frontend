@@ -20,6 +20,9 @@ export type CreateDepartmentPayload = {
     director_id?: number | null;
     is_active?: boolean;
 };
+
+export type UpdateDepartmentPayload = Partial<CreateDepartmentPayload>;
+
 export type DepartmentStats = {
     total_departments: number;
     total_employees: number;
@@ -27,8 +30,6 @@ export type DepartmentStats = {
     this_month_count?: number;
     timestamp?: string;
 };
-
-export type UpdateDepartmentPayload = Partial<CreateDepartmentPayload>;
 
 export type ApiListResponse<T> = {
     data: T[];
@@ -42,3 +43,19 @@ export type ApiPaginatedResponse<T> = {
     next?: string | null;
     previous?: string | null;
 };
+
+export type ApiSearchResponse<T> = {
+    data: T[];
+    total: number;
+    page: number;
+    limit: number;
+    total_pages: number;
+    query: string;
+};
+
+export type DepartmentOrdering =
+    | "name" | "-name"
+    | "created_at" | "-created_at"
+    | "updated_at" | "-updated_at"
+    | "teams_count" | "-teams_count"
+    | "employees_count" | "-employees_count";
