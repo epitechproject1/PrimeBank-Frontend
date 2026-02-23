@@ -1,4 +1,4 @@
-import { Button, Popconfirm, Tooltip } from "antd";
+import { Button, Popconfirm, Tooltip, Flex } from "antd";
 import { DeleteOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
 import type { TeamType } from "../../types/teams.type";
 
@@ -12,34 +12,13 @@ type Props = {
 
 export function TeamGridCardActions({ team, index, onEdit, onDelete, onView }: Props) {
     return (
-        <div
-            className="team-card-actions"
-            onClick={(e) => e.stopPropagation()}
-        >
-            <Tooltip title="Voir les détails">
-                <Button
-                    size="small"
-                    type="text"
-                    icon={<EyeOutlined />}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onView(team, index);
-                    }}
-                    className="team-action-btn"
-                />
+        <Flex gap={6} onClick={(e) => e.stopPropagation()}>
+            <Tooltip title="Voir">
+                <Button icon={<EyeOutlined />} onClick={() => onView(team, index)} />
             </Tooltip>
 
             <Tooltip title="Modifier">
-                <Button
-                    size="small"
-                    type="text"
-                    icon={<EditOutlined />}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onEdit(team);
-                    }}
-                    className="team-action-btn"
-                />
+                <Button icon={<EditOutlined />} onClick={() => onEdit(team)} />
             </Tooltip>
 
             <Popconfirm
@@ -55,16 +34,9 @@ export function TeamGridCardActions({ team, index, onEdit, onDelete, onView }: P
                 onCancel={(e) => e?.stopPropagation()}
             >
                 <Tooltip title="Supprimer">
-                    <Button
-                        size="small"
-                        type="text"
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={(e) => e.stopPropagation()}
-                        className="team-action-btn"
-                    />
+                    <Button danger icon={<DeleteOutlined />} onClick={(e) => e.stopPropagation()} />
                 </Tooltip>
             </Popconfirm>
-        </div>
+        </Flex>
     );
 }

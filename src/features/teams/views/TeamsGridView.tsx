@@ -1,7 +1,5 @@
-import { Flex } from "antd";
+import { Row, Col } from "antd";
 import type { TeamType } from "../types/teams.type.ts";
-import type { Screens } from "../utils/teams-grid.utils.ts";
-import { getGridCardWidth } from "../utils/teams-grid.utils.ts";
 import { TeamGridCard } from "../components/TeamGrid/TeamGridCard.tsx";
 
 interface TeamsGridViewProps {
@@ -9,25 +7,22 @@ interface TeamsGridViewProps {
     onEdit: (team: TeamType) => void;
     onDelete: (id: number) => void;
     onView: (team: TeamType, index: number) => void;
-    screens: Screens;
 }
 
-export function TeamsGridView({ teams, onEdit, onDelete, onView, screens }: TeamsGridViewProps) {
-    const width = getGridCardWidth(screens);
-
+export function TeamsGridView({ teams, onEdit, onDelete, onView }: TeamsGridViewProps) {
     return (
-        <Flex gap={24} wrap="wrap">
+        <Row gutter={[16, 16]}>
             {teams.map((team, i) => (
-                <TeamGridCard
-                    key={team.id}
-                    team={team}
-                    index={i}
-                    width={width}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    onView={onView}
-                />
+                <Col key={team.id} xs={24} sm={12} lg={8} xl={8}>
+                    <TeamGridCard
+                        team={team}
+                        index={i}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onView={onView}
+                    />
+                </Col>
             ))}
-        </Flex>
+        </Row>
     );
 }
