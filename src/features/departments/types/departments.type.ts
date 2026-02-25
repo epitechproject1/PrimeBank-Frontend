@@ -9,7 +9,7 @@ export type DepartmentType = {
 
     employees_count?: number;
     teams_count?: number;
-
+    is_pinned?: number;
     created_at: string;
     updated_at: string;
 };

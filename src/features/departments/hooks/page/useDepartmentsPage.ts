@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useDepartmentsQueries } from "./useDepartmentsQueries";
 import { useDepartmentsActions } from "./useDepartmentsActions";
 import { useDepartmentsUiState } from "./useDepartmentsUiState";
+import type { DepartmentType } from "../../types/departments.type";
 
 export type TeamLite = {
     id: number;
@@ -17,9 +18,23 @@ export type TeamLite = {
     } | null;
 };
 
+function sortPinnedByDate(items: DepartmentType[]) {
+    return [...items].sort((a, b) => {
+        const ap = a.is_pinned ?? 0;
+        const bp = b.is_pinned ?? 0;
+        if (bp !== ap) return bp - ap;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+}
+
+function buildCounts(departments: DepartmentType[]) {
+    const activeCount = departments.filter((d) => d.is_active).length;
+    const directorCount = departments.filter((d) => d.director !== null).length;
+    return { activeCount, directorCount };
+}
+
 export function useDepartmentsPage() {
     const ui = useDepartmentsUiState();
-
     const deptId = ui.detailsDepartment?.id;
 
     const { departmentsQuery, statsQuery, teamsQuery } = useDepartmentsQueries({
@@ -40,10 +55,10 @@ export function useDepartmentsPage() {
         detailsOpen: ui.detailsOpen,
     });
 
-    const departments = useMemo(
-        () => departmentsQuery.data?.items ?? [],
-        [departmentsQuery.data]
-    );
+    const departments = useMemo(() => {
+        const items = departmentsQuery.data?.items ?? [];
+        return sortPinnedByDate(items);
+    }, [departmentsQuery.data]);
 
     const total = departmentsQuery.data?.total ?? 0;
 
@@ -53,15 +68,7 @@ export function useDepartmentsPage() {
 
     const stats = statsQuery.data ?? null;
 
-    const activeCount = useMemo(
-        () => departments.filter((d) => d.is_active).length,
-        [departments]
-    );
-
-    const directorCount = useMemo(
-        () => departments.filter((d) => d.director !== null).length,
-        [departments]
-    );
+    const counts = useMemo(() => buildCounts(departments), [departments]);
 
     const departmentTeams = teamsQuery.data?.items ?? [];
     const teamsLoading = teamsQuery.isFetching || teamsQuery.isLoading;
@@ -75,8 +82,8 @@ export function useDepartmentsPage() {
         departments,
         rawDepartments: departments,
         stats,
-        activeCount,
-        directorCount,
+        activeCount: counts.activeCount,
+        directorCount: counts.directorCount,
 
         page: ui.page,
         pageSize: ui.pageSize,
