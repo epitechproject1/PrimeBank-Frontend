@@ -12,6 +12,8 @@ export function useTeamsPage() {
         viewMode: ui.viewMode,
         setViewMode: ui.setViewMode,
 
+        canManage: data.canManage,
+
         modalOpen: data.modalOpen,
         editTeam: data.editTeam,
         openAdd: data.openAdd,
@@ -29,7 +31,7 @@ export function useTeamsPage() {
         filtered: data.filtered,
         deptCount: data.deptCount,
         thisMonth: data.thisMonth,
-
+        canViewDetails: data.canViewDetails,
         loading: data.loading,
         saving: data.saving,
         spinning: data.spinning,

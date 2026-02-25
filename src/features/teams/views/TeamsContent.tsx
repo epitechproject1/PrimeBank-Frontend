@@ -1,8 +1,9 @@
 import { Empty, Button, Table } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import type { TeamType } from "../types/teams.type.ts";
-import { TeamsGridView } from "./TeamsGridView.tsx";
+
+import type { TeamType } from "../types/teams.type";
+import { TeamsGridSection } from "./TeamsGridSection";
 
 interface TeamsContentProps {
     loading: boolean;
@@ -10,11 +11,11 @@ interface TeamsContentProps {
     search: string;
     viewMode: "grid" | "list";
     getColumns: (onView: (team: TeamType, index: number) => void) => ColumnsType<TeamType>;
-    onEdit: (team: TeamType) => void;
-    onDelete: (id: number) => void;
-    onAdd: () => void;
+    canViewDetails: (team: TeamType) => boolean;
+    onEdit?: (team: TeamType) => void;
+    onDelete?: (id: number) => void;
+    onAdd?: () => void;
     onView: (team: TeamType, index: number) => void;
-    screens: Partial<Record<string, boolean>>;
 }
 
 export function TeamsContent({
@@ -27,6 +28,7 @@ export function TeamsContent({
                                  onDelete,
                                  onAdd,
                                  onView,
+                                 canViewDetails,
                              }: TeamsContentProps) {
     if (!loading && filtered.length === 0) {
         return (
@@ -34,7 +36,7 @@ export function TeamsContent({
                 description={search ? "Aucune équipe trouvée" : "Aucune équipe pour l'instant"}
                 style={{ marginTop: 64 }}
             >
-                {!search && (
+                {!search && onAdd && (
                     <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
                         Créer une équipe
                     </Button>
@@ -45,11 +47,12 @@ export function TeamsContent({
 
     if (viewMode === "grid") {
         return (
-            <TeamsGridView
+            <TeamsGridSection
                 teams={filtered}
+                onView={onView}
                 onEdit={onEdit}
                 onDelete={onDelete}
-                onView={onView}
+                canViewDetails={canViewDetails}
             />
         );
     }

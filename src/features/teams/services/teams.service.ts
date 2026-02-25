@@ -11,12 +11,46 @@ import type {
     TeamMembersParams,
 } from "../types/teams.type.ts";
 
+type RawListResponse<T> = {
+    data?: T[];
+    results?: T[];
+    total?: number;
+    count?: number;
+    query?: string;
+}
+function normalizeList<T>(raw: unknown): ApiListResponse<T> {
+    if (!raw || typeof raw !== "object") {
+        return { data: [], total: 0 };
+    }
+
+    const r = raw as RawListResponse<T>;
+
+    let items: T[] = [];
+
+    if (Array.isArray(r.data)) {
+        items = r.data;
+    } else if (Array.isArray(r.results)) {
+        items = r.results;
+    }
+
+    let total = items.length;
+
+    if (typeof r.total === "number") {
+        total = r.total;
+    } else if (typeof r.count === "number") {
+        total = r.count;
+    }
+
+    return {
+        data: items,
+        total,
+        query: r.query,
+    };
+}
 export const teamService = {
     getAll: async (filters?: TeamFilters): Promise<ApiListResponse<TeamType>> => {
-        const { data } = await apiClient.get<ApiListResponse<TeamType>>("/teams/", {
-            params: filters,
-        });
-        return data;
+        const { data } = await apiClient.get("/teams/", { params: filters });
+        return normalizeList<TeamType>(data);
     },
 
     getById: async (id: number): Promise<TeamType> => {
@@ -50,10 +84,10 @@ export const teamService = {
     },
 
     getMyTeams: async (ordering?: TeamFilters["ordering"]): Promise<ApiListResponse<TeamType>> => {
-        const { data } = await apiClient.get<ApiListResponse<TeamType>>("/teams/my-teams/", {
+        const { data } = await apiClient.get("/teams/my-teams/", {
             params: ordering ? { ordering } : undefined,
         });
-        return data;
+        return normalizeList<TeamType>(data);
     },
 
     search: async (

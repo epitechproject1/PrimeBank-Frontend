@@ -12,6 +12,7 @@ export type TeamType = {
     department: DepartmentType | null;
 
     members_count: number;
+    is_pinned?: number;
     members?: TeamMember[];
     members_preview?: TeamMember[];
 

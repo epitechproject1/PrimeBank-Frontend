@@ -9,7 +9,11 @@ interface TeamDetailsModalProps {
     open: boolean;
     team: TeamType | null;
     onClose: () => void;
-    onEdit: (team: TeamType) => void;
+
+    onEdit?: (team: TeamType) => void;
+
+    canEdit?: boolean;
+
     colorIndex: number;
     loading?: boolean;
 }
@@ -19,15 +23,18 @@ export function TeamDetailsModal({
                                      team,
                                      onClose,
                                      onEdit,
+                                     canEdit = false,
                                      colorIndex,
                                      loading = false,
                                  }: TeamDetailsModalProps) {
-
     const handleEdit = useCallback(() => {
         if (!team) return;
+        if (!canEdit) return;
+        if (!onEdit) return;
+
         onEdit(team);
         onClose();
-    }, [team, onEdit, onClose]);
+    }, [team, canEdit, onEdit, onClose]);
 
     return (
         <Modal
@@ -54,13 +61,11 @@ export function TeamDetailsModal({
                     <TeamDetailsHeader
                         team={team}
                         colorIndex={colorIndex}
-                        onEditClick={handleEdit}
+                        canEdit={canEdit}
+                        onEditClick={canEdit ? handleEdit : undefined}
                     />
 
-                    <TeamDetailsBody
-                        team={team}
-                        colorIndex={colorIndex}
-                    />
+                    <TeamDetailsBody team={team} colorIndex={colorIndex} />
                 </>
             )}
         </Modal>

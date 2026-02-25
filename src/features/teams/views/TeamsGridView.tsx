@@ -1,27 +1,30 @@
-import { Row, Col } from "antd";
-import type { TeamType } from "../types/teams.type.ts";
-import { TeamGridCard } from "../components/TeamGrid/TeamGridCard.tsx";
+import { Row } from "antd";
+import type { TeamType } from "../types/teams.type";
+import { TeamsGridCard } from "./TeamsGridCard.tsx";
 
-interface TeamsGridViewProps {
+type Props = {
     teams: TeamType[];
-    onEdit: (team: TeamType) => void;
-    onDelete: (id: number) => void;
     onView: (team: TeamType, index: number) => void;
-}
+    canViewDetails: (team: TeamType) => boolean;
+    onEdit?: (team: TeamType) => void;
+    onDelete?: (id: number) => void;
+    pinned?: boolean;
+};
 
-export function TeamsGridView({ teams, onEdit, onDelete, onView }: TeamsGridViewProps) {
+export function TeamsGridView({ teams, onView, canViewDetails, onEdit, onDelete, pinned }: Props) {
     return (
-        <Row gutter={[16, 16]}>
-            {teams.map((team, i) => (
-                <Col key={team.id} xs={24} sm={12} lg={8} xl={8}>
-                    <TeamGridCard
-                        team={team}
-                        index={i}
-                        onEdit={onEdit}
-                        onDelete={onDelete}
-                        onView={onView}
-                    />
-                </Col>
+        <Row gutter={[20, 20]}>
+            {teams.map((team, index) => (
+                <TeamsGridCard
+                    key={team.id}
+                    team={team}
+                    index={index}
+                    pinned={pinned}
+                    onView={onView}
+                    canViewDetails={canViewDetails}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                />
             ))}
         </Row>
     );
