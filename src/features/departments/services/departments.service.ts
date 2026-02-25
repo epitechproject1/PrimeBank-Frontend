@@ -100,11 +100,11 @@ export const departmentService = {
         await apiClient.delete(`/departments/${id}/`);
     },
 
-    getTeams: async (departmentId: number): Promise<{ items: TeamLite[]; total: number }> => {
-        const { data } = await apiClient.get<UnknownListResponse<TeamLite>>(
+    getTeams: async (departmentId: number): Promise<TeamLite[]> => {
+        const { data } = await apiClient.get<TeamLite[]>(
             `/departments/${departmentId}/teams/`
         );
-        return normalizeList<TeamLite>(data);
+        return data;
     },
 
     stats: async (): Promise<DepartmentStats> => {

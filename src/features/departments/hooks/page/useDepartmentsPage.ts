@@ -57,8 +57,13 @@ export function useDepartmentsPage() {
 
     const departments = useMemo(() => {
         const items = departmentsQuery.data?.items ?? [];
-        return sortPinnedByDate(items);
-    }, [departmentsQuery.data]);
+
+        if (!ui.ordering || ui.ordering === "-created_at") return sortPinnedByDate(items);
+
+        const pinned = items.filter(d => (d.is_pinned ?? 0) === 1);
+        const others = items.filter(d => (d.is_pinned ?? 0) !== 1);
+        return [...pinned, ...others];
+    }, [departmentsQuery.data, ui.ordering]);
 
     const total = departmentsQuery.data?.total ?? 0;
 
@@ -70,7 +75,7 @@ export function useDepartmentsPage() {
 
     const counts = useMemo(() => buildCounts(departments), [departments]);
 
-    const departmentTeams = teamsQuery.data?.items ?? [];
+    const departmentTeams = teamsQuery.data ?? [];
     const teamsLoading = teamsQuery.isFetching || teamsQuery.isLoading;
     const detailsLoading = teamsQuery.isLoading;
 

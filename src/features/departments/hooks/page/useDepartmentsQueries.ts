@@ -1,7 +1,6 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type { DepartmentStats, DepartmentType } from "../../types/departments.type";
 import { departmentService } from "../../services/departments.service";
-import type { TeamLite } from "./useDepartmentsPage";
 import type { DepartmentFilters } from "../../services/departments.service";
 
 type ListResponse<T> = { items: T[]; total: number };
@@ -41,14 +40,10 @@ export function useDepartmentsQueries(params: {
         staleTime: 30_000,
     });
 
-    const teamsQuery = useQuery<ListResponse<TeamLite>, Error>({
-        queryKey: ["department-teams", deptId],
-        queryFn: () =>
-            departmentService.getTeams(deptId as number) as Promise<ListResponse<TeamLite>>,
-        enabled: detailsOpen && typeof deptId === "number",
-        staleTime: 0,
-        gcTime: 0,
-        placeholderData: keepPreviousData,
+    const teamsQuery = useQuery({
+        queryKey: ["departmentTeams", deptId],
+        queryFn: () => departmentService.getTeams(deptId!),
+        enabled: detailsOpen && !!deptId,
     });
 
     return { departmentsQuery, statsQuery, teamsQuery };
