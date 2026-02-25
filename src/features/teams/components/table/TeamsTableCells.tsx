@@ -1,14 +1,15 @@
 import { Avatar, Button, Popconfirm, Space, Tag, Tooltip, Typography } from "antd";
 import { BankOutlined, DeleteOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
-import type { TeamType } from "../../types/teams.type.ts";
-import { AVATAR_COLORS, TAG_COLORS, getInitials } from "../../utils/teams-constants.ts";
+import type { TeamType } from "../../types/teams.type";
+import { AVATAR_COLORS, TAG_COLORS, getInitials } from "../../utils/teams-constants";
 
 const { Text } = Typography;
 
 export type TeamsTableHandlers = {
-    onEdit: (team: TeamType) => void;
-    onDelete: (id: number) => void;
+    onEdit?: (team: TeamType) => void;
+    onDelete?: (id: number) => void;
     onView: (team: TeamType, index: number) => void;
+    canViewDetails: (team: TeamType) => boolean;
     saving: boolean;
 };
 
@@ -100,27 +101,56 @@ export function MembersCountCell({ team }: { team: TeamType }) {
     );
 }
 
-export function ActionsCell({ team, index, handlers }: { team: TeamType; index: number; handlers: TeamsTableHandlers }) {
+export function ActionsCell({
+                                team,
+                                index,
+                                handlers,
+                            }: {
+    team: TeamType;
+    index: number;
+    handlers: TeamsTableHandlers;
+}) {
+    const canEdit = !!handlers.onEdit;
+    const canDelete = !!handlers.onDelete;
+
     return (
         <Space size={4}>
-            <Tooltip title="Voir les détails">
-                <Button type="text" icon={<EyeOutlined />} onClick={() => handlers.onView(team, index)} style={{ borderRadius: 6 }} />
-            </Tooltip>
-            <Tooltip title="Modifier">
-                <Button type="text" icon={<EditOutlined />} onClick={() => handlers.onEdit(team)} style={{ borderRadius: 6 }} />
-            </Tooltip>
-            <Popconfirm
-                title="Supprimer cette équipe ?"
-                description="Cette action est irréversible."
-                okText="Supprimer"
-                cancelText="Annuler"
-                okButtonProps={{ danger: true, loading: handlers.saving }}
-                onConfirm={() => handlers.onDelete(team.id)}
-            >
-                <Tooltip title="Supprimer">
-                    <Button type="text" danger icon={<DeleteOutlined />} style={{ borderRadius: 6 }} />
+            {handlers.canViewDetails(team) && (
+                <Tooltip title="Voir les détails">
+                    <Button
+                        type="text"
+                        icon={<EyeOutlined />}
+                        onClick={() => handlers.onView(team, index)}
+                        style={{ borderRadius: 6 }}
+                    />
                 </Tooltip>
-            </Popconfirm>
+            )}
+
+            {canEdit && (
+                <Tooltip title="Modifier">
+                    <Button
+                        type="text"
+                        icon={<EditOutlined />}
+                        onClick={() => handlers.onEdit?.(team)}
+                        style={{ borderRadius: 6 }}
+                    />
+                </Tooltip>
+            )}
+
+            {canDelete && (
+                <Popconfirm
+                    title="Supprimer cette équipe ?"
+                    description="Cette action est irréversible."
+                    okText="Supprimer"
+                    cancelText="Annuler"
+                    okButtonProps={{ danger: true, loading: handlers.saving }}
+                    onConfirm={() => handlers.onDelete?.(team.id)}
+                >
+                    <Tooltip title="Supprimer">
+                        <Button type="text" danger icon={<DeleteOutlined />} style={{ borderRadius: 6 }} />
+                    </Tooltip>
+                </Popconfirm>
+            )}
         </Space>
     );
 }

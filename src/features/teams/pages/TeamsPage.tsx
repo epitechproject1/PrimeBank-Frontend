@@ -17,14 +17,14 @@ export function TeamsPage() {
         setViewMode,
         onOrderingChange,
         ordering,
-
+        canManage,
         modalOpen,
         editTeam,
         openAdd,
         openEdit,
         closeModal,
         onSaved,
-
+        canViewDetails,
         detailsOpen,
         detailsTeam,
         detailsLoading,
@@ -75,6 +75,9 @@ export function TeamsPage() {
                 getColumns={getColumns}
                 handleDelete={handleDelete}
                 handleView={handleView}
+                canManage={canManage}
+                canViewDetails={canViewDetails}
+
             />
 
             <TeamFormModal open={modalOpen} editTeam={editTeam} onClose={closeModal} onSaved={onSaved} />
@@ -84,6 +87,7 @@ export function TeamsPage() {
                 team={detailsTeam}
                 onClose={closeDetails}
                 onEdit={openEdit}
+                canEdit={canManage}
                 colorIndex={0}
                 loading={detailsLoading}
             />

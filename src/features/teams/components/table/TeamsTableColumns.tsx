@@ -15,12 +15,13 @@ import {
 const { Text } = Typography;
 
 export function getTeamsTableColumns(
-    onEdit: (team: TeamType) => void,
-    onDelete: (id: number) => void,
+    onEdit: ((t: TeamType) => void) | undefined,
+    onDelete: ((id: number) => Promise<void>) | undefined,
     onView: (team: TeamType, index: number) => void,
-    saving: boolean
+    saving: boolean,
+    canViewDetails: (team: TeamType) => boolean
 ): ColumnsType<TeamType> {
-    const handlers: TeamsTableHandlers = { onEdit, onDelete, onView, saving };
+    const handlers: TeamsTableHandlers = { onEdit, onDelete, onView, saving,canViewDetails  };
 
     return [
         {

@@ -8,10 +8,18 @@ const { Title, Paragraph } = Typography;
 type Props = {
     team: TeamType;
     colorIndex: number;
-    onEditClick: () => void;
+
+    // ✅ bouton seulement si autorisé
+    onEditClick?: () => void;
+    canEdit?: boolean;
 };
 
-export function TeamDetailsHeader({ team, colorIndex, onEditClick }: Props) {
+export function TeamDetailsHeader({
+                                      team,
+                                      colorIndex,
+                                      onEditClick,
+                                      canEdit = false,
+                                  }: Props) {
     const avatarColor = AVATAR_COLORS[colorIndex % AVATAR_COLORS.length];
     const tagColor = TAG_COLORS[colorIndex % TAG_COLORS.length];
 
@@ -63,7 +71,8 @@ export function TeamDetailsHeader({ team, colorIndex, onEditClick }: Props) {
                             icon={<TeamOutlined />}
                             style={{ borderRadius: 8, padding: "4px 12px", fontSize: 13 }}
                         >
-                            {team.members_count} {team.members_count <= 1 ? "Membre" : "Membres"}
+                            {team.members_count ?? 0}{" "}
+                            {(team.members_count ?? 0) <= 1 ? "Membre" : "Membres"}
                         </Tag>
                     </Flex>
 
@@ -77,9 +86,16 @@ export function TeamDetailsHeader({ team, colorIndex, onEditClick }: Props) {
                     )}
                 </Flex>
 
-                <Button type="primary" icon={<EditOutlined />} onClick={onEditClick} style={{ borderRadius: 8 }}>
-                    Modifier
-                </Button>
+                {canEdit && onEditClick && (
+                    <Button
+                        type="primary"
+                        icon={<EditOutlined />}
+                        onClick={onEditClick}
+                        style={{ borderRadius: 8 }}
+                    >
+                        Modifier
+                    </Button>
+                )}
             </Flex>
         </div>
     );

@@ -3,13 +3,11 @@ import type { ColumnsType } from "antd/es/table";
 
 import type { TeamFilters, TeamType } from "../types/teams.type";
 
-import { TeamsStats } from "../components/TeamsStats/TeamsStats";
 import { TeamsToolbar } from "../components/TeamsToolbar/TeamsToolbar";
 import { TeamsContent } from "../views/TeamsContent";
-import { TeamsHeader } from "../views/TeamsHeader";
+import { TeamsTopSection } from "../components/TeamsTopSection";
 
 type ViewMode = "grid" | "list";
-
 type Screens = ReturnType<typeof Grid.useBreakpoint>;
 
 type Props = {
@@ -24,8 +22,10 @@ type Props = {
     ordering: TeamFilters["ordering"];
     onOrderingChange: (v: TeamFilters["ordering"]) => void;
 
-    openAdd: () => void;
-    openEdit: (t: TeamType) => void;
+    canManage: boolean;
+
+    openAdd?: () => void;
+    openEdit?: (t: TeamType) => void;
 
     displayedTeamsCount: number;
     deptCount: number;
@@ -43,10 +43,11 @@ type Props = {
 
     filtered: TeamType[];
 
-    // getColumns est une factory dans ton code: (onView) => columns
     getColumns: (onView: (team: TeamType, index: number) => void) => ColumnsType<TeamType>;
 
-    handleDelete: (id: number) => void;
+    canViewDetails: (team: TeamType) => boolean;
+    handleDelete?: (id: number) => void;
+
     handleView: (team: TeamType) => void;
 };
 
@@ -60,6 +61,8 @@ export function TeamsPageLayout({
 
                                     ordering,
                                     onOrderingChange,
+
+                                    canManage,
 
                                     openAdd,
                                     openEdit,
@@ -75,7 +78,7 @@ export function TeamsPageLayout({
                                     searching,
                                     onSearchChange,
                                     onSearchClear,
-
+                                    canViewDetails,
                                     refresh,
 
                                     filtered,
@@ -83,30 +86,22 @@ export function TeamsPageLayout({
                                     handleDelete,
                                     handleView,
                                 }: Props) {
+    const onAdd = canManage ? openAdd : undefined;
+    const onEdit = canManage ? openEdit : undefined;
+    const onDelete = canManage ? handleDelete : undefined;
+
     return (
         <Flex vertical style={{ minHeight: "100vh", padding: screens.md ? "24px 32px" : "14px" }}>
             <div style={{ maxWidth: 1400, width: "100%", margin: "0 auto" }}>
-                <div
-                    style={{
-                        background: "rgba(255,255,255,0.9)",
-                        borderRadius: 18,
-                        padding: 18,
-                        border: "1px solid rgba(0,0,0,0.06)",
-                        boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-                        backdropFilter: "blur(10px)",
-                    }}
-                >
-                    <TeamsHeader onAdd={openAdd} screens={screens} primaryColor={token.colorPrimary} />
-
-                    <div style={{ marginTop: 16 }}>
-                        <TeamsStats
-                            totalTeams={displayedTeamsCount}
-                            departmentCount={deptCount}
-                            thisMonthCount={thisMonth}
-                            colors={colors}
-                        />
-                    </div>
-                </div>
+                <TeamsTopSection
+                    screens={screens}
+                    primaryColor={token.colorPrimary}
+                    colors={colors}
+                    totalTeams={displayedTeamsCount}
+                    departmentCount={deptCount}
+                    thisMonthCount={thisMonth}
+                    onAdd={onAdd}
+                />
 
                 <div style={{ marginTop: 14 }}>
                     <TeamsToolbar
@@ -131,11 +126,12 @@ export function TeamsPageLayout({
                             search={search}
                             viewMode={viewMode}
                             getColumns={getColumns}
-                            onEdit={openEdit}
-                            onDelete={handleDelete}
-                            onAdd={openAdd}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
+                            onAdd={onAdd}
                             onView={handleView}
-                            screens={screens}
+
+                            canViewDetails={canViewDetails}
                         />
                     </div>
                 </Spin>

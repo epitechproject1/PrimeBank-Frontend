@@ -4,7 +4,7 @@ import { PlusOutlined, TeamOutlined } from "@ant-design/icons";
 const { Title, Text } = Typography;
 
 interface TeamsHeaderProps {
-    onAdd: () => void;
+    onAdd?: () => void;
     screens: ReturnType<typeof Grid.useBreakpoint>;
     primaryColor: string;
 }
@@ -26,9 +26,16 @@ export function TeamsHeader({ onAdd, screens, primaryColor }: TeamsHeaderProps) 
                 </div>
             </Flex>
 
-            <Button type="primary" icon={<PlusOutlined />} size="large" onClick={onAdd}>
-                {screens.sm ? "Nouvelle équipe" : ""}
-            </Button>
+            {onAdd && (
+                <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    size="large"
+                    onClick={onAdd}
+                >
+                    {screens.sm ? "Nouvelle équipe" : ""}
+                </Button>
+            )}
         </Flex>
     );
 }
