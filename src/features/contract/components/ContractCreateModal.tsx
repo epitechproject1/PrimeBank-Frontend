@@ -1,63 +1,84 @@
 import { Button, DatePicker, Form, InputNumber, Modal, Select, Space } from "antd";
 import type { Dayjs } from "dayjs";
 import type { ContractType } from "../../contract_types/types/contract_type.types";
+import type { User } from "../../users/types/user.type";
 
-const { Option } = Select;
-
-export type ContractFormValues = {
+type ContractCreateValues = {
+    user: number;
     contract_type: number;
     start_date: Dayjs;
     end_date?: Dayjs | null;
     weekly_hours_target: number;
 };
 
-interface ContractFormModalProps {
+type Props = {
     open: boolean;
     onClose: () => void;
-    onSubmit: (values: ContractFormValues) => void;
+    onSubmit: (values: ContractCreateValues) => void;
+    users: User[];
     contractTypes: ContractType[];
+    loadingUsers?: boolean;
     loadingTypes?: boolean;
     submitting?: boolean;
     onOpenCreateType: () => void;
-}
+};
 
-export function ContractFormModal({
+export function ContractCreateModal({
     open,
     onClose,
     onSubmit,
+    users,
     contractTypes,
+    loadingUsers = false,
     loadingTypes = false,
     submitting = false,
     onOpenCreateType,
-}: ContractFormModalProps) {
-    const [form] = Form.useForm<ContractFormValues>();
-
-    const handleFinish = (values: ContractFormValues) => {
-        onSubmit(values);
-    };
+}: Props) {
+    const [form] = Form.useForm<ContractCreateValues>();
 
     return (
         <Modal
-            title="Ajouter un contrat"
+            title="Nouveau contrat"
             open={open}
             onCancel={onClose}
             footer={null}
             destroyOnClose
         >
-            <Form form={form} layout="vertical" onFinish={handleFinish}>
+            <Form form={form} layout="vertical" onFinish={onSubmit}>
+                <Form.Item
+                    name="user"
+                    label="Utilisateur"
+                    rules={[{ required: true, message: "Selectionnez un utilisateur" }]}
+                >
+                    <Select
+                        showSearch
+                        placeholder="Selectionner un utilisateur"
+                        loading={loadingUsers}
+                        optionFilterProp="label"
+                        options={users.map((u) => ({
+                            value: Number(u.id),
+                            label: `${u.first_name} ${u.last_name} (${u.email})`,
+                        }))}
+                    />
+                </Form.Item>
+
                 <Form.Item
                     name="contract_type"
                     label="Type de contrat"
                     rules={[{ required: true, message: "Le type est requis" }]}
                 >
-                    <Select placeholder="Selectionner un type de contrat" loading={loadingTypes}>
-                        {contractTypes.map((type) => (
-                            <Option key={type.id} value={type.id}>
-                                {type.name} ({type.code})
-                            </Option>
-                        ))}
-                    </Select>
+                    <Select
+                        showSearch
+                        placeholder="Selectionner un type de contrat"
+                        loading={loadingTypes}
+                        optionFilterProp="label"
+                        options={contractTypes.map((type) => ({
+                            value: type.id,
+                            label: `${type.name} (${type.code})`,
+                        }))}
+                    />
                 </Form.Item>
+
                 <div style={{ marginBottom: 12, textAlign: "right" }}>
                     <Button type="link" onClick={onOpenCreateType} style={{ padding: 0 }}>
                         Ajouter un type de contrat
@@ -75,21 +96,20 @@ export function ContractFormModal({
                     </Form.Item>
                     <Form.Item
                         name="end_date"
-                        label="Date de fin"
+                        label="Date fin"
                         style={{ flex: 1 }}
                         dependencies={["contract_type", "start_date"]}
                         rules={[
                             ({ getFieldValue }) => ({
                                 validator(_, value: Dayjs | null) {
-                                    const selectedTypeId = getFieldValue("contract_type");
-                                    const startDate = getFieldValue("start_date") as Dayjs | undefined;
                                     const selectedType = contractTypes.find(
-                                        (type) => type.id === selectedTypeId
+                                        (type) => type.id === getFieldValue("contract_type")
                                     );
+                                    const startDate = getFieldValue("start_date") as Dayjs | undefined;
 
                                     if (selectedType?.requires_end_date && !value) {
                                         return Promise.reject(
-                                            new Error("Date de fin requise pour ce type de contrat")
+                                            new Error("Date de fin requise pour ce type")
                                         );
                                     }
 
@@ -125,10 +145,12 @@ export function ContractFormModal({
                 <Space style={{ display: "flex", justifyContent: "flex-end" }}>
                     <Button onClick={onClose}>Annuler</Button>
                     <Button type="primary" loading={submitting} onClick={() => form.submit()}>
-                        Enregistrer
+                        Creer
                     </Button>
                 </Space>
             </Form>
         </Modal>
     );
 }
+
+export type { ContractCreateValues };

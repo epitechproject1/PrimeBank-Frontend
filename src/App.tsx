@@ -13,6 +13,7 @@ import { RequireAdmin } from "./features/auth/login/components/RequireAdmin.tsx"
 import {ScheduleAssignmentsManagerPage} from "./features/scheduleAssignment/pages/ScheduleAssignmentsManagerPage.tsx";
 import {WeekPatternsPage} from "./features/week-pattern/pages/Weekpatternspage.tsx";
 import {ShiftsPlannerPage} from "./features/shift/page/ShiftsPlannerPage.tsx";
+import { ContractsPage } from "./features/contract/pages/ContractsPage.tsx";
 
 const DashboardHome = () => (
     <div>
@@ -34,6 +35,7 @@ function App() {
 
                     <Route element={<RequireAdmin />}>
                         <Route path="/users" element={<UsersPage />} />
+                        <Route path="/contracts" element={<ContractsPage />} />
                     </Route>
 
                     {/* ── PLANNING — routes dédiées ── */}
