@@ -1,12 +1,19 @@
-import { Flex, Input, Button, Space, Tooltip, Typography, Select } from "antd";
-import type { InputProps } from "antd";
+import React from "react";
+import { Flex, Input, Button, Space, Tooltip, Typography, Select, Upload, message } from "antd";
+import type { InputProps, UploadProps } from "antd";
 import {
     SearchOutlined,
     ReloadOutlined,
     AppstoreOutlined,
     UnorderedListOutlined,
+    DownloadOutlined,
+    UploadOutlined,
+    FilePdfOutlined,
 } from "@ant-design/icons";
-import { DepartmentOrdering } from "../../types/departments.type.ts";
+
+import { DepartmentOrdering } from "../../types/departments.type";
+import { departmentService } from "../../services/departments.service";
+import { getErrorMessage } from "../../services/httpError";
 
 const { Text } = Typography;
 
@@ -23,7 +30,7 @@ const ORDERING_OPTIONS: { label: string; value: DepartmentOrdering }[] = [
     { value: "employees_count", label: "Moins d'employés" },
 ];
 
-interface DepartmentsToolbarProps {
+export interface DepartmentsToolbarProps {
     search: string;
     onSearchChange: (value: string) => void;
     onSearchClear: () => void;
@@ -34,6 +41,10 @@ interface DepartmentsToolbarProps {
     onViewModeChange: (mode: "grid" | "list") => void;
     ordering: DepartmentOrdering;
     onOrderingChange: (ordering: DepartmentOrdering) => void;
+
+    canExportCsv: boolean;
+    canExportPdf: boolean;
+    canImport: boolean;
 }
 
 const H = 40;
@@ -107,12 +118,9 @@ function SearchInput({
                 prefix={<SearchOutlined style={{ color: "#bfbfbf", fontSize: 15 }} />}
                 allowClear={{
                     clearIcon: (
-                        <span
-                            onClick={onClear}
-                            style={{ cursor: "pointer", display: "inline-flex" }}
-                        >
-                            ×
-                        </span>
+                        <span onClick={onClear} style={{ cursor: "pointer", display: "inline-flex" }}>
+              ×
+            </span>
                     ),
                 }}
                 style={inputStyle}
@@ -121,13 +129,7 @@ function SearchInput({
     );
 }
 
-function OrderingSelect({
-                            value,
-                            onChange,
-                        }: {
-    value: DepartmentOrdering;
-    onChange: (v: DepartmentOrdering) => void;
-}) {
+function OrderingSelect({ value, onChange }: { value: DepartmentOrdering; onChange: (v: DepartmentOrdering) => void }) {
     return (
         <Select<DepartmentOrdering>
             value={value}
@@ -140,22 +142,141 @@ function OrderingSelect({
     );
 }
 
-function RefreshButton({
-                           onRefresh,
-                           loading,
-                       }: {
-    onRefresh: () => void;
-    loading: boolean;
-}) {
+function RefreshButton({ onRefresh, loading }: { onRefresh: () => void; loading: boolean }) {
     return (
         <Tooltip title="Rafraîchir">
+            <Button onClick={onRefresh} loading={loading} icon={<ReloadOutlined />} style={squareBtnStyle} />
+        </Tooltip>
+    );
+}
+
+function ExportCsvButton({
+                             disabled,
+                             filters,
+                         }: {
+    disabled: boolean;
+    filters: { q?: string; ordering?: DepartmentOrdering };
+}) {
+    const [loading, setLoading] = React.useState(false);
+
+    const onExport = async () => {
+        try {
+            setLoading(true);
+            await departmentService.exportCsv(filters);
+            message.success("Export CSV téléchargé.");
+        } catch (e: any) {
+            const msg = await getErrorMessage(
+                e,
+                "Vous n’avez pas le droit d’exporter selon votre poste."
+            );
+            message.error(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Tooltip title="Exporter en CSV">
             <Button
-                onClick={onRefresh}
+                onClick={onExport}
                 loading={loading}
-                icon={<ReloadOutlined />}
+                icon={<DownloadOutlined />}
                 style={squareBtnStyle}
+                disabled={disabled || loading}
             />
         </Tooltip>
+    );
+}
+
+function ExportPdfButton({
+                             disabled,
+                             filters,
+                         }: {
+    disabled: boolean;
+    filters: { q?: string; ordering?: DepartmentOrdering };
+}) {
+    const [loading, setLoading] = React.useState(false);
+
+    const onExport = async () => {
+        try {
+            setLoading(true);
+            await departmentService.exportPdf(filters);
+            message.success("Export PDF téléchargé.");
+        } catch (e: any) {
+            const msg = await getErrorMessage(
+                e,
+                "Vous n’avez pas le droit d’exporter selon votre poste."
+            );
+            message.error(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Tooltip title="Exporter en PDF">
+            <Button
+                onClick={onExport}
+                loading={loading}
+                icon={<FilePdfOutlined />}
+                style={squareBtnStyle}
+                disabled={disabled || loading}
+            />
+        </Tooltip>
+    );
+}
+
+function ImportCsvButton({
+                             disabled,
+                             onDone,
+                         }: {
+    disabled: boolean;
+    onDone: () => void;
+}) {
+    const [loading, setLoading] = React.useState(false);
+
+    const uploadProps: UploadProps = {
+        accept: ".csv",
+        maxCount: 1,
+        showUploadList: false,
+        beforeUpload: async (file) => {
+            try {
+                setLoading(true);
+                const res = await departmentService.importCsv(file as File);
+
+                const info = `Créés: ${res.created} | Mis à jour: ${res.updated} | Ignorés: ${res.skipped}`;
+                if (res.errors?.length) {
+                    message.warning(`${info} — ${res.errors.length} erreurs.`);
+                } else {
+                    message.success(info);
+                }
+
+                onDone();
+            } catch (e: any) {
+                const msg = await getErrorMessage(
+                    e,
+                    "Vous n’avez pas le droit d’importer selon votre poste."
+                );
+                message.error(msg);
+            } finally {
+                setLoading(false);
+            }
+
+            return false;
+        },
+    };
+
+    return (
+        <Upload {...uploadProps} disabled={disabled || loading}>
+            <Tooltip title="Importer un CSV">
+                <Button
+                    icon={<UploadOutlined />}
+                    style={squareBtnStyle}
+                    loading={loading}
+                    disabled={disabled || loading}
+                />
+            </Tooltip>
+        </Upload>
     );
 }
 
@@ -224,15 +345,49 @@ export function DepartmentsToolbar({
                                        onViewModeChange,
                                        ordering,
                                        onOrderingChange,
+                                       canExportCsv,
+                                       canExportPdf,
+                                       canImport,
                                    }: DepartmentsToolbarProps) {
+    const filters = React.useMemo(
+        () => ({
+            q: search?.trim() ? search.trim() : undefined,
+            ordering,
+        }),
+        [search, ordering]
+    );
+
     return (
         <ToolbarContainer>
             <Flex gap={10} align="center" style={{ width: "100%" }}>
-                <SearchInput value={search} onChangeValue={onSearchChange} onClear={onSearchClear} />
+                <SearchInput
+                    value={search}
+                    onChangeValue={onSearchChange}
+                    onClear={onSearchClear}
+                />
+
                 <OrderingSelect value={ordering} onChange={onOrderingChange} />
+
                 <div style={dividerStyle} />
+
                 <RefreshButton onRefresh={onRefresh} loading={loading} />
-                <ViewModeToggle viewMode={viewMode} onChange={onViewModeChange} />
+
+                {canExportCsv && (
+                    <ExportCsvButton disabled={loading} filters={filters} />
+                )}
+
+                {canExportPdf && (
+                    <ExportPdfButton disabled={loading} filters={filters} />
+                )}
+
+                {canImport && (
+                    <ImportCsvButton disabled={loading} onDone={onRefresh} />
+                )}
+
+                <ViewModeToggle
+                    viewMode={viewMode}
+                    onChange={onViewModeChange}
+                />
             </Flex>
 
             <SearchingHint show={searching} />

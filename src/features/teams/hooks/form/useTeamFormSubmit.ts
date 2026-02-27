@@ -1,8 +1,10 @@
 import { useCallback, useState } from "react";
 import { message } from "antd";
 import type { FormInstance } from "antd/es/form";
-import type { TeamType, CreateTeamPayload, UpdateTeamPayload } from "../../types/teams.type.ts";
-import { teamService } from "../../services/teams.service.ts";
+import type { TeamType, CreateTeamPayload, UpdateTeamPayload } from "../../types/teams.type";
+import { teamService } from "../../services/teams.service";
+import axios from "axios";
+import {getErrorMessage} from "../../../departments/services/httpError.ts";
 
 type TeamFormValues = {
     name: string;
@@ -25,6 +27,7 @@ export function useTeamFormSubmit({ form, editTeam, onSaved, onClose }: UseTeamF
 
     const handleSubmit = useCallback(async () => {
         setSaving(true);
+
         try {
             const values = await form.validateFields();
 
@@ -32,8 +35,8 @@ export function useTeamFormSubmit({ form, editTeam, onSaved, onClose }: UseTeamF
             if (values.owner_id) membersSet.add(values.owner_id);
 
             const payloadBase = {
-                name: values.name,
-                description: values.description ?? null,
+                name: (values.name ?? "").trim(),
+                description: (values.description ?? "").trim() || null,
                 owner_id: values.owner_id,
                 department_id: values.department_id,
                 members_ids: Array.from(membersSet),
@@ -43,10 +46,7 @@ export function useTeamFormSubmit({ form, editTeam, onSaved, onClose }: UseTeamF
 
             if (editTeam) {
                 const payload: UpdateTeamPayload = payloadBase;
-                console.log("UPDATE PAYLOAD", payloadBase);
                 saved = await teamService.update(editTeam.id, payload);
-                console.log(" after UPDATE PAYLOAD", saved);
-
             } else {
                 const payload: CreateTeamPayload = payloadBase;
                 saved = await teamService.create(payload);
@@ -56,9 +56,59 @@ export function useTeamFormSubmit({ form, editTeam, onSaved, onClose }: UseTeamF
             onSaved(saved);
             onClose();
             form.resetFields();
-        } catch (e) {
-            const err = e as Error;
-            messageApi.error(err?.message ?? "Erreur lors de l'enregistrement");
+        } catch (err: unknown) {
+            if ((err as any)?.errorFields) return;
+
+            if (axios.isAxiosError(err)) {
+                const data: any = err.response?.data;
+
+                if (data?.name) {
+                    const msg = Array.isArray(data.name) ? String(data.name[0]) : String(data.name);
+                    form.setFields([{ name: "name", errors: [msg] }]);
+                    messageApi.error(msg);
+                    return;
+                }
+
+                if (data?.description) {
+                    const msg = Array.isArray(data.description)
+                        ? String(data.description[0])
+                        : String(data.description);
+                    form.setFields([{ name: "description", errors: [msg] }]);
+                    messageApi.error(msg);
+                    return;
+                }
+
+                if (data?.department_id) {
+                    const msg = Array.isArray(data.department_id)
+                        ? String(data.department_id[0])
+                        : String(data.department_id);
+                    form.setFields([{ name: "department_id", errors: [msg] }]);
+                    messageApi.error(msg);
+                    return;
+                }
+
+                if (data?.owner_id) {
+                    const msg = Array.isArray(data.owner_id) ? String(data.owner_id[0]) : String(data.owner_id);
+                    form.setFields([{ name: "owner_id", errors: [msg] }]);
+                    messageApi.error(msg);
+                    return;
+                }
+
+                if (data?.members_ids) {
+                    const msg = Array.isArray(data.members_ids)
+                        ? String(data.members_ids[0])
+                        : String(data.members_ids);
+                    form.setFields([{ name: "members_ids", errors: [msg] }]);
+                    messageApi.error(msg);
+                    return;
+                }
+            }
+
+            const msg = await getErrorMessage(err, "Erreur lors de l'enregistrement");
+            if ((msg || "").toLowerCase().includes("existe déjà")) {
+                form.setFields([{ name: "name", errors: [msg] }]);
+            }
+            messageApi.error(msg);
         } finally {
             setSaving(false);
         }

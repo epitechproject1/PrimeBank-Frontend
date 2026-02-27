@@ -60,11 +60,19 @@ export function useDepartmentsPage() {
 
         if (!ui.ordering || ui.ordering === "-created_at") return sortPinnedByDate(items);
 
-        const pinned = items.filter(d => (d.is_pinned ?? 0) === 1);
-        const others = items.filter(d => (d.is_pinned ?? 0) !== 1);
+        const pinned = items.filter((d) => (d.is_pinned ?? 0) === 1);
+        const others = items.filter((d) => (d.is_pinned ?? 0) !== 1);
         return [...pinned, ...others];
     }, [departmentsQuery.data, ui.ordering]);
+    const myDepartments = useMemo(
+        () => departments.filter((d) => (d.is_pinned ?? 0) === 1),
+        [departments]
+    );
 
+    const otherDepartments = useMemo(
+        () => departments.filter((d) => (d.is_pinned ?? 0) !== 1),
+        [departments]
+    );
     const total = departmentsQuery.data?.total ?? 0;
 
     const loading = departmentsQuery.isLoading;
@@ -118,7 +126,8 @@ export function useDepartmentsPage() {
         detailsLoading,
         handleView: ui.handleView,
         closeDetails: ui.closeDetails,
-
+        myDepartments,
+        otherDepartments,
         departmentTeams,
         teamsLoading,
     };

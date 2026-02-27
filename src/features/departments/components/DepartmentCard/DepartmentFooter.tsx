@@ -4,20 +4,20 @@ import { UserOutlined, TeamOutlined } from "@ant-design/icons";
 const { Text } = Typography;
 
 type Props = {
-    leaderName: string;
-    membersCount: number;
+    directorName: string;
+    teamsCount: number;
 };
 
-export function TeamsGridCardFooter({ leaderName, membersCount }: Props) {
+export function DepartmentFooter({ directorName, teamsCount }: Props) {
     return (
-        <div style={{ padding: "0 16px 14px" }}>
-            <Flex justify="space-between" align="center" style={{ marginTop: 6 }}>
+        <div style={{ padding: "0 16px 16px" }}>
+            <Flex justify="space-between" align="center" style={{ marginTop: 8 }}>
                 <Flex align="center" gap={8} style={{ minWidth: 0 }}>
                     <div
                         style={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: 8,
+                            width: 34,
+                            height: 34,
+                            borderRadius: 10,
                             background: "rgba(22,119,255,0.08)",
                             display: "grid",
                             placeItems: "center",
@@ -29,11 +29,11 @@ export function TeamsGridCardFooter({ leaderName, membersCount }: Props) {
 
                     <div style={{ minWidth: 0 }}>
                         <Text type="secondary" style={{ fontSize: 12 }}>
-                            Responsable
+                            Directeur
                         </Text>
-                        <div style={{ fontWeight: 600 }}>
+                        <div style={{ fontWeight: 650 }}>
                             <Text ellipsis style={{ maxWidth: 180, display: "inline-block" }}>
-                                {leaderName}
+                                {directorName}
                             </Text>
                         </div>
                     </div>
@@ -42,9 +42,9 @@ export function TeamsGridCardFooter({ leaderName, membersCount }: Props) {
                 <Flex align="center" gap={8}>
                     <div
                         style={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: 8,
+                            width: 34,
+                            height: 34,
+                            borderRadius: 10,
                             background: "rgba(82,196,26,0.10)",
                             display: "grid",
                             placeItems: "center",
@@ -55,9 +55,9 @@ export function TeamsGridCardFooter({ leaderName, membersCount }: Props) {
 
                     <div style={{ textAlign: "right" }}>
                         <Text type="secondary" style={{ fontSize: 12 }}>
-                            Membres
+                            Équipes
                         </Text>
-                        <div style={{ fontWeight: 700 }}>{membersCount}</div>
+                        <div style={{ fontWeight: 800 }}>{teamsCount}</div>
                     </div>
                 </Flex>
             </Flex>

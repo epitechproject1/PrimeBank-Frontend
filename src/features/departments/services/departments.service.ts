@@ -59,6 +59,16 @@ function normalizeList<T>(payload: UnknownListResponse<T>): { items: T[]; total:
 
     return { items: [], total: 0 };
 }
+function downloadBlob(blob: Blob, filename: string) {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+}
 
 export const departmentService = {
     getAll: async (filters?: DepartmentFilters): Promise<{ items: DepartmentType[]; total: number }> => {
@@ -109,6 +119,33 @@ export const departmentService = {
 
     stats: async (): Promise<DepartmentStats> => {
         const { data } = await apiClient.get<DepartmentStats>("/departments/stats/");
+        return data;
+    },
+
+    exportCsv: async (filters?: { q?: string; ordering?: DepartmentOrdering }) => {
+        const res = await apiClient.get("/departments/export/csv/", {
+            params: filters ?? {},
+            responseType: "blob",
+        });
+        downloadBlob(res.data, "departments.csv");
+    },
+
+    exportPdf: async (filters?: { q?: string; ordering?: DepartmentOrdering }) => {
+        const res = await apiClient.get("/departments/export/pdf/", {
+            params: filters ?? {},
+            responseType: "blob",
+        });
+        downloadBlob(res.data, "departments.pdf");
+    },
+
+    importCsv: async (file: File) => {
+        const form = new FormData();
+        form.append("file", file);
+
+        const { data } = await apiClient.post("/departments/import/csv/", form, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+
         return data;
     },
 };

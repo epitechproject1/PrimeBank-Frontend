@@ -11,9 +11,7 @@ import { useTeamsFilters } from "./useTeamsFilters";
 import { teamService } from "../../services/teams.service";
 import { getTeamsTableColumns } from "../../components/table/TeamsTableColumns";
 import type { useTeamsPageUi } from "./useTeamsPageUi";
-
 import { getMe } from "../../../users";
-
 
 type Ui = ReturnType<typeof useTeamsPageUi>;
 
@@ -30,15 +28,22 @@ function is403(err: unknown): boolean {
     return err.response?.status === 403;
 }
 
+function normalizeRole(role?: string) {
+    return (role ?? "").trim().toUpperCase();
+}
 function isAdminRole(role?: string) {
-    return (role ?? "").toUpperCase() === "ADMIN" || (role ?? "").toLowerCase() === "admin";
+    return normalizeRole(role) === "ADMIN";
+}
+function isManagerRole(role?: string) {
+    return normalizeRole(role) === "MANAGER";
 }
 
 function useTeamsBaseData() {
     const { token } = theme.useToken();
     const colors = useMemo(() => getStatsColors(token), [token]);
 
-    const { teams, loading, saving, fetchTeams, handleDelete, ordering, setOrdering } = useTeamsData();
+    const { teams, loading, saving, fetchTeams, handleDelete, ordering, setOrdering } =
+        useTeamsData();
 
     const searchState = useTeamsSearch({
         searchEndpoint: "/teams/search/",
@@ -143,6 +148,7 @@ function useTeamsDetails(ui: Ui, canManage: boolean, canViewDetails: (t: TeamTyp
 
     return { handleView, contextHolder };
 }
+
 export function useTeamsPageData(ui: Ui) {
     const base = useTeamsBaseData();
 
@@ -152,12 +158,13 @@ export function useTeamsPageData(ui: Ui) {
         staleTime: 5 * 60 * 1000,
     });
 
-    const canManage = isAdminRole(me?.role);
+    const role = normalizeRole(me?.role);
 
-    const canViewDetails = useCallback(
-        (_team: TeamType) => true,
-        []
-    );
+    const canManage = isAdminRole(role);
+    const canExport = isAdminRole(role) || isManagerRole(role);
+    const canImport = isAdminRole(role);
+
+    const canViewDetails = useCallback((_team: TeamType) => true, []);
 
     const details = useTeamsDetails(ui, canManage, canViewDetails);
 
@@ -170,14 +177,18 @@ export function useTeamsPageData(ui: Ui) {
                 base.saving,
                 canViewDetails
             ),
-        [canManage, ui.openEdit, base.handleDelete, base.saving,canViewDetails]
+        [canManage, ui.openEdit, base.handleDelete, base.saving, canViewDetails]
     );
 
     return {
         ...base,
 
         canManage,
+        canExport,
+        canImport,
+
         canViewDetails,
+
         modalOpen: ui.modalOpen,
         editTeam: ui.editTeam,
         openAdd: ui.openAdd,

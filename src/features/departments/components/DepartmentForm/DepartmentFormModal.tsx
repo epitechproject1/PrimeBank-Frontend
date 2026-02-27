@@ -7,12 +7,13 @@ import type {
 } from "../../types/departments.type";
 import { departmentService } from "../../services/departments.service";
 import type { UserProfile } from "../../../users";
-import type { AxiosError } from "axios";
+import axios from "axios";
+import { getErrorMessage } from "../../services/httpError";
 
 type FormValues = {
     name: string;
-    description?: string | null;
-    director_id?: number | null;
+    description: string;
+    director_id: number;
     is_active?: boolean;
 };
 
@@ -25,19 +26,10 @@ type Props = {
     loadingUsers?: boolean;
 };
 
-function getErrMsg(err: unknown, fallback: string) {
-    const ax = err as AxiosError<{ detail?: string; message?: string }>;
-    return (
-        ax?.response?.data?.detail ||
-        ax?.response?.data?.message ||
-        (err instanceof Error ? err.message : fallback)
-    );
-}
-
 function buildPayload(values: FormValues): CreateDepartmentPayload {
     return {
-        name: values.name,
-        description: values.description ?? null,
+        name: (values.name ?? "").trim(),
+        description: (values.description ?? "").trim() || null,
         director_id: values.director_id ?? null,
         is_active: values.is_active ?? true,
     };
@@ -75,10 +67,16 @@ export default function DepartmentFormModal({
 
         form.setFieldsValue({
             name: editDepartment?.name ?? "",
-            description: editDepartment?.description ?? null,
-            director_id: editDepartment?.director?.id ?? null,
+            description: editDepartment?.description ?? "",
+            director_id: editDepartment?.director?.id ?? (undefined as any),
             is_active: editDepartment?.is_active ?? true,
         });
+
+        form.setFields([
+            { name: "name", errors: [] },
+            { name: "description", errors: [] },
+            { name: "director_id", errors: [] },
+        ]);
     }, [open, editDepartment, form]);
 
     const handleSubmit = async () => {
@@ -91,8 +89,46 @@ export default function DepartmentFormModal({
             onSaved();
             onClose();
             form.resetFields();
-        } catch (err: unknown) {
-            message.error(getErrMsg(err, "Erreur lors de l'enregistrement"));
+        } catch (err: any) {
+            if (err?.errorFields) return;
+
+            if (axios.isAxiosError(err)) {
+                const data: any = err.response?.data;
+
+                if (data?.name) {
+                    const msg = Array.isArray(data.name) ? data.name[0] : String(data.name);
+                    form.setFields([{ name: "name", errors: [msg] }]);
+                    message.error(msg);
+                    return;
+                }
+
+                if (data?.description) {
+                    const msg = Array.isArray(data.description) ? data.description[0] : String(data.description);
+                    form.setFields([{ name: "description", errors: [msg] }]);
+                    message.error(msg);
+                    return;
+                }
+
+                if (data?.director_id) {
+                    const msg = Array.isArray(data.director_id) ? data.director_id[0] : String(data.director_id);
+                    form.setFields([{ name: "director_id", errors: [msg] }]);
+                    message.error(msg);
+                    return;
+                }
+
+                if (data?.detail) {
+                    message.error(String(data.detail));
+                    return;
+                }
+
+                if (Array.isArray(data) && data[0]) {
+                    message.error(String(data[0]));
+                    return;
+                }
+            }
+
+            const msg = await getErrorMessage(err, "Erreur lors de l'enregistrement");
+            message.error(msg);
         } finally {
             setSaving(false);
         }
@@ -114,15 +150,42 @@ export default function DepartmentFormModal({
             destroyOnClose
         >
             <Form form={form} layout="vertical">
-                <Form.Item name="name" label="Nom" rules={[{ required: true, message: "Nom obligatoire" }]}>
-                    <Input placeholder="Ex: Engineering" />
+                <Form.Item
+                    name="name"
+                    label="Nom"
+                    rules={[{ required: true, message: "Nom obligatoire" }]}
+                >
+                    <Input
+                        placeholder="Ex: Engineering"
+                        onChange={() => form.setFields([{ name: "name", errors: [] }])}
+                    />
                 </Form.Item>
 
-                <Form.Item name="description" label="Description">
-                    <Input.TextArea rows={3} placeholder="Description du département" />
+                <Form.Item
+                    name="description"
+                    label="Description"
+                    rules={[
+                        { required: true, message: "Description obligatoire" },
+                        {
+                            validator: (_, v) =>
+                                typeof v === "string" && v.trim().length >= 5
+                                    ? Promise.resolve()
+                                    : Promise.reject(new Error("Minimum 5 caractères")),
+                        },
+                    ]}
+                >
+                    <Input.TextArea
+                        rows={3}
+                        placeholder="Description du département"
+                        onChange={() => form.setFields([{ name: "description", errors: [] }])}
+                    />
                 </Form.Item>
 
-                <Form.Item name="director_id" label="Directeur">
+                <Form.Item
+                    name="director_id"
+                    label="Directeur"
+                    rules={[{ required: true, message: "Directeur obligatoire" }]}
+                >
                     <Select
                         allowClear
                         placeholder="Choisir un directeur"
@@ -133,6 +196,7 @@ export default function DepartmentFormModal({
                         }))}
                         showSearch
                         optionFilterProp="label"
+                        onChange={() => form.setFields([{ name: "director_id", errors: [] }])}
                     />
                 </Form.Item>
 

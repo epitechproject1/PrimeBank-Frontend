@@ -3,8 +3,8 @@ import type { DepartmentType } from "../../types/departments.type";
 import { DepartmentDetailsHeader } from "./DepartmentDetailsHeader";
 import { DepartmentInfoSection } from "./DepartmentInfoSection";
 import { DepartmentTeamsSection, type TeamLite } from "./DepartmentTeamsSection";
-
 const { Text } = Typography;
+import type { CurrentUserLite } from "../../pages/DepartmentsPageLayout";
 
 type Props = {
     open: boolean;
@@ -17,6 +17,8 @@ type Props = {
     onClose: () => void;
     onEdit: (d: DepartmentType) => void;
     onViewTeam?: (teamId: number) => void;
+
+    currentUser: CurrentUserLite;
 };
 
 export function DepartmentDetailsModal({
@@ -28,10 +30,18 @@ export function DepartmentDetailsModal({
                                            onClose,
                                            onEdit,
                                            onViewTeam,
+                                           currentUser,
                                        }: Props) {
     const embeddedTeams = (department as unknown as { teams?: TeamLite[] } | null)?.teams;
     const finalTeams = teams ?? embeddedTeams ?? [];
     const teamsCount = finalTeams.length;
+
+    const isAdmin = currentUser.role === "ADMIN";
+
+    const isManagerOwner =
+        currentUser.role === "MANAGER" && department?.director?.id === currentUser.id;
+
+    const canEdit = isAdmin || isManagerOwner;
 
     return (
         <Modal
@@ -41,22 +51,26 @@ export function DepartmentDetailsModal({
             centered
             width={900}
             destroyOnClose
-            styles={{body: {padding: 0}}}
+            styles={{ body: { padding: 0 } }}
         >
             {department ? (
-                <DepartmentDetailsHeader department={department} teamsCount={teamsCount} onEdit={onEdit}/>
+                <DepartmentDetailsHeader
+                    department={department}
+                    teamsCount={teamsCount}
+                    canEdit={canEdit}
+                    colorIndex={(department.id ?? 0) % 8}
+                    onEditClick={() => onEdit(department)}
+                />
             ) : null}
 
-            <div style={{padding: 24}}>
-                {loading && <Skeleton active paragraph={{rows: 10}}/>}
+            <div style={{ padding: 24 }}>
+                {loading && <Skeleton active paragraph={{ rows: 10 }} />}
 
-                {!loading && !department && (
-                    <Text type="secondary">Aucun département.</Text>
-                )}
+                {!loading && !department && <Text type="secondary">Aucun département.</Text>}
 
                 {!loading && department && (
                     <>
-                        <DepartmentInfoSection department={department}/>
+                        <DepartmentInfoSection department={department} />
                         <DepartmentTeamsSection
                             teams={finalTeams}
                             loading={teamsLoading}
@@ -65,7 +79,6 @@ export function DepartmentDetailsModal({
                     </>
                 )}
             </div>
-
         </Modal>
     );
 }

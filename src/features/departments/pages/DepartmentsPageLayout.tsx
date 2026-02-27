@@ -1,13 +1,25 @@
+import React from "react";
 import { Card, Empty, Flex, Spin, Grid } from "antd";
 import type { DepartmentType, DepartmentStats, DepartmentOrdering } from "../types/departments.type";
 
 import { DepartmentsStats } from "../components/DepartmentsStats/DepartmentsStats";
 import { DepartmentsToolbar } from "../components/DepartmentsToolbar/DepartmentsToolbar";
 import { DepartmentsContent } from "../components/DepartmentsContent/DepartmentsContent";
-import { DepartmentsHeader } from "../vews/DepartmentsHeader";
+import { DepartmentsHeader } from "../views/DepartmentsHeader";
 
 type ViewMode = "grid" | "list";
 type Screens = ReturnType<typeof Grid.useBreakpoint>;
+
+export type CurrentUserLite = {
+    id: number;
+    role: "ADMIN" | "MANAGER" | "USER";
+};
+
+function mapRole(role: CurrentUserLite["role"]): "ADMIN" | "MANAGER" | "EMPLOYEE" {
+    if (role === "ADMIN") return "ADMIN";
+    if (role === "MANAGER") return "MANAGER";
+    return "EMPLOYEE";
+}
 
 type Props = {
     screens: Screens;
@@ -45,15 +57,11 @@ type Props = {
     onEdit: (d: DepartmentType) => void;
     onDelete: (id: number) => void;
     onView: (d: DepartmentType) => void;
+
+    currentUser: CurrentUserLite;
 };
 
-function PageShell({
-                       screens,
-                       children,
-                   }: {
-    screens: Screens;
-    children: React.ReactNode;
-}) {
+function PageShell({ screens, children }: { screens: Screens; children: React.ReactNode }) {
     return (
         <Flex vertical style={{ minHeight: "100vh", padding: screens.md ? "24px 32px" : "14px" }}>
             <div style={{ maxWidth: 1400, width: "100%", margin: "0 auto" }}>{children}</div>
@@ -64,20 +72,17 @@ function PageShell({
 function TopCard({
                      screens,
                      primaryColor,
-                     stats,
-                     rawDepartments,
-                     activeCount,
-                     directorCount,
                      onAdd,
+                     canAdd,
+                     currentUser,
                  }: {
     screens: Screens;
     primaryColor: string;
-    stats: DepartmentStats | null;
-    rawDepartments: DepartmentType[];
-    activeCount: number;
-    directorCount: number;
     onAdd: () => void;
+    canAdd: boolean;
+    currentUser: CurrentUserLite;
 }) {
+
     return (
         <div
             style={{
@@ -89,14 +94,25 @@ function TopCard({
                 backdropFilter: "blur(10px)",
             }}
         >
-            <DepartmentsHeader onAdd={onAdd} screens={screens} primaryColor={primaryColor} />
+            <DepartmentsHeader
+                onAdd={onAdd}
+                screens={screens}
+                primaryColor={primaryColor}
+                canAdd={canAdd}
+            />
 
             <div style={{ marginTop: 16 }}>
+                {/* ✅ Plus de props manuelles — le composant fetche lui-même via /departments/stats/ */}
                 <DepartmentsStats
-                    totalDepartments={stats?.total_departments ?? rawDepartments.length}
-                    activeCount={activeCount}
-                    directorCount={directorCount}
-                    colors={{ primary: "#1677ff", success: "#52c41a", warning: "#722ed1" }}
+                    role={mapRole(currentUser.role)}
+                    colors={{
+                        primary: "#1677ff",
+                        success: "#52c41a",
+                        warning: "#722ed1",
+                        info: "#0958d9",
+                        purple: "#531dab",
+                        orange: "#d46b08",
+                    }}
                 />
             </div>
         </div>
@@ -114,6 +130,7 @@ function ToolbarSection({
                             setViewMode,
                             ordering,
                             onOrderingChange,
+                            currentUser,
                         }: {
     search: string;
     setSearch: (v: string) => void;
@@ -125,7 +142,14 @@ function ToolbarSection({
     setViewMode: (v: ViewMode) => void;
     ordering: DepartmentOrdering;
     onOrderingChange: (o: DepartmentOrdering) => void;
+    currentUser: CurrentUserLite;
 }) {
+    const role = currentUser.role;
+
+    const canExportCsv = role === "ADMIN" || role === "MANAGER";
+    const canExportPdf = role === "ADMIN" || role === "MANAGER";
+    const canImport = role === "ADMIN";
+
     return (
         <div style={{ marginTop: 14 }}>
             <DepartmentsToolbar
@@ -139,6 +163,9 @@ function ToolbarSection({
                 onViewModeChange={setViewMode}
                 ordering={ordering}
                 onOrderingChange={onOrderingChange}
+                canExportCsv={canExportCsv}
+                canExportPdf={canExportPdf}
+                canImport={canImport}
             />
         </div>
     );
@@ -155,6 +182,7 @@ function ContentSection({
                             pageSize,
                             total,
                             onPageChange,
+                            currentUser,
                         }: {
     spinning: boolean;
     departments: DepartmentType[];
@@ -166,6 +194,7 @@ function ContentSection({
     pageSize: number;
     total: number;
     onPageChange: (p: number, ps: number) => void;
+    currentUser: CurrentUserLite;
 }) {
     return (
         <Spin spinning={spinning} style={{ width: "100%" }}>
@@ -186,6 +215,7 @@ function ContentSection({
                         pageSize={pageSize}
                         total={total}
                         onPageChange={onPageChange}
+                        currentUser={currentUser}
                     />
                 )}
             </div>
@@ -198,10 +228,6 @@ export function DepartmentsPageLayout(props: Props) {
         screens,
         primaryColor,
         departments,
-        rawDepartments,
-        stats,
-        activeCount,
-        directorCount,
         loading,
         searching,
         spinning,
@@ -221,18 +247,20 @@ export function DepartmentsPageLayout(props: Props) {
         onEdit,
         onDelete,
         onView,
+        currentUser,
     } = props;
+
+    const canAdd = currentUser.role === "ADMIN";
 
     return (
         <PageShell screens={screens}>
+            {/* ✅ On passe currentUser à TopCard qui le transmet à DepartmentsStats */}
             <TopCard
                 screens={screens}
                 primaryColor={primaryColor}
-                stats={stats}
-                rawDepartments={rawDepartments}
-                activeCount={activeCount}
-                directorCount={directorCount}
                 onAdd={onAdd}
+                canAdd={canAdd}
+                currentUser={currentUser}
             />
 
             <ToolbarSection
@@ -246,6 +274,7 @@ export function DepartmentsPageLayout(props: Props) {
                 setViewMode={setViewMode}
                 ordering={ordering}
                 onOrderingChange={onOrderingChange}
+                currentUser={currentUser}
             />
 
             <ContentSection
@@ -259,6 +288,7 @@ export function DepartmentsPageLayout(props: Props) {
                 pageSize={pageSize}
                 total={total}
                 onPageChange={onPageChange}
+                currentUser={currentUser}
             />
         </PageShell>
     );

@@ -1,6 +1,5 @@
 import axios, {AxiosError, AxiosInstance, InternalAxiosRequestConfig} from "axios";
 import { authTokens } from "./authTokens.ts";
-import { normalizeApiError } from "./apiError.ts";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -70,12 +69,9 @@ apiClient.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                const refreshResponse = await axios.post(
-                    `${API_BASE_URL}/auth/refresh/`,
-                    {
-                        refresh: authTokens.getRefresh(),
-                    }
-                );
+                const refreshResponse = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
+                    refresh: authTokens.getRefresh(),
+                });
 
                 const newAccess = refreshResponse.data.access;
                 authTokens.setTokens(newAccess, authTokens.getRefresh()!);
@@ -88,13 +84,12 @@ apiClient.interceptors.response.use(
                 processQueue(refreshError, null);
                 authTokens.clear();
 
-                // 👉 ici tu peux rediriger vers /login
-                return Promise.reject(normalizeApiError(refreshError));
+                return Promise.reject(refreshError);
             } finally {
                 isRefreshing = false;
             }
         }
 
-        return Promise.reject(normalizeApiError(error));
+            return Promise.reject(error);
     }
 );

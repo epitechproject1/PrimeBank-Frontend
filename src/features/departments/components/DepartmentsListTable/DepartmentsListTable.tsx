@@ -5,17 +5,17 @@ import { buildDepartmentsTableColumns } from "./DepartmentsTableColumns";
 type Props = {
     data: DepartmentType[];
     loading: boolean;
-
     onView?: (d: DepartmentType) => void;
     onEdit: (d: DepartmentType) => void;
     onDelete: (id: number) => void;
-
-    deletingId?: number | null;
 
     page: number;
     pageSize: number;
     total: number;
     onPageChange: (page: number, pageSize: number) => void;
+
+    canEdit: boolean;
+    canDelete: boolean;
 };
 
 export function DepartmentsListTable(props: Props) {

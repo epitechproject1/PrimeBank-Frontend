@@ -7,7 +7,7 @@ type Props = { team: TeamType };
 
 export function TeamsGridCardBody({ team }: Props) {
     return (
-        <div style={{ padding: 16, minHeight: 72 }}>
+        <div style={{ padding: 16, minHeight: 56 }}>
             <Text type={team.description ? undefined : "secondary"}>
                 {team.description || "Aucune description."}
             </Text>

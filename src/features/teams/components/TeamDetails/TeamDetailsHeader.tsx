@@ -9,7 +9,6 @@ type Props = {
     team: TeamType;
     colorIndex: number;
 
-    // ✅ bouton seulement si autorisé
     onEditClick?: () => void;
     canEdit?: boolean;
 };
