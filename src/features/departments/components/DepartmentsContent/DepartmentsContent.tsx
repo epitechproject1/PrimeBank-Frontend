@@ -4,6 +4,8 @@ import type { DepartmentType } from "../../types/departments.type";
 import { DepartmentCard } from "../DepartmentCard/DepartmentCard";
 import { DepartmentsListTable } from "../DepartmentsListTable/DepartmentsListTable";
 
+import type { CurrentUserLite } from "../../pages/DepartmentsPageLayout";
+
 const { Title } = Typography;
 
 type Props = {
@@ -13,17 +15,25 @@ type Props = {
     onEdit: (d: DepartmentType) => void;
     onDelete: (id: number) => void;
     onView?: (d: DepartmentType) => void;
-
     page: number;
     pageSize: number;
     total: number;
     onPageChange: (page: number, pageSize: number) => void;
+    currentUser: CurrentUserLite;
 };
 
-function SectionHeader({ title, count, primary }: { title: string; count: number; primary?: boolean }) {
+function SectionHeader({
+                           title,
+                           count,
+                           primary,
+                       }: {
+    title: string;
+    count: number;
+    primary?: boolean;
+}) {
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-            {primary ? <PushpinFilled style={{ color: "#1677ff", fontSize: 16 }} /> : null}
+            {primary && <PushpinFilled style={{ color: "#1677ff", fontSize: 16 }} />}
 
             <Title level={5} style={{ margin: 0, color: primary ? "#1677ff" : "#595959" }}>
                 {title}
@@ -39,8 +49,8 @@ function SectionHeader({ title, count, primary }: { title: string; count: number
                     fontWeight: 600,
                 }}
             >
-                {count}
-            </span>
+        {count}
+      </span>
         </div>
     );
 }
@@ -50,17 +60,31 @@ function DepartmentsGrid({
                              onEdit,
                              onDelete,
                              onView,
+                             canEdit,
+                             canDelete,
+                             variant,
                          }: {
     items: DepartmentType[];
     onEdit: (d: DepartmentType) => void;
     onDelete: (id: number) => void;
     onView?: (d: DepartmentType) => void;
+    canEdit: boolean;
+    canDelete: boolean;
+    variant?: "default" | "highlight";
 }) {
     return (
         <Row gutter={[16, 16]}>
             {items.map((d) => (
                 <Col key={d.id} xs={24} sm={12} lg={8}>
-                    <DepartmentCard department={d} onEdit={onEdit} onDelete={onDelete} onView={onView} />
+                    <DepartmentCard
+                        department={d}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onView={onView}
+                        canEdit={canEdit}
+                        canDelete={canDelete}
+                        variant={variant}
+                    />
                 </Col>
             ))}
         </Row>
@@ -84,7 +108,13 @@ export function DepartmentsContent({
                                        pageSize,
                                        total,
                                        onPageChange,
+                                       currentUser,
                                    }: Props) {
+    const role = currentUser.role;
+
+    const canEdit = role === "ADMIN";
+    const canDelete = role === "ADMIN";
+
     if (viewMode === "list") {
         return (
             <DepartmentsListTable
@@ -97,6 +127,8 @@ export function DepartmentsContent({
                 pageSize={pageSize}
                 total={total}
                 onPageChange={onPageChange}
+                canEdit={canEdit}
+                canDelete={canDelete}
             />
         );
     }
@@ -112,16 +144,30 @@ export function DepartmentsContent({
             {pinned.length > 0 && (
                 <div>
                     <SectionHeader title="Mes départements" count={pinned.length} primary />
-                    <DepartmentsGrid items={pinned} onEdit={onEdit} onDelete={onDelete} onView={onView} />
+                    <DepartmentsGrid
+                        items={pinned}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onView={onView}
+                        canEdit={canEdit}
+                        canDelete={canDelete}
+                        variant="highlight"
+                    />
                 </div>
             )}
 
             {others.length > 0 && (
                 <div>
-                    {pinned.length > 0 ? (
-                        <SectionHeader title="Tous les départements" count={others.length} />
-                    ) : null}
-                    <DepartmentsGrid items={others} onEdit={onEdit} onDelete={onDelete} onView={onView} />
+                    {pinned.length > 0 && <SectionHeader title="Tous les départements" count={others.length} />}
+                    <DepartmentsGrid
+                        items={others}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onView={onView}
+                        canEdit={canEdit}
+                        canDelete={canDelete}
+                        variant="default"
+                    />
                 </div>
             )}
         </div>

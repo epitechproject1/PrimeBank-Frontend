@@ -1,16 +1,18 @@
-import { Flex, Input, Button, Select, Space, Tooltip, Typography } from "antd";
+import React from "react";
+import { Input, Button, Select, Space, Tooltip, Typography } from "antd";
 import type { InputProps } from "antd";
 import {
     SearchOutlined,
     ReloadOutlined,
     AppstoreOutlined,
     UnorderedListOutlined,
+    DownloadOutlined,
+    FilePdfOutlined,
+    UploadOutlined,
 } from "@ant-design/icons";
 import type { TeamFilters } from "../../types/teams.type";
 
 const { Text } = Typography;
-
-//test
 
 interface TeamsToolbarProps {
     search: string;
@@ -23,9 +25,15 @@ interface TeamsToolbarProps {
     onViewModeChange: (mode: "grid" | "list") => void;
     ordering: TeamFilters["ordering"];
     onOrderingChange: (v: TeamFilters["ordering"]) => void;
+
+    canExport?: boolean;
+    canImport?: boolean;
+    onExportCsv?: () => void;
+    onExportPdf?: () => void;
+    onOpenImport?: () => void;
 }
 
-const H = 40;
+const H = 38;
 const DEFAULT_ORDERING: NonNullable<TeamFilters["ordering"]> = "-created_at";
 
 const ORDERING_OPTIONS: { value: NonNullable<TeamFilters["ordering"]>; label: string }[] = [
@@ -39,162 +47,139 @@ const ORDERING_OPTIONS: { value: NonNullable<TeamFilters["ordering"]>; label: st
     { value: "members_count", label: "Moins de membres" },
 ];
 
-const containerStyle: React.CSSProperties = {
-    position: "sticky",
-    top: 12,
-    zIndex: 20,
-    marginBottom: 18,
-    borderRadius: 16,
-    padding: "10px 14px",
-    background: "rgba(255,255,255,0.9)",
-    border: "1px solid rgba(0,0,0,0.07)",
-    backdropFilter: "blur(12px)",
-    boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
-};
-
-const dividerStyle: React.CSSProperties = {
-    width: 1,
-    height: 24,
-    background: "rgba(0,0,0,0.08)",
-    flexShrink: 0,
-};
-
 const inputStyle: React.CSSProperties = {
     height: H,
-    borderRadius: 10,
-    background: "#f8f8f8",
-    border: "1px solid rgba(0,0,0,0.08)",
+    borderRadius: 8,
     fontSize: 14,
-    boxShadow: "none",
 };
 
-const refreshBtnStyle: React.CSSProperties = {
+const iconBtnStyle: React.CSSProperties = {
     height: H,
     width: H,
-    borderRadius: 10,
-    border: "1px solid rgba(0,0,0,0.08)",
-    background: "#f8f8f8",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    borderRadius: 8,
     flexShrink: 0,
 };
 
-function Divider() {
-    return <div style={dividerStyle} />;
-}
-
-function SearchBox({
-                       value,
-                       onChangeValue,
-                       onClear,
-                   }: {
-    value: string;
-    onChangeValue: (v: string) => void;
-    onClear: () => void;
+function SearchBlock({
+                         search,
+                         onSearchChange,
+                         onSearchClear,
+                     }: {
+    search: string;
+    onSearchChange: (v: string) => void;
+    onSearchClear: () => void;
 }) {
-    const handleChange: InputProps["onChange"] = (e) => {
+    const handleInputChange: InputProps["onChange"] = (e) => {
         const v = e.target.value;
-        onChangeValue(v);
-        if (v.trim() === "") onClear();
+        onSearchChange(v);
+        if (v.trim() === "") onSearchClear();
     };
 
     return (
         <div style={{ flex: 1, minWidth: 0 }}>
             <Input
-                value={value}
-                onChange={handleChange}
+                value={search}
+                onChange={handleInputChange}
                 allowClear
-                placeholder="Rechercher une équipe…"
-                prefix={<SearchOutlined style={{ color: "#bfbfbf", fontSize: 15 }} />}
+                placeholder="Rechercher une équipe..."
+                prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
                 style={inputStyle}
             />
         </div>
     );
 }
 
-function OrderingSelect({
-                            value,
-                            onChange,
-                        }: {
-    value: NonNullable<TeamFilters["ordering"]>;
-    onChange: (v: TeamFilters["ordering"]) => void;
+function OrderingBlock({
+                           ordering,
+                           onOrderingChange,
+                       }: {
+    ordering: TeamFilters["ordering"];
+    onOrderingChange: (v: TeamFilters["ordering"]) => void;
 }) {
+    const selectedOrdering = (ordering ?? DEFAULT_ORDERING) as NonNullable<TeamFilters["ordering"]>;
+
     return (
-        <Select<NonNullable<TeamFilters["ordering"]>>
-            value={value}
-            onChange={onChange}
-            style={{ width: 200, height: H, flexShrink: 0 }}
-            styles={{ popup: { root: { borderRadius: 10 } } }}
+        <Select
+            value={selectedOrdering}
+            onChange={onOrderingChange}
+            style={{ width: 180, height: H, flexShrink: 0 }}
             options={ORDERING_OPTIONS}
         />
     );
 }
 
-function RefreshButton({
-                           onRefresh,
-                           loading,
-                       }: {
-    onRefresh: () => void;
+function ActionsBlock({
+                          loading,
+                          onRefresh,
+                          canExport,
+                          canImport,
+                          onExportCsv,
+                          onExportPdf,
+                          onOpenImport,
+                      }: {
     loading: boolean;
+    onRefresh: () => void;
+    canExport: boolean;
+    canImport: boolean;
+    onExportCsv?: () => void;
+    onExportPdf?: () => void;
+    onOpenImport?: () => void;
 }) {
     return (
-        <Tooltip title="Rafraîchir">
-            <Button
-                onClick={onRefresh}
-                loading={loading}
-                icon={<ReloadOutlined />}
-                style={refreshBtnStyle}
-            />
-        </Tooltip>
+        <>
+            <Tooltip title="Rafraîchir">
+                <Button onClick={onRefresh} loading={loading} icon={<ReloadOutlined />} style={iconBtnStyle} />
+            </Tooltip>
+
+            {canExport && (
+                <Tooltip title="Exporter CSV">
+                    <Button icon={<DownloadOutlined />} onClick={onExportCsv} style={iconBtnStyle} />
+                </Tooltip>
+            )}
+
+            {canExport && (
+                <Tooltip title="Exporter PDF">
+                    <Button icon={<FilePdfOutlined />} onClick={onExportPdf} style={iconBtnStyle} />
+                </Tooltip>
+            )}
+
+            {canImport && (
+                <Tooltip title="Importer CSV">
+                    <Button icon={<UploadOutlined />} onClick={onOpenImport} style={iconBtnStyle} />
+                </Tooltip>
+            )}
+        </>
     );
 }
 
-function ViewModeToggle({
-                            viewMode,
-                            onChange,
-                        }: {
+function ViewModeBlock({
+                           viewMode,
+                           onViewModeChange,
+                       }: {
     viewMode: "grid" | "list";
-    onChange: (mode: "grid" | "list") => void;
+    onViewModeChange: (m: "grid" | "list") => void;
 }) {
     return (
-        <Space.Compact style={{ flexShrink: 0 }}>
-            <Tooltip title="Vue grille">
-                <Button
-                    icon={<AppstoreOutlined />}
-                    type={viewMode === "grid" ? "primary" : "default"}
-                    onClick={() => onChange("grid")}
-                    style={{
-                        height: H,
-                        width: H,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "10px 0 0 10px",
-                    }}
-                />
-            </Tooltip>
-            <Tooltip title="Vue liste">
-                <Button
-                    icon={<UnorderedListOutlined />}
-                    type={viewMode === "list" ? "primary" : "default"}
-                    onClick={() => onChange("list")}
-                    style={{
-                        height: H,
-                        width: H,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "0 10px 10px 0",
-                    }}
-                />
-            </Tooltip>
+        <Space.Compact>
+            <Button
+                icon={<AppstoreOutlined />}
+                type={viewMode === "grid" ? "primary" : "default"}
+                onClick={() => onViewModeChange("grid")}
+                style={{ height: H }}
+            />
+            <Button
+                icon={<UnorderedListOutlined />}
+                type={viewMode === "list" ? "primary" : "default"}
+                onClick={() => onViewModeChange("list")}
+                style={{ height: H }}
+            />
         </Space.Compact>
     );
 }
 
-function SearchingHint({ show }: { show: boolean }) {
-    if (!show) return null;
+function SearchingHint({ searching }: { searching: boolean }) {
+    if (!searching) return null;
+
     return (
         <div style={{ marginTop: 6, paddingLeft: 2 }}>
             <Text type="secondary" style={{ fontSize: 12 }}>
@@ -215,21 +200,33 @@ export function TeamsToolbar({
                                  onViewModeChange,
                                  ordering,
                                  onOrderingChange,
+                                 canExport = true,
+                                 canImport = true,
+                                 onExportCsv,
+                                 onExportPdf,
+                                 onOpenImport,
                              }: TeamsToolbarProps) {
-    const selectedOrdering = (ordering ?? DEFAULT_ORDERING) as NonNullable<TeamFilters["ordering"]>;
-
     return (
-        <div style={containerStyle}>
-            <Flex gap={10} align="center" style={{ width: "100%" }}>
-                <SearchBox value={search} onChangeValue={onSearchChange} onClear={onSearchClear} />
-                <Divider />
-                <OrderingSelect value={selectedOrdering} onChange={onOrderingChange} />
-                <Divider />
-                <RefreshButton onRefresh={onRefresh} loading={loading} />
-                <ViewModeToggle viewMode={viewMode} onChange={onViewModeChange} />
-            </Flex>
+        <div style={{ marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <SearchBlock search={search} onSearchChange={onSearchChange} onSearchClear={onSearchClear} />
 
-            <SearchingHint show={searching} />
+                <OrderingBlock ordering={ordering} onOrderingChange={onOrderingChange} />
+
+                <ActionsBlock
+                    loading={loading}
+                    onRefresh={onRefresh}
+                    canExport={canExport}
+                    canImport={canImport}
+                    onExportCsv={onExportCsv}
+                    onExportPdf={onExportPdf}
+                    onOpenImport={onOpenImport}
+                />
+
+                <ViewModeBlock viewMode={viewMode} onViewModeChange={onViewModeChange} />
+            </div>
+
+            <SearchingHint searching={searching} />
         </div>
     );
 }

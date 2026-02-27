@@ -1,236 +1,103 @@
-import { Card, Flex, Typography, Tag, Button, Tooltip } from "antd";
-import {
-    EyeOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    UserOutlined,
-    TeamOutlined,
-} from "@ant-design/icons";
+import { Card, Typography } from "antd";
 import type { DepartmentType } from "../../types/departments.type";
+import { DepartmentHeader } from "./DepartmentHeader";
+import { DepartmentFooter } from "./DepartmentFooter";
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 type Props = {
     department: DepartmentType;
     onEdit: (d: DepartmentType) => void;
     onDelete: (id: number) => void;
     onView?: (d: DepartmentType) => void;
+    canEdit: boolean;
+    canDelete: boolean;
+    variant?: "default" | "highlight";
 };
 
-type HeaderProps = {
-    department: DepartmentType;
-    name: string;
-    initials: string;
-    onEdit: (d: DepartmentType) => void;
-    onDelete: (id: number) => void;
-    onView?: (d: DepartmentType) => void;
-};
-
-function DepartmentCardHeader({
-                                  department,
-                                  name,
-                                  initials,
-                                  onEdit,
-                                  onDelete,
-                                  onView,
-                              }: HeaderProps) {
-    return (
-        <div
-            style={{
-                padding: 16,
-                background: "linear-gradient(135deg, rgba(22,119,255,0.10), rgba(22,119,255,0.02))",
-            }}
-        >
-            <Flex align="start" justify="space-between" gap={12}>
-                <Flex align="center" gap={12} style={{ minWidth: 0 }}>
-                    <div
-                        style={{
-                            width: 54,
-                            height: 54,
-                            borderRadius: "50%",
-                            display: "grid",
-                            placeItems: "center",
-                            background: "#1677ff",
-                            color: "white",
-                            fontWeight: 700,
-                            fontSize: 18,
-                            boxShadow: "0 6px 18px rgba(22,119,255,0.25)",
-                            flexShrink: 0,
-                        }}
-                    >
-                        {initials}
-                    </div>
-
-                    <div style={{ minWidth: 0 }}>
-                        <Flex align="center" gap={8} style={{ minWidth: 0 }}>
-                            <Title
-                                level={5}
-                                style={{ margin: 0, lineHeight: 1.2 }}
-                                ellipsis={{ tooltip: name }}
-                            >
-                                {name}
-                            </Title>
-
-                            <Tag
-                                color={department.is_active ? "success" : "default"}
-                                style={{ marginInlineEnd: 0 }}
-                            >
-                                {department.is_active ? "Actif" : "Inactif"}
-                            </Tag>
-                        </Flex>
-
-                    </div>
-                </Flex>
-
-                <Flex gap={6}>
-                    <Tooltip title="Voir">
-                        <Button icon={<EyeOutlined />} onClick={() => onView?.(department)} />
-                    </Tooltip>
-
-                    <Tooltip title="Modifier">
-                        <Button icon={<EditOutlined />} onClick={() => onEdit(department)} />
-                    </Tooltip>
-
-                    <Tooltip title="Supprimer">
-                        <Button
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() => onDelete(department.id)}
-                        />
-                    </Tooltip>
-                </Flex>
-            </Flex>
-        </div>
-    );
+function getInitials(name?: string) {
+    const s = (name ?? "").trim();
+    return s ? s.slice(0, 2).toUpperCase() : "--";
 }
 
-function DepartmentCardDescription({ description }: { description?: string | null }) {
-    return (
-        <div style={{ padding: 16, minHeight: 72 }}>
-            <Text type={description ? undefined : "secondary"}>
-                {description || "Aucune description."}
-            </Text>
-        </div>
-    );
+function getDirectorName(d: DepartmentType) {
+    if (!d.director) return "—";
+    const full = `${d.director.first_name ?? ""} ${d.director.last_name ?? ""}`.trim();
+    return full || "—";
 }
 
-type FooterProps = {
-    directorName: string;
-    membersCount: number;
-    onView?: () => void;
-};
+export function DepartmentCard({
+                                   department,
+                                   onEdit,
+                                   onDelete,
+                                   onView,
+                                   canEdit,
+                                   canDelete,
+                                   variant = "default",
+                               }: Props) {
+    const name = (department.name ?? "").trim() || "-";
+    const initials = getInitials(name);
+    const directorName = getDirectorName(department);
+    const teamsCount = department.teams_count ?? 0;
 
-function DepartmentCardFooter({ directorName, membersCount, onView }: FooterProps) {
-    return (
-        <div style={{ padding: "0 16px 16px" }}>
-            <Flex justify="space-between" align="center" style={{ marginTop: 8 }}>
-                <Flex align="center" gap={8} style={{ minWidth: 0 }}>
-                    <div
-                        style={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: 8,
-                            background: "rgba(22,119,255,0.08)",
-                            display: "grid",
-                            placeItems: "center",
-                            flexShrink: 0,
-                        }}
-                    >
-                        <UserOutlined style={{ color: "#1677ff" }} />
-                    </div>
+    const canOpen = Boolean(onView);
+    const isHighlight = variant === "highlight";
 
-                    <div style={{ minWidth: 0 }}>
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                            Directeur
-                        </Text>
-                        <div style={{ fontWeight: 600 }}>
-                            <Text ellipsis style={{ maxWidth: 180, display: "inline-block" }}>
-                                {directorName}
-                            </Text>
-                        </div>
-                    </div>
-                </Flex>
+    const border = isHighlight
+        ? "1px solid rgba(22,119,255,0.35)"
+        : "1px solid rgba(0,0,0,0.08)";
 
-                <Flex align="center" gap={8}>
-                    <div
-                        style={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: 8,
-                            background: "rgba(82,196,26,0.10)",
-                            display: "grid",
-                            placeItems: "center",
-                        }}
-                    >
-                        <TeamOutlined style={{ color: "#52c41a" }} />
-                    </div>
+    const shadow = isHighlight
+        ? "0 10px 26px rgba(22,119,255,0.10)"
+        : "0 10px 26px rgba(0,0,0,0.06)";
 
-                    <div style={{ textAlign: "right" }}>
-                        <Text type="secondary" style={{ fontSize: 12 }}>
-                            Équipes
-                        </Text>
-                        <div style={{ fontWeight: 700 }}>{membersCount}</div>
-                    </div>
-                </Flex>
-            </Flex>
-
-            <div style={{ marginTop: 12, textAlign: "center" }}>
-                <Button type="link" icon={<EyeOutlined />} onClick={onView}>
-                    Voir les détails
-                </Button>
-            </div>
-        </div>
-    );
-}
-
-export function DepartmentCard({ department, onEdit, onDelete, onView }: Props) {
-    const directorName = department.director
-        ? `${department.director.first_name} ${department.director.last_name}`
-        : "—";
-
-    const name = department.name ?? "-";
-    const initialsValue = name.slice(0, 2).toUpperCase();
-    const membersCount = department.teams_count ?? 0;
+    const hoverShadow = isHighlight
+        ? "0 18px 52px rgba(22,119,255,0.18)"
+        : "0 18px 52px rgba(0,0,0,0.10)";
 
     return (
         <Card
             hoverable
+            styles={{ body: { padding: 0 } }}
+            onClick={() => onView?.(department)}
             style={{
                 width: "100%",
                 borderRadius: 18,
                 overflow: "hidden",
-                border: "1px solid rgba(0,0,0,0.06)",
-                boxShadow: "0 10px 26px rgba(0,0,0,0.06)",
+                cursor: canOpen ? "pointer" : "default",
+                border,
+                boxShadow: shadow,
+                background: "rgba(255,255,255,0.95)",
                 transition: "all 220ms ease",
-                background: "rgba(255,255,255,0.92)",
             }}
             onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-6px)";
-                e.currentTarget.style.boxShadow = "0 18px 52px rgba(0,0,0,0.10)";
+                e.currentTarget.style.boxShadow = hoverShadow;
             }}
             onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 10px 26px rgba(0,0,0,0.06)";
+                e.currentTarget.style.boxShadow = shadow;
             }}
-            styles={{ body: { padding: 0 } }}
         >
-
-        <DepartmentCardHeader
-                department={department}
+            <DepartmentHeader
                 name={name}
-                initials={initialsValue}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onView={onView}
+                initials={initials}
+                isActive={Boolean(department.is_active)}
+                canEdit={canEdit}
+                canDelete={canDelete}
+                onEdit={() => onEdit(department)}
+                onDelete={() => onDelete(department.id)}
             />
 
-            <DepartmentCardDescription description={department.description} />
+            <div style={{ height: 1, background: "rgba(0,0,0,0.06)" }} />
 
-            <DepartmentCardFooter
-                directorName={directorName}
-                membersCount={membersCount}
-                onView={() => onView?.(department)}
-            />
+            <div style={{ padding: 16, minHeight: 56, background: "#fff" }}>
+                <Text type={department.description ? undefined : "secondary"}>
+                    {department.description || "Aucune description."}
+                </Text>
+            </div>
+
+            <DepartmentFooter directorName={directorName} teamsCount={teamsCount} />
         </Card>
     );
 }

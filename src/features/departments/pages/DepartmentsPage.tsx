@@ -1,10 +1,12 @@
 import { Grid } from "antd";
+import { useQuery } from "@tanstack/react-query";
 
 import { useDepartmentsPage } from "../hooks/page/useDepartmentsPage";
 import { useDepartmentFormOptions } from "../hooks/form/useDepartmentFormOptions";
 
-import { DepartmentsPageLayout } from "./DepartmentsPageLayout";
+import { DepartmentsPageLayout, type CurrentUserLite } from "./DepartmentsPageLayout";
 import { DepartmentsModals } from "./DepartmentsModals";
+import { getMe } from "../../users";
 
 const { useBreakpoint } = Grid;
 
@@ -14,6 +16,16 @@ export function DepartmentsPage() {
 
     const page = useDepartmentsPage();
     const { users, loadingUsers } = useDepartmentFormOptions(page.isModalOpen);
+
+    const { data: me } = useQuery({
+        queryKey: ["me"],
+        queryFn: getMe,
+    });
+
+    const currentUser: CurrentUserLite = {
+        id: me?.id ?? 0,
+        role: (me?.role ?? "USER") as CurrentUserLite["role"],
+    };
 
     return (
         <>
@@ -44,6 +56,7 @@ export function DepartmentsPage() {
                 pageSize={page.pageSize}
                 total={page.total}
                 onPageChange={page.onPageChange}
+                currentUser={currentUser}
             />
 
             <DepartmentsModals
@@ -60,9 +73,8 @@ export function DepartmentsPage() {
                 closeDetails={page.closeDetails}
                 departmentTeams={page.departmentTeams}
                 teamsLoading={page.teamsLoading}
+                currentUser={currentUser}
             />
         </>
     );
 }
-
-export default DepartmentsPage;

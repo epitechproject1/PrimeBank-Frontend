@@ -4,6 +4,7 @@ import { DepartmentDetailsModal } from "../components/DepartmentDetails/Departme
 import type { DepartmentType } from "../types/departments.type";
 import type { UserProfile } from "../../users";
 import type { TeamLite } from "../hooks/page/useDepartmentsPage";
+import type { CurrentUserLite } from "./DepartmentsPageLayout";
 
 type Props = {
     isModalOpen: boolean;
@@ -21,6 +22,8 @@ type Props = {
 
     departmentTeams: TeamLite[];
     teamsLoading: boolean;
+
+    currentUser: CurrentUserLite;
 };
 
 export function DepartmentsModals({
@@ -39,6 +42,7 @@ export function DepartmentsModals({
 
                                       departmentTeams,
                                       teamsLoading,
+                                      currentUser,
                                   }: Props) {
     return (
         <>
@@ -59,6 +63,7 @@ export function DepartmentsModals({
                 teamsLoading={teamsLoading}
                 onClose={closeDetails}
                 onEdit={onEdit}
+                currentUser={currentUser}
             />
         </>
     );

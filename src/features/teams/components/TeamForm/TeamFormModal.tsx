@@ -14,7 +14,7 @@ interface TeamFormModalProps {
     open: boolean;
     editTeam: TeamType | null;
     onClose: () => void;
-    onSaved: (team: TeamType) => void;
+    onSaved: (() => void) | ((team: TeamType) => void | Promise<void>);
 }
 
 interface TeamFormValues {
@@ -38,7 +38,7 @@ export function TeamFormModal({ open, editTeam, onClose, onSaved }: TeamFormModa
 
     const { users, departments, loadingOptions } = useTeamFormOptions(open);
 
-    const { handleSubmit, saving, contextHolder } = useTeamFormSubmit({
+    const { submit, saving } = useTeamFormSubmit({
         form,
         editTeam,
         onSaved,
@@ -56,8 +56,7 @@ export function TeamFormModal({ open, editTeam, onClose, onSaved }: TeamFormModa
             : [];
 
         return list.map((d) => {
-            const labelText =
-                d.name ?? d.title ?? d.label ?? d.code ?? `Département #${d.id}`;
+            const labelText = d.name ?? d.title ?? d.label ?? d.code ?? `Département #${d.id}`;
 
             return {
                 value: d.id,
@@ -66,7 +65,6 @@ export function TeamFormModal({ open, editTeam, onClose, onSaved }: TeamFormModa
             };
         });
     }, [departments]);
-
 
     useEffect(() => {
         if (!open) return;
@@ -86,35 +84,31 @@ export function TeamFormModal({ open, editTeam, onClose, onSaved }: TeamFormModa
     }, [open, editTeam, form]);
 
     return (
-        <>
-            {contextHolder}
-
-            <Modal
-                title={
-                    <Space>
-                        {editTeam ? <EditOutlined /> : <PlusOutlined />}
-                        {editTeam ? "Modifier l'équipe" : "Nouvelle équipe"}
-                    </Space>
-                }
-                open={open}
-                onCancel={onClose}
-                onOk={handleSubmit}
-                okText={editTeam ? "Enregistrer" : "Créer"}
-                cancelText="Annuler"
-                confirmLoading={saving}
-                destroyOnClose
-                width={520}
-            >
-                <Spin spinning={loadingOptions}>
-                    <TeamFormFields
-                        form={form}
-                        loadingOptions={loadingOptions}
-                        userOptions={userOptions}
-                        deptOptions={deptOptions}
-                    />
-                </Spin>
-            </Modal>
-        </>
+        <Modal
+            title={
+                <Space>
+                    {editTeam ? <EditOutlined /> : <PlusOutlined />}
+                    {editTeam ? "Modifier l'équipe" : "Nouvelle équipe"}
+                </Space>
+            }
+            open={open}
+            onCancel={onClose}
+            onOk={submit}
+            okText={editTeam ? "Enregistrer" : "Créer"}
+            cancelText="Annuler"
+            confirmLoading={saving}
+            destroyOnClose
+            width={520}
+        >
+            <Spin spinning={loadingOptions}>
+                <TeamFormFields
+                    form={form}
+                    loadingOptions={loadingOptions}
+                    userOptions={userOptions}
+                    deptOptions={deptOptions}
+                />
+            </Spin>
+        </Modal>
     );
 }
 

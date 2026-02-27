@@ -1,3 +1,4 @@
+import React from "react";
 import { Flex, Input, Button, Space, Tooltip, Typography, Select } from "antd";
 import type { InputProps } from "antd";
 import {
@@ -6,7 +7,10 @@ import {
     AppstoreOutlined,
     UnorderedListOutlined,
 } from "@ant-design/icons";
-import { DepartmentOrdering } from "../../types/departments.type.ts";
+
+import type { DepartmentOrdering } from "../../types/departments.type";
+import { ExportCsvButton, ExportPdfButton, ImportCsvButton } from "./toolbar.actions";
+import type { DeptFilters } from "./toolbar.utils";
 
 const { Text } = Typography;
 
@@ -23,7 +27,7 @@ const ORDERING_OPTIONS: { label: string; value: DepartmentOrdering }[] = [
     { value: "employees_count", label: "Moins d'employés" },
 ];
 
-interface DepartmentsToolbarProps {
+export interface DepartmentsToolbarProps {
     search: string;
     onSearchChange: (value: string) => void;
     onSearchClear: () => void;
@@ -34,6 +38,10 @@ interface DepartmentsToolbarProps {
     onViewModeChange: (mode: "grid" | "list") => void;
     ordering: DepartmentOrdering;
     onOrderingChange: (ordering: DepartmentOrdering) => void;
+
+    canExportCsv: boolean;
+    canExportPdf: boolean;
+    canImport: boolean;
 }
 
 const H = 40;
@@ -107,12 +115,9 @@ function SearchInput({
                 prefix={<SearchOutlined style={{ color: "#bfbfbf", fontSize: 15 }} />}
                 allowClear={{
                     clearIcon: (
-                        <span
-                            onClick={onClear}
-                            style={{ cursor: "pointer", display: "inline-flex" }}
-                        >
-                            ×
-                        </span>
+                        <span onClick={onClear} style={{ cursor: "pointer", display: "inline-flex" }}>
+              ×
+            </span>
                     ),
                 }}
                 style={inputStyle}
@@ -140,21 +145,10 @@ function OrderingSelect({
     );
 }
 
-function RefreshButton({
-                           onRefresh,
-                           loading,
-                       }: {
-    onRefresh: () => void;
-    loading: boolean;
-}) {
+function RefreshButton({ onRefresh, loading }: { onRefresh: () => void; loading: boolean }) {
     return (
         <Tooltip title="Rafraîchir">
-            <Button
-                onClick={onRefresh}
-                loading={loading}
-                icon={<ReloadOutlined />}
-                style={squareBtnStyle}
-            />
+            <Button onClick={onRefresh} loading={loading} icon={<ReloadOutlined />} style={squareBtnStyle} />
         </Tooltip>
     );
 }
@@ -224,14 +218,33 @@ export function DepartmentsToolbar({
                                        onViewModeChange,
                                        ordering,
                                        onOrderingChange,
+                                       canExportCsv,
+                                       canExportPdf,
+                                       canImport,
                                    }: DepartmentsToolbarProps) {
+    const filters: DeptFilters = React.useMemo(
+        () => ({
+            q: search?.trim() ? search.trim() : undefined,
+            ordering,
+        }),
+        [search, ordering]
+    );
+
     return (
         <ToolbarContainer>
             <Flex gap={10} align="center" style={{ width: "100%" }}>
                 <SearchInput value={search} onChangeValue={onSearchChange} onClear={onSearchClear} />
+
                 <OrderingSelect value={ordering} onChange={onOrderingChange} />
+
                 <div style={dividerStyle} />
+
                 <RefreshButton onRefresh={onRefresh} loading={loading} />
+
+                {canExportCsv && <ExportCsvButton disabled={loading} filters={filters} />}
+                {canExportPdf && <ExportPdfButton disabled={loading} filters={filters} />}
+                {canImport && <ImportCsvButton disabled={loading} onDone={onRefresh} />}
+
                 <ViewModeToggle viewMode={viewMode} onChange={onViewModeChange} />
             </Flex>
 

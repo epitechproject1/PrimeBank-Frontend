@@ -49,6 +49,12 @@ type Props = {
     handleDelete?: (id: number) => void;
 
     handleView: (team: TeamType) => void;
+
+    canExport?: boolean;
+    canImport?: boolean;
+    onExportCsv?: () => void;
+    onExportPdf?: () => void;
+    onOpenImport?: () => void;
 };
 
 export function TeamsPageLayout({
@@ -85,9 +91,15 @@ export function TeamsPageLayout({
                                     getColumns,
                                     handleDelete,
                                     handleView,
+
+                                    canExport,
+                                    canImport,
+                                    onExportCsv,
+                                    onExportPdf,
+                                    onOpenImport,
                                 }: Props) {
-    const onAdd = canManage ? openAdd : undefined;
-    const onEdit = canManage ? openEdit : undefined;
+    const onAdd    = canManage ? openAdd    : undefined;
+    const onEdit   = canManage ? openEdit   : undefined;
     const onDelete = canManage ? handleDelete : undefined;
 
     return (
@@ -115,6 +127,11 @@ export function TeamsPageLayout({
                         onViewModeChange={setViewMode}
                         ordering={ordering}
                         onOrderingChange={onOrderingChange}
+                        canExport={canExport}
+                        canImport={canImport}
+                        onExportCsv={onExportCsv}
+                        onExportPdf={onExportPdf}
+                        onOpenImport={onOpenImport}
                     />
                 </div>
 
@@ -130,7 +147,6 @@ export function TeamsPageLayout({
                             onDelete={onDelete}
                             onAdd={onAdd}
                             onView={handleView}
-
                             canViewDetails={canViewDetails}
                         />
                     </div>

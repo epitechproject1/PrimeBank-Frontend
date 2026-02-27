@@ -26,7 +26,8 @@ export function useTeamsPage() {
         detailsLoading: data.detailsLoading,
         handleView: data.handleView,
         closeDetails: data.closeDetails,
-
+        canExport: data.canExport,
+        canImport: data.canImport,
         displayedTeams: data.displayedTeams,
         filtered: data.filtered,
         deptCount: data.deptCount,

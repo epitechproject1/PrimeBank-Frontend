@@ -1,9 +1,9 @@
 import { Card, Col } from "antd";
-import {TeamType} from "../types/teams.type.ts";
-import {TeamsGridCardHeader} from "./card/TeamsGridCardHeader.tsx";
-import {TeamsGridCardBody} from "./card/TeamsGridCardBody.tsx";
-import {TeamsGridCardFooter} from "./card/TeamsGridCardFooter.tsx";
+import type { TeamType } from "../types/teams.type";
 
+import { TeamsGridCardHeader } from "./card/TeamsGridCardHeader";
+import { TeamsGridCardBody } from "./card/TeamsGridCardBody";
+import { TeamsGridCardFooter } from "./card/TeamsGridCardFooter";
 
 type Props = {
     team: TeamType;
@@ -18,8 +18,13 @@ type Props = {
 };
 
 function getInitials(name?: string) {
-    const s = (name ?? "").trim();
-    return s ? s.slice(0, 2).toUpperCase() : "--";
+    const s = (name ?? "").trim().replace(/\s+/g, " ");
+    if (!s) return "--";
+
+    const parts = s.split(" ").filter(Boolean);
+    const a = parts[0]?.[0] ?? "";
+    const b = parts[1]?.[0] ?? parts[0]?.[1] ?? "";
+    return (a + b).toUpperCase().padEnd(2, "•");
 }
 
 function getLeaderName(team: TeamType) {
@@ -29,10 +34,12 @@ function getLeaderName(team: TeamType) {
 }
 
 export function TeamsGridCard({ team, index, pinned, onView, canViewDetails, onEdit, onDelete }: Props) {
-    const name = team.name ?? "-";
+    const name = (team.name ?? "").trim() || "-";
     const initials = getInitials(name);
     const leaderName = getLeaderName(team);
     const membersCount = team.members_count ?? 0;
+
+    const canOpen = canViewDetails(team);
 
     const baseShadow = pinned ? "0 10px 26px rgba(22,119,255,0.10)" : "0 10px 26px rgba(0,0,0,0.06)";
     const hoverShadow = pinned ? "0 18px 52px rgba(22,119,255,0.15)" : "0 18px 52px rgba(0,0,0,0.10)";
@@ -41,6 +48,7 @@ export function TeamsGridCard({ team, index, pinned, onView, canViewDetails, onE
         <Col xs={24} sm={12} lg={8}>
             <Card
                 hoverable
+                className="tm-team-card"
                 style={{
                     width: "100%",
                     borderRadius: 18,
@@ -50,6 +58,12 @@ export function TeamsGridCard({ team, index, pinned, onView, canViewDetails, onE
                     transition: "all 220ms ease",
                     background: "rgba(255,255,255,0.92)",
                     height: "100%",
+                    cursor: canOpen ? "pointer" : "default",
+                    opacity: canOpen ? 1 : 0.92,
+                }}
+                styles={{ body: { padding: 0 } }}
+                onClick={() => {
+                    if (canOpen) onView(team, index);
                 }}
                 onMouseEnter={(e) => {
                     e.currentTarget.style.transform = "translateY(-6px)";
@@ -59,30 +73,20 @@ export function TeamsGridCard({ team, index, pinned, onView, canViewDetails, onE
                     e.currentTarget.style.transform = "translateY(0)";
                     e.currentTarget.style.boxShadow = baseShadow;
                 }}
-                styles={{ body: { padding: 0 } }}
-                onClick={() => onView(team, index)}
             >
                 <TeamsGridCardHeader
                     team={team}
-                    index={index}
                     pinned={pinned}
-                    name={name}
                     initials={initials}
-                    onView={onView}
-                    canViewDetails={canViewDetails}
+                    name={name}
+                    canOpen={canOpen}
                     onEdit={onEdit}
                     onDelete={onDelete}
                 />
 
                 <TeamsGridCardBody team={team} />
 
-                <TeamsGridCardFooter
-                    team={team}
-                    index={index}
-                    leaderName={leaderName}
-                    membersCount={membersCount}
-                    onView={onView}
-                />
+                <TeamsGridCardFooter leaderName={leaderName} membersCount={membersCount} />
             </Card>
         </Col>
     );

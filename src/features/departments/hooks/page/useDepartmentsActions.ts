@@ -3,6 +3,7 @@ import { message } from "antd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { departmentService } from "../../services/departments.service";
 import type { DepartmentFilters } from "../../services/departments.service";
+import { getErrorMessage } from "../../services/httpError";
 
 export function useDepartmentsActions(params: {
     deptId?: number;
@@ -15,8 +16,9 @@ export function useDepartmentsActions(params: {
     const { deptId, detailsOpen } = params;
     const qc = useQueryClient();
 
-    const deleteMutation = useMutation<void, Error, number>({
+    const deleteMutation = useMutation<void, unknown, number>({
         mutationFn: (id: number) => departmentService.delete(id),
+
         onSuccess: async () => {
             message.success("Département supprimé");
             await Promise.all([
@@ -27,12 +29,17 @@ export function useDepartmentsActions(params: {
                 qc.removeQueries({ queryKey: ["department-teams", deptId] });
             }
         },
-        onError: () => message.error("Erreur suppression"),
+
+        onError: async (err) => {
+            const msg = await getErrorMessage(err, "Erreur lors de la suppression du département");
+            message.error(msg);
+        },
     });
 
-    const handleDelete = useCallback(async (id: number) => {
-        await deleteMutation.mutateAsync(id);
-    }, [deleteMutation]);
+    const handleDelete = useCallback(
+        (id: number) => deleteMutation.mutateAsync(id),
+        [deleteMutation]
+    );
 
     const onSaved = useCallback(async () => {
         await Promise.all([
