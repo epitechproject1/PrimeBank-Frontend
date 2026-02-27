@@ -8,60 +8,49 @@ import { RequireAuth } from "./features/auth/login/components/RequireAuth.tsx";
 import { PublicOnlyRoute } from "./features/auth/login/components/PublicOnlyRoute.tsx";
 import UsersPage from "./features/users/Page/UserPage.tsx";
 import { ProfilePage } from "./features/profile/index.ts";
-import {DepartmentsPage} from "./features/departments/pages/DepartmentsPage.tsx";
+import { DepartmentsPage } from "./features/departments/pages/DepartmentsPage.tsx";
 import { RequireAdmin } from "./features/auth/login/components/RequireAdmin.tsx";
+import {ScheduleAssignmentsManagerPage} from "./features/scheduleAssignment/pages/ScheduleAssignmentsManagerPage.tsx";
+import {WeekPatternsPage} from "./features/week-pattern/pages/Weekpatternspage.tsx";
+import {ShiftsPlannerPage} from "./features/shift/page/ShiftsPlannerPage.tsx";
 
-// 3. Composant temporaire (Placeholder pour la page d'accueil)
 const DashboardHome = () => (
     <div>
         <h1 style={{ fontSize: 24, marginBottom: 16 }}>Vue d'ensemble</h1>
-        <p>Bienvenue sur votre espace bancaire securise.</p>
+        <p>Bienvenue sur votre espace bancaire sécurisé.</p>
     </div>
 );
 
 function App() {
     return (
         <Routes>
-            {/* ========================================
-               ZONE PUBLIQUE (Accessible uniquement si NON connecte)
-               ========================================
-               Si l'utilisateur est deja connecte, il est redirige vers /dashboard
-            */}
             <Route element={<PublicOnlyRoute />}>
                 <Route path="/login" element={<LoginPage />} />
             </Route>
 
-            {/* ========================================
-               ZONE PRIVEE (Accessible uniquement si connecte)
-               ========================================
-               Si l'utilisateur n'est pas connecte, il est redirige vers /login
-            */}
             <Route element={<RequireAuth />}>
-                {/* Une fois le guard passe, on affiche le Layout (Sidebar + Header) */}
                 <Route element={<DashboardLayout />}>
-                    {/* Route par defaut du dashboard */}
                     <Route path="/dashboard" element={<DashboardHome />} />
 
                     <Route element={<RequireAdmin />}>
                         <Route path="/users" element={<UsersPage />} />
                     </Route>
 
-                    <Route path="/teams" element={<TeamsPage />} />
+                    {/* ── PLANNING — routes dédiées ── */}
+                    <Route element={<RequireAdmin />}>
+                        <Route path="/planning/shifts" element={<ShiftsPlannerPage />} />
+                        <Route path="/planning/assignments" element={<ScheduleAssignmentsManagerPage />} />
+                        <Route path="/planning/templates" element={<WeekPatternsPage />} />
+                    </Route>
+                    {/* Redirect /planning → /planning/shifts par défaut */}
+                    {/*   <Route path="/planning" element={<MyShiftsPage />} /> */}
+
+                    <Route path="/teams"       element={<TeamsPage />} />
                     <Route path="/departments" element={<DepartmentsPage />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    {/* Ajouter tes futures pages ici : */}
-                    {/* <Route path="/accounts" element={<AccountsPage />} /> */}
-                    {/* <Route path="/transfers" element={<TransfersPage />} /> */}
+                    <Route path="/profile"     element={<ProfilePage />} />
                 </Route>
             </Route>
 
-            {/* ========================================
-               REDIRECTION PAR DEFAUT (Catch-All)
-               ========================================
-               Si l'URL n'existe pas, on tente d'aller au dashboard.
-               - Si connecte : On voit le dashboard.
-               - Si pas connecte : RequireAuth nous renvoie au Login.
-            */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
     );

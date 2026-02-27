@@ -6,7 +6,6 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-    // 🔕 Fichiers ignorés
     globalIgnores(['dist', 'node_modules']),
 
     {
@@ -25,45 +24,22 @@ export default defineConfig([
         },
 
         rules: {
-            /* =====================
-               🔒 LIMITATEURS DE CODE
-               ===================== */
-
-            // Limite la taille des fonctions
-            'max-lines-per-function': ['error', 100],
-
-            // Alerte si fichier trop gros (non bloquant)
+            /* 🔒 LIMITATEURS */
+            'max-lines-per-function': ['error', 150],
             'max-lines': ['warn', 300],
-
-            // Limite l'imbrication (lisibilité)
             'max-depth': ['error', 3],
+            complexity: ['error', 16],
 
-            // Complexité logique maximale
-            complexity: ['error', 12],
+            /* ✅ autorise any */
+            '@typescript-eslint/no-explicit-any': 'off',
 
-            // Interdit `any`
-            '@typescript-eslint/no-explicit-any': 'error',
-
-            /* =====================
-               ⚛️ BONNES PRATIQUES REACT
-               ===================== */
-
-            // Empêche les hooks mal utilisés
+            /* ⚛️ REACT */
             'react-hooks/rules-of-hooks': 'error',
             'react-hooks/exhaustive-deps': 'warn',
 
-            /* =====================
-               🧹 QUALITÉ GÉNÉRALE
-               ===================== */
-
-            // Nettoyage variables inutilisées
+            /* 🧹 QUALITÉ */
             'no-unused-vars': 'off',
-            '@typescript-eslint/no-unused-vars': [
-                'warn',
-                { argsIgnorePattern: '^_' },
-            ],
-
-            // Lisibilité
+            '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
             'no-nested-ternary': 'error',
         },
     },

@@ -1,0 +1,275 @@
+/* ./features/planning/shift/components/PlannerCalendar.css */
+
+/* ─── Wrapper ─────────────────────────────────────────────────── */
+.planner-calendar-wrapper {
+    height: 100%;
+    background: var(--fc-bg);
+    border-radius: var(--fc-radius);
+    padding: 0;
+    overflow: hidden;
+    font-family: "DM Sans", "Geist", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ─── Global reset/base ───────────────────────────────────────── */
+.planner-calendar-wrapper .fc {
+    height: 100%;
+    color: var(--fc-text);
+}
+
+.planner-calendar-wrapper .fc-theme-standard td,
+.planner-calendar-wrapper .fc-theme-standard th,
+.planner-calendar-wrapper .fc-theme-standard .fc-scrollgrid {
+    border-color: var(--fc-border);
+}
+
+/* ─── Toolbar ─────────────────────────────────────────────────── */
+.planner-calendar-wrapper .fc-toolbar {
+    padding: 16px 20px 14px;
+    background: var(--fc-bg-elevated);
+    border-bottom: 1px solid var(--fc-border);
+    margin-bottom: 0 !important;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.planner-calendar-wrapper .fc-toolbar-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--fc-text);
+    letter-spacing: -0.02em;
+    text-transform: capitalize;
+}
+
+/* ─── Buttons ─────────────────────────────────────────────────── */
+.planner-calendar-wrapper .fc-button {
+    background: transparent !important;
+    border: 1px solid var(--fc-border) !important;
+    color: var(--fc-text-secondary) !important;
+    border-radius: 8px !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    padding: 5px 12px !important;
+    height: 32px !important;
+    line-height: 1 !important;
+    transition: all 0.15s ease !important;
+    box-shadow: none !important;
+    letter-spacing: 0.01em;
+}
+
+.planner-calendar-wrapper .fc-button:hover:not(:disabled) {
+    background: var(--fc-primary-light) !important;
+    border-color: var(--fc-primary-border) !important;
+    color: var(--fc-primary) !important;
+}
+
+.planner-calendar-wrapper .fc-button:focus {
+    box-shadow: 0 0 0 2px var(--fc-primary-light) !important;
+}
+
+.planner-calendar-wrapper .fc-button-active,
+.planner-calendar-wrapper .fc-button-primary:not(:disabled).fc-button-active {
+    background: var(--fc-primary) !important;
+    border-color: var(--fc-primary) !important;
+    color: #fff !important;
+    box-shadow: 0 1px 4px color-mix(in srgb, var(--fc-primary) 30%, transparent) !important;
+}
+
+/* Prev / Next arrows */
+.planner-calendar-wrapper .fc-prev-button,
+.planner-calendar-wrapper .fc-next-button {
+    width: 32px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Today button – slight highlight */
+.planner-calendar-wrapper .fc-today-button:not(:disabled) {
+    border-color: var(--fc-primary-border) !important;
+    color: var(--fc-primary) !important;
+}
+
+/* Button group borders */
+.planner-calendar-wrapper .fc-button-group .fc-button {
+    border-radius: 0 !important;
+}
+.planner-calendar-wrapper .fc-button-group .fc-button:first-child {
+    border-radius: 8px 0 0 8px !important;
+}
+.planner-calendar-wrapper .fc-button-group .fc-button:last-child {
+    border-radius: 0 8px 8px 0 !important;
+}
+
+/* ─── Scrollgrid ──────────────────────────────────────────────── */
+.planner-calendar-wrapper .fc-scrollgrid {
+    border-radius: 0;
+    border: none !important;
+}
+
+.planner-calendar-wrapper .fc-scrollgrid-section > td {
+    border: none !important;
+}
+
+/* ─── Day headers ─────────────────────────────────────────────── */
+.planner-calendar-wrapper .fc-col-header {
+    background: var(--fc-bg-elevated);
+}
+
+.planner-calendar-wrapper .fc-col-header-cell {
+    padding: 10px 0 !important;
+    border-bottom: 2px solid var(--fc-border) !important;
+}
+
+.planner-calendar-wrapper .fc-col-header-cell-cushion {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--fc-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-decoration: none !important;
+    padding: 0 8px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+/* Today column header highlight */
+.planner-calendar-wrapper .fc-day-today .fc-col-header-cell-cushion {
+    color: var(--fc-primary);
+}
+
+/* ─── Time slots ──────────────────────────────────────────────── */
+.planner-calendar-wrapper .fc-timegrid-slot {
+    height: 44px !important;
+    border-color: var(--fc-border) !important;
+}
+
+.planner-calendar-wrapper .fc-timegrid-slot-minor {
+    border-top-style: dashed !important;
+    border-color: color-mix(in srgb, var(--fc-border) 50%, transparent) !important;
+}
+
+.planner-calendar-wrapper .fc-timegrid-slot-label-cushion {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--fc-text-tertiary);
+    padding-right: 12px;
+    letter-spacing: 0.02em;
+}
+
+/* ─── Today column ────────────────────────────────────────────── */
+.planner-calendar-wrapper .fc-day-today {
+    background: var(--fc-today-bg) !important;
+}
+
+/* ─── Now indicator ───────────────────────────────────────────── */
+.planner-calendar-wrapper .fc-timegrid-now-indicator-line {
+    border-color: var(--fc-primary) !important;
+    border-width: 2px !important;
+    opacity: 0.85;
+}
+
+.planner-calendar-wrapper .fc-timegrid-now-indicator-arrow {
+    border-color: var(--fc-primary) !important;
+    border-top-color: transparent !important;
+    border-bottom-color: transparent !important;
+    border-left-color: var(--fc-primary) !important;
+}
+
+/* ─── Events ──────────────────────────────────────────────────── */
+.planner-calendar-wrapper .fc-event {
+    border-radius: 6px !important;
+    border: none !important;
+    padding: 3px 7px !important;
+    font-size: 0.78rem !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease !important;
+    letter-spacing: 0.01em;
+}
+
+.planner-calendar-wrapper .fc-event:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+    filter: brightness(1.05) !important;
+    z-index: 10 !important;
+}
+
+.planner-calendar-wrapper .fc-event-title {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.planner-calendar-wrapper .fc-event-time {
+    font-size: 0.7rem;
+    opacity: 0.85;
+    font-weight: 400;
+}
+
+/* ─── Selection highlight ─────────────────────────────────────── */
+.planner-calendar-wrapper .fc-highlight {
+    background: color-mix(in srgb, var(--fc-primary) 12%, transparent) !important;
+    border: 2px dashed var(--fc-primary) !important;
+    border-radius: 6px !important;
+}
+
+/* ─── Day grid (month view) ───────────────────────────────────── */
+.planner-calendar-wrapper .fc-daygrid-day {
+    transition: background 0.1s ease;
+}
+
+.planner-calendar-wrapper .fc-daygrid-day:hover {
+    background: color-mix(in srgb, var(--fc-primary) 4%, transparent) !important;
+}
+
+.planner-calendar-wrapper .fc-daygrid-day-number {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--fc-text-secondary);
+    text-decoration: none !important;
+    padding: 6px 8px !important;
+    transition: color 0.1s ease;
+}
+
+.planner-calendar-wrapper .fc-day-today .fc-daygrid-day-number {
+    color: var(--fc-primary);
+    font-weight: 700;
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────── */
+.planner-calendar-wrapper .fc-scroller::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+.planner-calendar-wrapper .fc-scroller::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.planner-calendar-wrapper .fc-scroller::-webkit-scrollbar-thumb {
+    background: var(--fc-border);
+    border-radius: 10px;
+}
+
+.planner-calendar-wrapper .fc-scroller::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--fc-text-tertiary) 60%, transparent);
+}
+
+/* ─── All-day row ─────────────────────────────────────────────── */
+.planner-calendar-wrapper .fc-timegrid-axis-cushion,
+.planner-calendar-wrapper .fc-daygrid-day-events {
+    font-size: 0.78rem;
+}
+
+/* ─── More link ───────────────────────────────────────────────── */
+.planner-calendar-wrapper .fc-daygrid-more-link {
+    font-size: 0.75rem;
+    color: var(--fc-primary);
+    font-weight: 600;
+}

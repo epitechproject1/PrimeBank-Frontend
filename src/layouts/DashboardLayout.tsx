@@ -32,9 +32,6 @@ export function DashboardLayout() {
 
                 {/* Content (Zone principale qui change selon la route) */}
                 <Content style={{
-                    margin: "24px 24px",
-                    padding: 24,
-                    minHeight: 280,
                     background: token.colorBgContainer,
                     borderRadius: token.borderRadiusLG,
                     // Ombre légère uniquement en mode clair pour le relief
