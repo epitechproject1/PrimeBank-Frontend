@@ -1,5 +1,6 @@
+import  { useCallback } from "react";
 import { Form, Input, Select, Modal } from "antd";
-import type { FormInstance } from "antd/es/form";
+import type { FormInstance, RuleObject } from "antd/es/form";
 import type { DefaultOptionType } from "antd/es/select";
 import type { SelectOption } from "../form/team-select-options";
 
@@ -47,40 +48,32 @@ function handleTeamFormValuesChange(
     }
 }
 
-const atLeastOneMemberRule = {
-    validator: async (_: any, value: number[] | undefined) => {
-        const arr = Array.isArray(value) ? value : [];
+function filterBySearchLabel(input: string, option?: DefaultOptionType): boolean {
+    const needle = input.trim().toLowerCase();
+
+    const opt = option as DefaultOptionType & { searchLabel?: string };
+    const hay = String(opt?.searchLabel ?? opt?.label ?? "").toLowerCase();
+
+    return hay.includes(needle);
+}
+
+const atLeastOneMemberRule: RuleObject = {
+    validator: async (_rule: RuleObject, value: unknown) => {
+        const arr = Array.isArray(value) ? (value as unknown[]) : [];
         if (arr.length < 1) {
             throw new Error("Au moins un membre requis");
         }
     },
 };
 
-export function TeamFormFields({
-                                   form,
-                                   loadingOptions,
-                                   userOptions,
-                                   deptOptions,
-                               }: TeamFormFieldsProps) {
-    const filterBySearchLabel = (input: string, option?: DefaultOptionType) => {
-        const needle = input.trim().toLowerCase();
-        const opt = option as DefaultOptionType & { searchLabel?: string };
-        const hay = String(opt?.searchLabel ?? opt?.label ?? "").toLowerCase();
-        return hay.includes(needle);
-    };
-
+function TeamFormItems({
+                           form,
+                           loadingOptions,
+                           userOptions,
+                           deptOptions,
+                       }: TeamFormFieldsProps) {
     return (
-        <Form
-            form={form}
-            layout="vertical"
-            onValuesChange={(changed, allValues) =>
-                handleTeamFormValuesChange(
-                    form,
-                    changed as Partial<TeamFormValues>,
-                    allValues as TeamFormValues
-                )
-            }
-        >
+        <>
             <Form.Item
                 name="name"
                 label="Nom de l'équipe"
@@ -118,11 +111,7 @@ export function TeamFormFields({
                 />
             </Form.Item>
 
-            <Form.Item
-                name="owner_id"
-                label="Responsable"
-                rules={[{ required: true, message: "Responsable obligatoire" }]}
-            >
+            <Form.Item name="owner_id" label="Responsable" rules={[{ required: true, message: "Responsable obligatoire" }]}>
                 <Select
                     showSearch
                     options={userOptions}
@@ -132,11 +121,7 @@ export function TeamFormFields({
                 />
             </Form.Item>
 
-            <Form.Item
-                name="department_id"
-                label="Département"
-                rules={[{ required: true, message: "Département obligatoire" }]}
-            >
+            <Form.Item name="department_id" label="Département" rules={[{ required: true, message: "Département obligatoire" }]}>
                 <Select
                     showSearch
                     loading={loadingOptions}
@@ -146,11 +131,7 @@ export function TeamFormFields({
                 />
             </Form.Item>
 
-            <Form.Item
-                name="members_ids"
-                label="Membres"
-                rules={[atLeastOneMemberRule]}
-            >
+            <Form.Item name="members_ids" label="Membres" rules={[atLeastOneMemberRule]}>
                 <Select
                     mode="multiple"
                     showSearch
@@ -160,6 +141,25 @@ export function TeamFormFields({
                     loading={loadingOptions}
                 />
             </Form.Item>
+        </>
+    );
+}
+
+export function TeamFormFields({ form, loadingOptions, userOptions, deptOptions }: TeamFormFieldsProps) {
+    const onValuesChange = useCallback(
+        (changed: unknown, allValues: unknown) => {
+            handleTeamFormValuesChange(
+                form,
+                changed as Partial<TeamFormValues>,
+                allValues as TeamFormValues
+            );
+        },
+        [form]
+    );
+
+    return (
+        <Form form={form} layout="vertical" onValuesChange={onValuesChange}>
+            <TeamFormItems form={form} loadingOptions={loadingOptions} userOptions={userOptions} deptOptions={deptOptions} />
         </Form>
     );
 }

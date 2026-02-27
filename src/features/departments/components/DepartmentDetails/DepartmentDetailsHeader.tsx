@@ -10,7 +10,6 @@ import type { DepartmentType } from "../../types/departments.type";
 
 const { Title, Paragraph } = Typography;
 
-/** ✅ mêmes idées que Teams, mais local au fichier */
 const AVATAR_COLORS = [
     "#1677ff",
     "#13c2c2",
@@ -38,14 +37,89 @@ function getInitials(text?: string) {
     return s ? s.slice(0, 2).toUpperCase() : "DP";
 }
 
+function getSafeIndex(colorIndex: number | undefined, departmentId: number | undefined) {
+    return (colorIndex ?? departmentId ?? 0) % AVATAR_COLORS.length;
+}
+
+function getDirectorLabel(dept: DepartmentType) {
+    const d = dept.director;
+    if (!d) return "—";
+
+    const fullName = `${d.first_name ?? ""} ${d.last_name ?? ""}`.trim();
+    return fullName || "—";
+}
+
+function TeamsCountTag({ teamsCount }: { teamsCount: number }) {
+    const label = teamsCount === 1 ? "Équipe" : "Équipes";
+    return (
+        <Tag icon={<TeamOutlined />} style={{ borderRadius: 8, padding: "4px 12px", fontSize: 13 }}>
+            {teamsCount} {label}
+        </Tag>
+    );
+}
+
+function StatusTag({ isActive }: { isActive: boolean }) {
+    const color = isActive ? "success" : "default";
+    const icon = isActive ? <CheckCircleOutlined /> : <StopOutlined />;
+    const label = isActive ? "Actif" : "Inactif";
+
+    return (
+        <Tag
+            color={color}
+            icon={icon}
+            style={{
+                borderRadius: 8,
+                padding: "4px 12px",
+                fontSize: 13,
+                fontWeight: 500,
+            }}
+        >
+            {label}
+        </Tag>
+    );
+}
+
+function DirectorTag({ tagColor, directorLabel }: { tagColor: (typeof TAG_COLORS)[number]; directorLabel: string }) {
+    return (
+        <Tag
+            color={tagColor}
+            icon={<UserOutlined />}
+            style={{
+                borderRadius: 8,
+                padding: "4px 12px",
+                fontSize: 13,
+                fontWeight: 500,
+            }}
+        >
+            {directorLabel}
+        </Tag>
+    );
+}
+
+function DescriptionBlock({ description }: { description?: string | null }) {
+    if (!description) return null;
+
+    return (
+        <Paragraph type="secondary" style={{ marginTop: 12, marginBottom: 0, fontSize: 14, lineHeight: 1.6 }}>
+            {description}
+        </Paragraph>
+    );
+}
+
+function EditButton({ canEdit, onEditClick }: { canEdit: boolean; onEditClick?: () => void }) {
+    if (!canEdit || !onEditClick) return null;
+
+    return (
+        <Button type="primary" icon={<EditOutlined />} onClick={onEditClick} style={{ borderRadius: 8 }}>
+            Modifier
+        </Button>
+    );
+}
+
 type Props = {
     department: DepartmentType;
     teamsCount: number;
-
-    /** ✅ option 1 : tu passes colorIndex depuis le parent */
     colorIndex?: number;
-
-    /** ✅ option 2 : ou tu laisses auto basé sur id (si colorIndex non fourni) */
     onEditClick?: () => void;
     canEdit?: boolean;
 };
@@ -57,17 +131,14 @@ export function DepartmentDetailsHeader({
                                             onEditClick,
                                             canEdit = false,
                                         }: Props) {
-    const safeIndex = (colorIndex ?? department.id ?? 0) % AVATAR_COLORS.length;
+    const safeIndex = getSafeIndex(colorIndex, department.id);
 
     const avatarColor = AVATAR_COLORS[safeIndex];
     const tagColor = TAG_COLORS[safeIndex % TAG_COLORS.length];
 
-    const name = department.name ?? "Département";
+    const name = department.name || "Département";
     const isActive = Boolean(department.is_active);
-
-    const directorLabel = department.director
-        ? `${department.director.first_name ?? ""} ${department.director.last_name ?? ""}`.trim() || "—"
-        : "—";
+    const directorLabel = getDirectorLabel(department);
 
     return (
         <div
@@ -98,52 +169,15 @@ export function DepartmentDetailsHeader({
                     </Title>
 
                     <Flex gap={8} wrap="wrap" align="center">
-                        <Tag
-                            color={isActive ? "success" : "default"}
-                            icon={isActive ? <CheckCircleOutlined /> : <StopOutlined />}
-                            style={{
-                                borderRadius: 8,
-                                padding: "4px 12px",
-                                fontSize: 13,
-                                fontWeight: 500,
-                            }}
-                        >
-                            {isActive ? "Actif" : "Inactif"}
-                        </Tag>
-
-                        <Tag
-                            color={tagColor}
-                            icon={<UserOutlined />}
-                            style={{
-                                borderRadius: 8,
-                                padding: "4px 12px",
-                                fontSize: 13,
-                                fontWeight: 500,
-                            }}
-                        >
-                            {directorLabel}
-                        </Tag>
-
-                        <Tag icon={<TeamOutlined />} style={{ borderRadius: 8, padding: "4px 12px", fontSize: 13 }}>
-                            {teamsCount} {teamsCount === 1 ? "Équipe" : "Équipes"}
-                        </Tag>
+                        <StatusTag isActive={isActive} />
+                        <DirectorTag tagColor={tagColor} directorLabel={directorLabel} />
+                        <TeamsCountTag teamsCount={teamsCount} />
                     </Flex>
 
-                    {department.description && (
-                        <Paragraph
-                            type="secondary"
-                            style={{ marginTop: 12, marginBottom: 0, fontSize: 14, lineHeight: 1.6 }}
-                        >
-                            {department.description}
-                        </Paragraph>
-                    )}
+                    <DescriptionBlock description={department.description} />
                 </Flex>
 
-                {canEdit && onEditClick && (
-                    <Button type="primary" icon={<EditOutlined />} onClick={onEditClick} style={{ borderRadius: 8 }}>
-                        Modifier
-                    </Button>
-                )}
+                <EditButton canEdit={canEdit} onEditClick={onEditClick} />
             </Flex>
         </div>
     );

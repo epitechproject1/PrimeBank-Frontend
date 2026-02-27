@@ -1,66 +1,140 @@
-// httpError.ts
-export async function getErrorMessage(err: any, fallback: string) {
-    const data = err?.response?.data;
+type UnknownRecord = Record<string, unknown>;
 
-    // ✅ si l'erreur n'est pas Axios (ou error transformée)
+function isRecord(v: unknown): v is UnknownRecord {
+    return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+
+function firstString(v: unknown): string | null {
+    if (typeof v === "string" && v.trim()) {
+        return v;
+    }
+
+    if (Array.isArray(v) && v.length > 0) {
+        const x = v[0];
+
+        if (typeof x === "string" && x.trim()) {
+            return x;
+        }
+
+        if (x != null) {
+            return String(x);
+        }
+
+        return null;
+    }
+
+    if (v != null) {
+        return String(v);
+    }
+
+    return null;
+}
+
+function pickCommonFields(obj: UnknownRecord): string | null {
+    const fields = [
+        obj.error,
+        obj.message,
+        obj.detail,
+        obj.non_field_errors,
+        obj.name,
+    ];
+
+    for (const field of fields) {
+        const msg = firstString(field);
+        if (msg) return msg;
+    }
+
+    return null;
+}
+
+function pickFirstKeyValue(obj: UnknownRecord): string | null {
+    const keys = Object.keys(obj);
+    if (keys.length === 0) return null;
+
+    const value = obj[keys[0]];
+    return firstString(value);
+}
+
+function extractFromObject(data: UnknownRecord): string | null {
+    return pickCommonFields(data) || pickFirstKeyValue(data);
+}
+
+async function tryParseBlobAsText(blob: Blob): Promise<string | null> {
+    try {
+        const text = await blob.text();
+        return text || null;
+    } catch {
+        return null;
+    }
+}
+
+function tryParseJson(text: string): unknown {
+    try {
+        return JSON.parse(text);
+    } catch {
+        return null;
+    }
+}
+
+async function extractFromBlob(blob: Blob): Promise<string | null> {
+    const text = await tryParseBlobAsText(blob);
+    if (!text) return null;
+
+    const parsed = tryParseJson(text);
+
+    if (isRecord(parsed)) {
+        const extracted = extractFromObject(parsed);
+        return extracted || text;
+    }
+
+    return text;
+}
+
+function extractResponseData(err: unknown): unknown {
+    if (!isRecord(err)) return null;
+
+    const response = err.response;
+    if (!isRecord(response)) return null;
+
+    return response.data ?? null;
+}
+
+function extractMessageFromUnknown(err: unknown): string | null {
+    if (!isRecord(err)) return null;
+
+    const msg = err.message;
+    if (typeof msg === "string" && msg.trim()) {
+        return msg;
+    }
+
+    return null;
+}
+
+export async function getErrorMessage(
+    err: unknown,
+    fallback: string
+): Promise<string> {
+    const data = extractResponseData(err);
+
     if (!data) {
-        return err?.message || fallback;
+        return extractMessageFromUnknown(err) || fallback;
     }
 
-    // ✅ DRF peut renvoyer ["msg"]
-    if (Array.isArray(data) && data[0]) return String(data[0]);
-
-    // ✅ JSON standard
-    if (data && typeof data === "object" && !(data instanceof Blob)) {
-        // ✅ AJOUT IMPORTANT (tes APIs peuvent renvoyer ça)
-        if (data.error) return String(data.error);
-        if (data.message) return String(data.message);
-
-        if (data.name) return Array.isArray(data.name) ? String(data.name[0]) : String(data.name);
-        if (data.detail) return String(data.detail);
-        if (data.non_field_errors) {
-            return Array.isArray(data.non_field_errors)
-                ? String(data.non_field_errors[0])
-                : String(data.non_field_errors);
-        }
-
-        const firstKey = Object.keys(data)[0];
-        const v = (data as any)[firstKey];
-        if (Array.isArray(v) && v[0]) return String(v[0]);
-        if (typeof v === "string") return v;
-
-        return fallback;
+    if (Array.isArray(data)) {
+        return firstString(data) || fallback;
     }
 
-    // ✅ string
-    if (typeof data === "string") return data;
+    if (typeof data === "string") {
+        return data || fallback;
+    }
 
-    // ✅ Blob (exports, ou certains backends renvoient du blob en erreur)
     if (data instanceof Blob) {
-        try {
-            const text = await data.text();
-            try {
-                const json = JSON.parse(text);
+        const blobMsg = await extractFromBlob(data);
+        return blobMsg || fallback;
+    }
 
-                // ✅ AJOUT IMPORTANT
-                if (json?.error) return String(json.error);
-                if (json?.message) return String(json.message);
-
-                if (json?.name) return Array.isArray(json.name) ? String(json.name[0]) : String(json.name);
-                if (json?.detail) return String(json.detail);
-                if (json?.non_field_errors) {
-                    return Array.isArray(json.non_field_errors)
-                        ? String(json.non_field_errors[0])
-                        : String(json.non_field_errors);
-                }
-
-                return text || fallback;
-            } catch {
-                return text || fallback;
-            }
-        } catch {
-            return fallback;
-        }
+    if (isRecord(data)) {
+        return extractFromObject(data) || fallback;
     }
 
     return fallback;

@@ -1,190 +1,97 @@
-import { useState, useCallback } from "react";
-import { Grid, Modal, Upload, Spin, message } from "antd";
+import  { useCallback } from "react";
+import { Grid, message } from "antd";
 
 import TeamFormModal from "../components/TeamForm/TeamFormModal";
 import { TeamDetailsModal } from "../components/TeamDetails/TeamDetailsModal";
-import { useTeamsPage } from "../hooks/page/useTeamsPage";
 import { TeamsPageLayout } from "./TeamsPageLayout";
-import { teamService } from "../services/teams.service.ts";
+import { useTeamsPage } from "../hooks/page/useTeamsPage";
+import { teamService } from "../services/teams.service";
+import { getErrorMessage } from "../../departments/services/httpError";
+import { TeamsImportModal } from "../components/TeamsImportModal";
+import {useTeamsImportCsv} from "./useTeamsImportCsv.ts";
 
 const { useBreakpoint } = Grid;
 
 export function TeamsPage() {
     const screens = useBreakpoint();
+    const page = useTeamsPage();
 
-    const {
-        token,
-        colors,
-        viewMode,
-        setViewMode,
-        onOrderingChange,
-        ordering,
-        canManage,
-
-        canExport,
-        canImport,
-
-        modalOpen,
-        editTeam,
-        openAdd,
-        openEdit,
-        closeModal,
-        onSaved,
-        canViewDetails,
-        detailsOpen,
-        detailsTeam,
-        detailsLoading,
-        closeDetails,
-        displayedTeams,
-        filtered,
-        deptCount,
-        thisMonth,
-        loading,
-        spinning,
-        searchState,
-        refresh,
-        getColumns,
-        handleDelete,
-        contextHolder,
-        handleView,
-    } = useTeamsPage();
-
-    const [importModalOpen, setImportModalOpen] = useState(false);
-    const [importLoading, setImportLoading] = useState(false);
+    const importCsv = useTeamsImportCsv(page.refresh);
 
     const handleExportCsv = useCallback(async () => {
         try {
-            await teamService.exportCsv({ ordering });
+            await teamService.exportCsv({ ordering: page.ordering });
             message.success("Export CSV téléchargé avec succès.");
-        } catch {
-            message.error("Erreur lors de l'export CSV.");
+        } catch (err: unknown) {
+            const msg = await getErrorMessage(err, "Erreur lors de l'export CSV.");
+            message.error(msg);
         }
-    }, [ordering]);
+    }, [page.ordering]);
 
     const handleExportPdf = useCallback(async () => {
         try {
-            await teamService.exportPdf({ ordering });
+            await teamService.exportPdf({ ordering: page.ordering });
             message.success("Export PDF téléchargé avec succès.");
-        } catch {
-            message.error("Erreur lors de l'export PDF.");
+        } catch (err: unknown) {
+            const msg = await getErrorMessage(err, "Erreur lors de l'export PDF.");
+            message.error(msg);
         }
-    }, [ordering]);
-
-    const handleImportCsv = useCallback(
-        async (file: File) => {
-            setImportLoading(true);
-            try {
-                const result = await teamService.importCsv(file);
-
-                if (result.errors.length > 0) {
-                    message.warning(
-                        `Import terminé : ${result.created} créés, ${result.updated} mis à jour, ${result.errors.length} erreur(s).`
-                    );
-                } else {
-                    message.success(
-                        `Import réussi : ${result.created} créés, ${result.updated} mis à jour.`
-                    );
-                }
-
-                setImportModalOpen(false);
-                refresh();
-            } catch (err: any) {
-                message.error(err?.message ?? "Erreur lors de l'import CSV.");
-            } finally {
-                setImportLoading(false);
-            }
-        },
-        [refresh]
-    );
+    }, [page.ordering]);
 
     return (
         <>
-            {contextHolder}
+            {page.contextHolder}
 
             <TeamsPageLayout
                 screens={screens}
-                token={token}
-                colors={colors}
-                viewMode={viewMode}
-                setViewMode={setViewMode}
-                ordering={ordering}
-                onOrderingChange={onOrderingChange}
-                openAdd={openAdd}
-                openEdit={openEdit}
-                displayedTeamsCount={displayedTeams.length}
-                deptCount={deptCount}
-                thisMonth={thisMonth}
-                loading={loading}
-                spinning={spinning}
-                search={searchState.search}
-                searching={searchState.searching}
-                onSearchChange={searchState.handleSearchChange}
-                onSearchClear={searchState.handleSearchClear}
-                refresh={refresh}
-                filtered={filtered}
-                getColumns={getColumns}
-                handleDelete={handleDelete}
-                handleView={handleView}
-                canManage={canManage}
-                canViewDetails={canViewDetails}
-                canExport={canExport}
-                canImport={canImport}
+                token={page.token}
+                colors={page.colors}
+                viewMode={page.viewMode}
+                setViewMode={page.setViewMode}
+                ordering={page.ordering}
+                onOrderingChange={page.onOrderingChange}
+                openAdd={page.openAdd}
+                openEdit={page.openEdit}
+                displayedTeamsCount={page.displayedTeams.length}
+                deptCount={page.deptCount}
+                thisMonth={page.thisMonth}
+                loading={page.loading}
+                spinning={page.spinning}
+                search={page.searchState.search}
+                searching={page.searchState.searching}
+                onSearchChange={page.searchState.handleSearchChange}
+                onSearchClear={page.searchState.handleSearchClear}
+                refresh={page.refresh}
+                filtered={page.filtered}
+                getColumns={page.getColumns}
+                handleDelete={page.handleDelete}
+                handleView={page.handleView}
+                canManage={page.canManage}
+                canViewDetails={page.canViewDetails}
+                canExport={page.canExport}
+                canImport={page.canImport}
                 onExportCsv={handleExportCsv}
                 onExportPdf={handleExportPdf}
-                onOpenImport={() => setImportModalOpen(true)}
+                onOpenImport={importCsv.openModal}
             />
 
-            <Modal
-                title="Importer des équipes (CSV)"
-                open={importModalOpen}
-                onCancel={() => !importLoading && setImportModalOpen(false)}
-                footer={null}
-                destroyOnClose
-                maskClosable={!importLoading}
-            >
-                <Upload.Dragger
-                    accept=".csv"
-                    showUploadList={false}
-                    disabled={importLoading}
-                    beforeUpload={(file) => {
-                        handleImportCsv(file);
-                        return false;
-                    }}
-                    style={{ padding: "20px 0" }}
-                >
-                    <p className="ant-upload-drag-icon" style={{ fontSize: 40 }}>
-                        📂
-                    </p>
-                    <p className="ant-upload-text">
-                        Glissez votre fichier CSV ici ou cliquez pour sélectionner
-                    </p>
-                    <p className="ant-upload-hint">
-                        Formats acceptés : .csv — encodage UTF-8 recommandé
-                    </p>
-                </Upload.Dragger>
-
-                {importLoading && (
-                    <div style={{ textAlign: "center", marginTop: 20 }}>
-                        <Spin tip="Import en cours…" />
-                    </div>
-                )}
-            </Modal>
-
-            <TeamFormModal
-                open={modalOpen}
-                editTeam={editTeam}
-                onClose={closeModal}
-                onSaved={onSaved}
+            <TeamsImportModal
+                open={importCsv.open}
+                loading={importCsv.loading}
+                onClose={importCsv.closeModal}
+                onImport={importCsv.importCsv}
             />
+
+            <TeamFormModal open={page.modalOpen} editTeam={page.editTeam} onClose={page.closeModal} onSaved={page.onSaved} />
 
             <TeamDetailsModal
-                open={detailsOpen}
-                team={detailsTeam}
-                onClose={closeDetails}
-                onEdit={openEdit}
-                canEdit={canManage}
+                open={page.detailsOpen}
+                team={page.detailsTeam}
+                onClose={page.closeDetails}
+                onEdit={page.openEdit}
+                canEdit={page.canManage}
                 colorIndex={0}
-                loading={detailsLoading}
+                loading={page.detailsLoading}
             />
         </>
     );

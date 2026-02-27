@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Flex, Card, Avatar, Statistic, Skeleton, Alert } from "antd";
 import {
     ApartmentOutlined,
@@ -6,8 +7,7 @@ import {
     TeamOutlined,
     CalendarOutlined,
 } from "@ant-design/icons";
-import {apiClient} from "../../../../lib/api_client/apiClient.ts";
-
+import { apiClient } from "../../../../lib/api_client/apiClient.ts";
 
 type UserRole = "ADMIN" | "MANAGER" | "EMPLOYEE";
 
@@ -30,9 +30,7 @@ interface StatItem {
 }
 
 interface DepartmentsStatsProps {
-    /** Rôle de l'utilisateur connecté — contrôle la visibilité des KPI */
     role: UserRole;
-    /** Palette de couleurs personnalisable */
     colors?: {
         primary: string;
         success: string;
@@ -44,62 +42,82 @@ interface DepartmentsStatsProps {
     onError?: (error: string) => void;
 }
 
+const DEFAULT_COLORS = {
+    primary: "#1677ff",
+    success: "#52c41a",
+    warning: "#722ed1",
+    info: "#0958d9",
+    purple: "#531dab",
+    orange: "#d46b08",
+};
 
-function useDepartmentStats(role: UserRole): {
-    data: StatsApiResponse | null;
-    loading: boolean;
-    error: string | null;
-    refetch: () => void;
-} {
-    const [data, setData] = useState<StatsApiResponse | null>(null);
-    const [loading, setLoading] = useState(role !== "EMPLOYEE");
-    const [error, setError] = useState<string | null>(null);
-    const [trigger, setTrigger] = useState(0);
-
-    useEffect(() => {
-        if (role === "EMPLOYEE") {
-            setLoading(false);
-            return;
-        }
-
-        let cancelled = false;
-        setLoading(true);
-        setError(null);
-
-        apiClient
-            .get<StatsApiResponse>("/departments/stats/")
-            .then((res) => {
-                if (!cancelled) setData(res.data);
-            })
-            .catch((err: Error) => {
-                if (!cancelled) setError(err.message);
-            })
-            .finally(() => {
-                if (!cancelled) setLoading(false);
-            });
-
-        return () => {
-            cancelled = true;
-        };
-    }, [role, trigger]);
-
-    return {
-        data,
-        loading,
-        error,
-        refetch: () => setTrigger((t) => t + 1),
-    };
+function safeNum(v?: number) {
+    return v ?? 0;
 }
 
-// ─── Composant KPI Card ───────────────────────────────────────────────────────
-
-interface KpiCardProps {
-    stat: StatItem;
-    loading: boolean;
-    index: number;
+async function fetchDepartmentStats(): Promise<StatsApiResponse> {
+    const res = await apiClient.get<StatsApiResponse>("/departments/stats/");
+    return res.data;
 }
 
-function KpiCard({ stat, loading, index }: KpiCardProps) {
+function buildStats(role: UserRole, colors: DepartmentsStatsProps["colors"], d: StatsApiResponse | null): StatItem[] {
+    const c = colors ?? DEFAULT_COLORS;
+
+    if (role === "EMPLOYEE") return [];
+
+    if (role === "MANAGER") {
+        return [
+            {
+                title: "Mes départements",
+                value: safeNum(d?.total_departments),
+                icon: <ApartmentOutlined />,
+                color: c.primary,
+            },
+            {
+                title: "Actifs",
+                value: safeNum(d?.active_count),
+                icon: <CheckCircleOutlined />,
+                color: c.success,
+            },
+            {
+                title: "Total employés",
+                value: safeNum(d?.total_employees),
+                icon: <TeamOutlined />,
+                color: c.info,
+            },
+        ];
+    }
+
+    return [
+        {
+            title: "Total départements",
+            value: safeNum(d?.total_departments),
+            icon: <ApartmentOutlined />,
+            color: c.primary,
+        },
+        {
+            title: "Actifs",
+            value: safeNum(d?.active_count),
+            icon: <CheckCircleOutlined />,
+            color: c.success,
+        },
+        {
+            title: "Total employés",
+            value: safeNum(d?.total_employees),
+            icon: <TeamOutlined />,
+            color: c.info,
+        },
+        {
+            title: "Créés ce mois",
+            value: safeNum(d?.this_month_count),
+            icon: <CalendarOutlined />,
+            color: c.orange,
+        },
+    ];
+}
+
+
+function KpiCard({ stat, loading, index }: { stat: StatItem; loading: boolean; index: number }) {
     return (
         <Card
             style={{
@@ -134,6 +152,7 @@ function KpiCard({ stat, loading, index }: KpiCardProps) {
                         fontSize: 20,
                     }}
                 />
+
                 {loading ? (
                     <Flex vertical gap={6} style={{ flex: 1 }}>
                         <Skeleton.Input active size="small" style={{ width: 120 }} />
@@ -151,8 +170,8 @@ function KpiCard({ stat, loading, index }: KpiCardProps) {
                                     textTransform: "uppercase",
                                 }}
                             >
-                                {stat.title}
-                            </span>
+                {stat.title}
+              </span>
                         }
                         value={stat.value}
                         suffix={stat.suffix}
@@ -169,104 +188,40 @@ function KpiCard({ stat, loading, index }: KpiCardProps) {
     );
 }
 
-// ─── Composant principal ──────────────────────────────────────────────────────
 
-export function DepartmentsStats({
-                                     role,
-                                     colors = {
-                                         primary: "#1677ff",
-                                         success: "#52c41a",
-                                         warning: "#722ed1",
-                                         info: "#0958d9",
-                                         purple: "#531dab",
-                                         orange: "#d46b08",
-                                     },
-                                     onError,
-                                 }: DepartmentsStatsProps) {
-    const { data, loading, error } = useDepartmentStats(role);
+export function DepartmentsStats({ role, colors = DEFAULT_COLORS, onError }: DepartmentsStatsProps) {
+    const enabled = role !== "EMPLOYEE";
+
+    const { data, isLoading, error } = useQuery({
+        queryKey: ["departments", "stats"],
+        queryFn: fetchDepartmentStats,
+        enabled,
+        staleTime: 30_000,
+        retry: 1,
+    });
+
+    const errorMessage = error ? (error as Error).message : null;
 
     useEffect(() => {
-        if (error && onError) onError(error);
-    }, [error, onError]);
+        if (errorMessage) onError?.(errorMessage);
+    }, [errorMessage, onError]);
 
-    // ── KPI selon le rôle ───────────────────────────────────────────────────
+    const stats = useMemo(() => buildStats(role, colors, data ?? null), [role, colors, data]);
 
-    const buildStats = (d: StatsApiResponse | null): StatItem[] => {
-        const safe = (v?: number) => v ?? 0;
-
-        if (role === "EMPLOYEE") return [];
-
-        if (role === "MANAGER") {
-            return [
-                {
-                    title: "Mes départements",
-                    value: safe(d?.total_departments),
-                    icon: <ApartmentOutlined />,
-                    color: colors.primary,
-                },
-                {
-                    title: "Actifs",
-                    value: safe(d?.active_count),
-                    icon: <CheckCircleOutlined />,
-                    color: colors.success,
-                },
-                {
-                    title: "Total employés",
-                    value: safe(d?.total_employees),
-                    icon: <TeamOutlined />,
-                    color: colors.info,
-                },
-            ];
-        }
-
-        // ✅ ADMIN — vision globale, 4 KPI essentiels
-        return [
-            {
-                title: "Total départements",
-                value: safe(d?.total_departments),
-                icon: <ApartmentOutlined />,
-                color: colors.primary,
-            },
-            {
-                title: "Actifs",
-                value: safe(d?.active_count),
-                icon: <CheckCircleOutlined />,
-                color: colors.success,
-            },
-            {
-                title: "Total employés",
-                value: safe(d?.total_employees),
-                icon: <TeamOutlined />,
-                color: colors.info,
-            },
-            {
-                title: "Créés ce mois",
-                value: safe(d?.this_month_count),
-                icon: <CalendarOutlined />,
-                color: colors.orange,
-            },
-        ];
-    };
-
-    const stats = buildStats(data);
-
-    // ✅ EMPLOYEE — ne rien afficher du tout
     if (role === "EMPLOYEE") return null;
 
-    // ── Rendu erreur ────────────────────────────────────────────────────────
-    if (error && !loading) {
+    if (errorMessage && !isLoading) {
         return (
             <Alert
                 type="warning"
                 message="Impossible de charger les statistiques"
-                description={error}
+                description={errorMessage}
                 showIcon
                 style={{ marginBottom: 24, borderRadius: 8 }}
             />
         );
     }
 
-    // ── Rendu principal ─────────────────────────────────────────────────────
     return (
         <Flex
             gap={16}
@@ -276,7 +231,7 @@ export function DepartmentsStats({
             aria-label="Statistiques des départements"
         >
             {stats.map((stat, i) => (
-                <KpiCard key={stat.title} stat={stat} loading={loading} index={i} />
+                <KpiCard key={stat.title} stat={stat} loading={isLoading} index={i} />
             ))}
         </Flex>
     );

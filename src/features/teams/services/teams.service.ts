@@ -37,11 +37,8 @@ function normalizeList<T>(raw: unknown): ApiListResponse<T> {
     const r = raw as RawListResponse<T>;
     let items: T[] = [];
 
-    if (Array.isArray(r.data)) {
-        items = r.data;
-    } else if (Array.isArray(r.results)) {
-        items = r.results;
-    }
+    if (Array.isArray(r.data)) items = r.data;
+    else if (Array.isArray(r.results)) items = r.results;
 
     let total = items.length;
     if (typeof r.total === "number") total = r.total;
@@ -62,11 +59,39 @@ function downloadBlob(blob: Blob, filename: string): void {
     URL.revokeObjectURL(url);
 }
 
+function resolveFilename(headers: unknown, fallback: string): string {
+    const h = headers as Record<string, unknown> | null;
+    const disposition = typeof h?.["content-disposition"] === "string" ? h["content-disposition"] : "";
+    const match = disposition.match(/filename\*?=["']?(?:UTF-8'')?([^;"'\n]+)/i);
+    return match?.[1]?.trim() || fallback;
+}
+
 export type ImportCsvResult = {
     created: number;
     updated: number;
     errors: { row?: number; message: string }[];
 };
+
+function validateCsvFile(file: File): void {
+    const allowed = ["text/csv", "application/vnd.ms-excel", "text/plain"];
+    const ok = allowed.includes(file.type) || file.name.toLowerCase().endsWith(".csv");
+    if (!ok) {
+        throw new Error("Le fichier doit être un CSV valide (.csv).");
+    }
+}
+
+function tryExtractImportErrors(err: unknown): ImportCsvResult["errors"] | null {
+    if (typeof err !== "object" || err === null) return null;
+
+    const response = (err as { response?: unknown }).response;
+    if (typeof response !== "object" || response === null) return null;
+
+    const data = (response as { data?: unknown }).data;
+    if (typeof data !== "object" || data === null) return null;
+
+    const errors = (data as { errors?: unknown }).errors;
+    return Array.isArray(errors) ? (errors as ImportCsvResult["errors"]) : null;
+}
 
 export const teamService = {
     getAll: async (filters?: TeamFilters): Promise<ApiListResponse<TeamType>> => {
@@ -104,9 +129,7 @@ export const teamService = {
         return data;
     },
 
-    getMyTeams: async (
-        ordering?: TeamFilters["ordering"]
-    ): Promise<ApiListResponse<TeamType>> => {
+    getMyTeams: async (ordering?: TeamFilters["ordering"]): Promise<ApiListResponse<TeamType>> => {
         const { data } = await apiClient.get("/teams/my-teams/", {
             params: ordering ? { ordering } : undefined,
         });
@@ -127,70 +150,47 @@ export const teamService = {
 
     // ─── Export ───────────────────────────────────────────────────────────────
 
-    exportCsv: async (
-        filters?: TeamsFilters,
-        filename = "teams.csv"
-    ): Promise<Blob> => {
+    exportCsv: async (filters?: TeamsFilters, filename = "teams.csv"): Promise<Blob> => {
         const { data, headers } = await apiClient.get("/teams/export/csv/", {
             params: filters,
             responseType: "blob",
         });
 
-        const disposition: string = headers?.["content-disposition"] ?? "";
-        const match = disposition.match(/filename\*?=["']?(?:UTF-8'')?([^;"'\n]+)/i);
-        const resolvedFilename = match?.[1]?.trim() ?? filename;
-
-        downloadBlob(data, resolvedFilename);
+        downloadBlob(data, resolveFilename(headers, filename));
         return data;
     },
 
-    /**
-     * Télécharge l'export PDF des équipes.
-     */
-    exportPdf: async (
-        filters?: TeamsFilters,
-        filename = "teams.pdf"
-    ): Promise<Blob> => {
+    exportPdf: async (filters?: TeamsFilters, filename = "teams.pdf"): Promise<Blob> => {
         const { data, headers } = await apiClient.get("/teams/export/pdf/", {
             params: filters,
             responseType: "blob",
         });
 
-        const disposition: string = headers?.["content-disposition"] ?? "";
-        const match = disposition.match(/filename\*?=["']?(?:UTF-8'')?([^;"'\n]+)/i);
-        const resolvedFilename = match?.[1]?.trim() ?? filename;
-
-        downloadBlob(data, resolvedFilename);
+        downloadBlob(data, resolveFilename(headers, filename));
         return data;
     },
 
     // ─── Import ───────────────────────────────────────────────────────────────
+
     importCsv: async (file: File): Promise<ImportCsvResult> => {
-        const allowed = ["text/csv", "application/vnd.ms-excel", "text/plain"];
-        if (!allowed.includes(file.type) && !file.name.endsWith(".csv")) {
-            throw new Error("Le fichier doit être un CSV valide (.csv).");
-        }
+        validateCsvFile(file);
 
         const formData = new FormData();
         formData.append("file", file);
 
         try {
-            const { data } = await apiClient.post<ImportCsvResult>(
-                "/teams/import/csv/",
-                formData,
-                {
-                    headers: { "Content-Type": "multipart/form-data" },
-                }
-            );
+            const { data } = await apiClient.post<ImportCsvResult>("/teams/import/csv/", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
 
             return {
                 created: data?.created ?? 0,
                 updated: data?.updated ?? 0,
                 errors: Array.isArray(data?.errors) ? data.errors : [],
             };
-        } catch (err: any) {
-            const apiErrors = err?.response?.data?.errors;
-            if (Array.isArray(apiErrors)) {
+        } catch (err: unknown) {
+            const apiErrors = tryExtractImportErrors(err);
+            if (apiErrors) {
                 return { created: 0, updated: 0, errors: apiErrors };
             }
             throw err;

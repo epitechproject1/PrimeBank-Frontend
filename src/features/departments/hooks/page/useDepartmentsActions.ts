@@ -36,12 +36,10 @@ export function useDepartmentsActions(params: {
         },
     });
 
-    const handleDelete = useCallback(async (id: number) => {
-        try {
-            await deleteMutation.mutateAsync(id);
-        } catch {
-        }
-    }, [deleteMutation]);
+    const handleDelete = useCallback(
+        (id: number) => deleteMutation.mutateAsync(id),
+        [deleteMutation]
+    );
 
     const onSaved = useCallback(async () => {
         await Promise.all([

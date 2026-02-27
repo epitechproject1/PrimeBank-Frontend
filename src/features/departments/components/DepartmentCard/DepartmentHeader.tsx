@@ -1,5 +1,10 @@
 import { Flex, Typography, Button, Tooltip, Popconfirm } from "antd";
-import { EditOutlined, DeleteOutlined, CheckCircleFilled, MinusCircleFilled } from "@ant-design/icons";
+import {
+    EditOutlined,
+    DeleteOutlined,
+    CheckCircleFilled,
+    MinusCircleFilled,
+} from "@ant-design/icons";
 
 const { Text, Title } = Typography;
 
@@ -12,6 +17,105 @@ type Props = {
     onEdit: () => void;
     onDelete: () => void;
 };
+function DepartmentAvatar({ initials }: { initials: string }) {
+    return (
+        <div
+            style={{
+                width: 56,
+                height: 56,
+                borderRadius: "50%",
+                display: "grid",
+                placeItems: "center",
+                background: "#1677ff",
+                color: "white",
+                fontWeight: 800,
+                fontSize: 18,
+                boxShadow: "0 10px 24px rgba(22,119,255,0.28)",
+                flexShrink: 0,
+            }}
+        >
+            {initials}
+        </div>
+    );
+}
+function DepartmentStatus({ isActive }: { isActive: boolean }) {
+    const icon = isActive ? (
+        <CheckCircleFilled style={{ color: "#52c41a" }} />
+    ) : (
+        <MinusCircleFilled style={{ color: "rgba(0,0,0,0.35)" }} />
+    );
+
+    const label = isActive ? "Actif" : "Inactif";
+
+    return (
+        <span
+            style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "6px 10px",
+                borderRadius: 999,
+                background: "rgba(0,0,0,0.04)",
+                fontSize: 12,
+                fontWeight: 500,
+            }}
+        >
+      {icon}
+            {label}
+    </span>
+    );
+}
+
+function DepartmentActions({
+                               canEdit,
+                               canDelete,
+                               onEdit,
+                               onDelete,
+                           }: {
+    canEdit: boolean;
+    canDelete: boolean;
+    onEdit: () => void;
+    onDelete: () => void;
+}) {
+    return (
+        <Flex gap={6} onClick={(e) => e.stopPropagation()}>
+            {canEdit && (
+                <Tooltip title="Modifier">
+                    <Button
+                        type="text"
+                        size="small"
+                        icon={<EditOutlined />}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit();
+                        }}
+                    />
+                </Tooltip>
+            )}
+
+            {canDelete && (
+                <Popconfirm
+                    title="Supprimer ce département ?"
+                    description="Cette action est irréversible."
+                    okText="Supprimer"
+                    cancelText="Annuler"
+                    okButtonProps={{ danger: true }}
+                    onConfirm={onDelete}
+                >
+                    <Tooltip title="Supprimer">
+                        <Button
+                            type="text"
+                            size="small"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                    </Tooltip>
+                </Popconfirm>
+            )}
+        </Flex>
+    );
+}
 
 export function DepartmentHeader({
                                      name,
@@ -26,31 +130,20 @@ export function DepartmentHeader({
         <div
             style={{
                 padding: 16,
-                background: "linear-gradient(135deg, rgba(22,119,255,0.12), rgba(22,119,255,0.03))",
+                background:
+                    "linear-gradient(135deg, rgba(22,119,255,0.12), rgba(22,119,255,0.03))",
             }}
         >
             <Flex align="start" justify="space-between" gap={12}>
                 <Flex align="center" gap={12} style={{ minWidth: 0 }}>
-                    <div
-                        style={{
-                            width: 56,
-                            height: 56,
-                            borderRadius: "50%",
-                            display: "grid",
-                            placeItems: "center",
-                            background: "#1677ff",
-                            color: "white",
-                            fontWeight: 800,
-                            fontSize: 18,
-                            boxShadow: "0 10px 24px rgba(22,119,255,0.28)",
-                            flexShrink: 0,
-                        }}
-                    >
-                        {initials}
-                    </div>
+                    <DepartmentAvatar initials={initials} />
 
                     <div style={{ minWidth: 0 }}>
-                        <Title level={5} style={{ margin: 0, lineHeight: 1.2 }} ellipsis={{ tooltip: name }}>
+                        <Title
+                            level={5}
+                            style={{ margin: 0, lineHeight: 1.2 }}
+                            ellipsis={{ tooltip: name }}
+                        >
                             {name}
                         </Title>
 
@@ -59,65 +152,17 @@ export function DepartmentHeader({
                         </Text>
 
                         <div style={{ marginTop: 8 }}>
-              <span
-                  style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                      padding: "6px 10px",
-                      borderRadius: 999,
-                      background: "rgba(0,0,0,0.04)",
-                      fontSize: 12,
-                      fontWeight: 500,
-                  }}
-              >
-                {isActive ? (
-                    <CheckCircleFilled style={{ color: "#52c41a" }} />
-                ) : (
-                    <MinusCircleFilled style={{ color: "rgba(0,0,0,0.35)" }} />
-                )}
-                  {isActive ? "Actif" : "Inactif"}
-              </span>
+                            <DepartmentStatus isActive={isActive} />
                         </div>
                     </div>
                 </Flex>
 
-                <Flex gap={6} onClick={(e) => e.stopPropagation()}>
-                    {canEdit ? (
-                        <Tooltip title="Modifier">
-                            <Button
-                                type="text"
-                                size="small"
-                                icon={<EditOutlined />}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onEdit();
-                                }}
-                            />
-                        </Tooltip>
-                    ) : null}
-
-                    {canDelete ? (
-                        <Popconfirm
-                            title="Supprimer ce département ?"
-                            description="Cette action est irréversible."
-                            okText="Supprimer"
-                            cancelText="Annuler"
-                            okButtonProps={{ danger: true }}
-                            onConfirm={onDelete}
-                        >
-                            <Tooltip title="Supprimer">
-                                <Button
-                                    type="text"
-                                    size="small"
-                                    danger
-                                    icon={<DeleteOutlined />}
-                                    onClick={(e) => e.stopPropagation()}
-                                />
-                            </Tooltip>
-                        </Popconfirm>
-                    ) : null}
-                </Flex>
+                <DepartmentActions
+                    canEdit={canEdit}
+                    canDelete={canDelete}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                />
             </Flex>
         </div>
     );
