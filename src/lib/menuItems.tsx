@@ -1,33 +1,61 @@
 ﻿import {
-    BankOutlined,
-    CreditCardOutlined,
     DashboardOutlined,
     SettingOutlined,
     UsergroupAddOutlined,
-     TeamOutlined,
-    WalletOutlined,
+    TeamOutlined,
     ApartmentOutlined,
-
+    CalendarOutlined,
+    ThunderboltOutlined,
+    AppstoreOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 
-export const SIDEBAR_ITEMS = [
-    { key: "/dashboard", icon: <DashboardOutlined />, label: "Vue d'ensemble" },
-    { key: "/users", icon: <UsergroupAddOutlined />, label: "Utilisateurs" },
-    { key: "/accounts", icon: <BankOutlined />, label: "Mes Comptes" },
-    { key: "/transactions", icon: <WalletOutlined />, label: "Transactions" },
-    { key: "/cards", icon: <CreditCardOutlined />, label: "Cartes" },
-    { key: "/settings", icon: <SettingOutlined />, label: "Parametres" },
+type AppMenuItem = NonNullable<MenuProps["items"]>[number] & {
+    adminOnly?: boolean;
+    children?: AppMenuItem[];
+};
+
+export const SIDEBAR_ITEMS: AppMenuItem[] = [
+    {
+        key: "/dashboard",
+        icon: <DashboardOutlined />,
+        label: "Vue d'ensemble",
+    },
+    {
+        key: "/planning",
+        icon: <CalendarOutlined />,
+        label: "Planning",
+    },
+    {
+        key: "planning-group",
+        icon: <CalendarOutlined />,
+        label: "Planning",
+        adminOnly: true,
+        children: [
+            { key: "/planning/shifts",      icon: <ThunderboltOutlined />, label: "Planning réel" },
+            { key: "/planning/assignments", icon: <TeamOutlined />,        label: "Affectations" },
+            { key: "/planning/templates",   icon: <AppstoreOutlined />,    label: "Semaines types" },
+        ],
+    },
+    {
+        key: "/users",
+        icon: <UsergroupAddOutlined />,
+        label: "Utilisateurs",
+        adminOnly: true,
+    },
     {
         key: "/teams",
         icon: <TeamOutlined />,
-        label: "Gestion des equipes",
+        label: "Gestion des équipes",
     },
     {
         key: "/departments",
         icon: <ApartmentOutlined />,
-        label: "Gestion des départements"
+        label: "Gestion des départements",
     },
-
-]satisfies NonNullable<MenuProps["items"]>;
-
+    {
+        key: "/settings",
+        icon: <SettingOutlined />,
+        label: "Paramètres",
+    },
+];

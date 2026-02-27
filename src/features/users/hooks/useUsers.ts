@@ -1,4 +1,4 @@
-﻿// src/features/users/hooks/useUsers.ts
+﻿// src/features/users/types/useUsers.ts
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { message } from "antd";

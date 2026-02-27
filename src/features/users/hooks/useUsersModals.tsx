@@ -46,7 +46,7 @@ export function useUsersModals() {
     const handleContractSubmit = (values: ContractFormValues) => {
         messageApi.success("Contrat ajoute (mock)");
         setContractFormOpen(false);
-        console.log("contract payload", values);
+        console.log("contract_types payload", values);
     };
 
     const modals = (
