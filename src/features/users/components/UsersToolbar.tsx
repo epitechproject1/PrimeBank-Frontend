@@ -1,4 +1,4 @@
-﻿import { Flex, Input, Button } from "antd";
+import { Flex, Input, Button, Select } from "antd";
 import {
     SearchOutlined,
     ReloadOutlined,
@@ -9,7 +9,9 @@ import {
 
 interface UsersToolbarProps {
     search: string;
+    pageSize: number;
     onSearchChange: (value: string) => void;
+    onPageSizeChange: (value: number) => void;
     onRefresh: () => void;
     loading: boolean;
     viewMode: "grid" | "list";
@@ -22,7 +24,9 @@ interface UsersToolbarProps {
 
 export function UsersToolbar({
     search,
+    pageSize,
     onSearchChange,
+    onPageSizeChange,
     onRefresh,
     loading,
     viewMode,
@@ -33,6 +37,10 @@ export function UsersToolbar({
     exporting,
 }: UsersToolbarProps) {
     const exportDisabled = loading || exporting;
+    const pageSizeOptions = [5, 10, 20, 50, 100, 500].map((value) => ({
+        value,
+        label: `${value}`,
+    }));
 
     return (
         <Flex gap={12} style={{ marginBottom: 20 }} wrap="wrap">
@@ -43,6 +51,12 @@ export function UsersToolbar({
                 onChange={(e) => onSearchChange(e.target.value)}
                 allowClear
                 style={{ flex: 1, minWidth: 260 }}
+            />
+            <Select
+                value={pageSize}
+                onChange={onPageSizeChange}
+                options={pageSizeOptions}
+                style={{ width: 120 }}
             />
             <Button
                 icon={<ReloadOutlined />}

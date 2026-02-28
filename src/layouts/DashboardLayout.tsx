@@ -9,43 +9,33 @@ const { Content } = Layout;
 
 export function DashboardLayout() {
     const [collapsed, setCollapsed] = useState(false);
-
-    // Hooks Ant Design et Thème
     const { token } = theme.useToken();
     const { mode } = useThemeMode();
 
     return (
-        <Layout style={{ minHeight: "100vh" }}>
+        <Layout style={{ minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
+            <DashboardSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-            {/* Sidebar (Menu de gauche) */}
-            <DashboardSidebar
-                collapsed={collapsed}
-                setCollapsed={setCollapsed}
-            />
-
-            <Layout>
-                {/* Header (Barre du haut) */}
+            <Layout style={{ overflow: "hidden" }}>
                 <DashboardHeader
                     collapsed={collapsed}
                     toggleCollapse={() => setCollapsed(!collapsed)}
                 />
 
-                {/* Content (Zone principale qui change selon la route) */}
-                <Content style={{
-                    background: token.colorBgContainer,
-                    borderRadius: token.borderRadiusLG,
-                    // Ombre légère uniquement en mode clair pour le relief
-                    boxShadow: mode === 'light'
-                        ? '0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02)'
-                        : 'none',
-                    transition: 'all 0.2s', // Transition douce lors du changement de thème
-                }}>
-
-                    {/* 🚨 C'est ici que s'afficheront tes pages enfants
-                        (ex: DashboardHome, AccountsPage, etc.)
-                    */}
+                <Content
+                    style={{
+                        background: token.colorBgContainer,
+                        borderRadius: token.borderRadiusLG,
+                        boxShadow:
+                            mode === "light"
+                                ? "0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02)"
+                                : "none",
+                        transition: "all 0.2s",
+                        overflowY: "auto",
+                        height: "calc(100vh - 64px)",
+                    }}
+                >
                     <Outlet />
-
                 </Content>
             </Layout>
         </Layout>
