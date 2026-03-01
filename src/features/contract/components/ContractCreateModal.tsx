@@ -1,7 +1,9 @@
 import { Button, DatePicker, Form, InputNumber, Modal, Select, Space } from "antd";
 import type { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import type { ContractType } from "../../contract_types/types/contract_type.types";
 import type { User } from "../../users/types/user.type";
+import type { Contract } from "../types/contract.types";
 
 type ContractCreateValues = {
     user: number;
@@ -21,6 +23,7 @@ type Props = {
     loadingTypes?: boolean;
     submitting?: boolean;
     onOpenCreateType: () => void;
+    editingContract?: Contract | null;
 };
 
 export function ContractCreateModal({
@@ -33,18 +36,30 @@ export function ContractCreateModal({
     loadingTypes = false,
     submitting = false,
     onOpenCreateType,
+    editingContract = null,
 }: Props) {
     const [form] = Form.useForm<ContractCreateValues>();
+    const isEditing = !!editingContract;
+
+    const initialValues: Partial<ContractCreateValues> | undefined = editingContract
+        ? {
+              user: editingContract.user,
+              contract_type: editingContract.contract_type,
+              start_date: dayjs(editingContract.start_date),
+              end_date: editingContract.end_date ? dayjs(editingContract.end_date) : null,
+              weekly_hours_target: Number(editingContract.weekly_hours_target || 0),
+          }
+        : undefined;
 
     return (
         <Modal
-            title="Nouveau contrat"
+            title={isEditing ? "Modifier le contrat" : "Nouveau contrat"}
             open={open}
             onCancel={onClose}
             footer={null}
             destroyOnClose
         >
-            <Form form={form} layout="vertical" onFinish={onSubmit}>
+            <Form form={form} layout="vertical" onFinish={onSubmit} initialValues={initialValues}>
                 <Form.Item
                     name="user"
                     label="Utilisateur"
@@ -145,7 +160,7 @@ export function ContractCreateModal({
                 <Space style={{ display: "flex", justifyContent: "flex-end" }}>
                     <Button onClick={onClose}>Annuler</Button>
                     <Button type="primary" loading={submitting} onClick={() => form.submit()}>
-                        Creer
+                        {isEditing ? "Modifier" : "Creer"}
                     </Button>
                 </Space>
             </Form>

@@ -17,6 +17,7 @@ export interface Contract {
     end_date?: string | null;
 
     weekly_hours_target?: string | null;
+    status?: "active" | "expiring_soon" | "expired";
 
     created_at: string;
 }
@@ -38,9 +39,28 @@ export type UpdateContractPayload = Partial<CreateContractPayload>;
 // FILTERS
 // ==============================
 export interface ContractFilters {
+    q?: string;
+    status?: "active" | "expiring_soon" | "expired";
     user?: number;
     contract_type?: number;
-    active?: boolean; // si tu ajoutes ce filtre backend
-    search?: string;
+    page?: number;
+    page_size?: number;
     ordering?: string;
+}
+
+export interface ContractSearchStats {
+    total: number;
+    active: number;
+    expiring_soon: number;
+    expired: number;
+}
+
+export interface ContractSearchResponse {
+    data: Contract[];
+    total: number;
+    query: string;
+    page: number;
+    page_size: number;
+    total_pages: number;
+    stats: ContractSearchStats;
 }

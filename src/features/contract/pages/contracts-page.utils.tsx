@@ -1,52 +1,54 @@
 /* eslint-disable react-refresh/only-export-components */
-import { Button, Card, Col, Flex, Input, Row, Select, Space, Statistic, Tag, Typography, theme } from "antd";
+import {
+    AppstoreOutlined,
+    CalendarOutlined,
+    CheckCircleOutlined,
+    FileTextOutlined,
+    PlusOutlined,
+    ReloadOutlined,
+    SearchOutlined,
+    WarningOutlined,
+    UnorderedListOutlined,
+} from "@ant-design/icons";
+import {
+    Avatar,
+    Button,
+    Card,
+    Col,
+    Flex,
+    Input,
+    Row,
+    Select,
+    Space,
+    Statistic,
+    Tag,
+    Typography,
+    theme,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
-import type { Contract } from "../types/contract.types";
+import type { Contract, ContractSearchStats } from "../types/contract.types";
 
-export type StatusFilter = "all" | "active" | "expiring_soon" | "expired";
-
-const EXPIRING_SOON_DAYS = 30;
-
-export function getContractStatus(contract: Contract): StatusFilter {
-    if (!contract.end_date) return "active";
-
-    const today = new Date();
-    const endDate = new Date(contract.end_date);
-    if (endDate < today) return "expired";
-
-    const diff = endDate.getTime() - today.getTime();
-    const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    return daysLeft <= EXPIRING_SOON_DAYS ? "expiring_soon" : "active";
-}
-
-function formatDate(date?: string | null) {
-    if (!date) return "-";
-    return new Date(date).toLocaleDateString("fr-FR");
-}
-
-function userLabel(contract: Contract) {
-    const firstName = contract.user_detail?.first_name ?? "";
-    const lastName = contract.user_detail?.last_name ?? "";
-    const fullName = `${firstName} ${lastName}`.trim();
-    return fullName || `User #${contract.user}`;
-}
-
-function StatusTag({ contract }: { contract: Contract }) {
-    const status = getContractStatus(contract);
+function statusTag(status?: Contract["status"]) {
     if (status === "expired") return <Tag color="error">Expire</Tag>;
     if (status === "expiring_soon") return <Tag color="warning">Bientot expire</Tag>;
     return <Tag color="success">En cours</Tag>;
 }
 
-export function getColumns(): ColumnsType<Contract> {
+function formatDate(value?: string | null) {
+    if (!value) return "-";
+    return new Date(value).toLocaleDateString("fr-FR");
+}
+
+export function getColumns(onOpen: (contract: Contract) => void): ColumnsType<Contract> {
     return [
         {
             title: "Utilisateur",
             key: "user",
             render: (_, record) => (
                 <div>
-                    <div>{userLabel(record)}</div>
+                    <div>
+                        {record.user_detail?.first_name} {record.user_detail?.last_name}
+                    </div>
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                         {record.user_detail?.email ?? "-"}
                     </Typography.Text>
@@ -80,55 +82,38 @@ export function getColumns(): ColumnsType<Contract> {
         {
             title: "Statut",
             key: "status",
-            render: (_, record) => <StatusTag contract={record} />,
+            render: (_, record) => statusTag(record.status),
+        },
+        {
+            title: "Action",
+            key: "action",
+            render: (_, record) => (
+                <Button size="small" onClick={() => onOpen(record)}>
+                    Voir
+                </Button>
+            ),
         },
     ];
-}
-
-export function computeStats(contracts: Contract[]) {
-    const expired = contracts.filter((c) => getContractStatus(c) === "expired").length;
-    const expiringSoon = contracts.filter(
-        (c) => getContractStatus(c) === "expiring_soon"
-    ).length;
-    const active = contracts.filter((c) => getContractStatus(c) === "active").length;
-    return { total: contracts.length, active, expiringSoon, expired };
-}
-
-export function filterContracts(
-    contracts: Contract[],
-    statusFilter: StatusFilter,
-    typeFilter: number | "all",
-    search: string
-) {
-    const query = search.trim().toLowerCase();
-    return contracts.filter((contract) => {
-        const status = getContractStatus(contract);
-        if (statusFilter !== "all" && status !== statusFilter) return false;
-        if (typeFilter !== "all" && contract.contract_type !== typeFilter) return false;
-        if (!query) return true;
-
-        const uLabel = userLabel(contract).toLowerCase();
-        const email = contract.user_detail?.email?.toLowerCase() ?? "";
-        const typeName = contract.contract_type_detail?.name?.toLowerCase() ?? "";
-        return uLabel.includes(query) || email.includes(query) || typeName.includes(query);
-    });
 }
 
 export function ContractsHeader({
     onRefresh,
     onCreate,
     onCreateType,
+    viewMode,
+    onViewModeChange,
 }: {
     onRefresh: () => void;
     onCreate: () => void;
     onCreateType: () => void;
+    viewMode: "grid" | "list";
+    onViewModeChange: (mode: "grid" | "list") => void;
 }) {
     const { token } = theme.useToken();
 
     return (
         <div
             style={{
-                background: token.colorBgContainer,
                 padding: "16px 24px",
                 borderBottom: `1px solid ${token.colorBorderSecondary}`,
                 display: "flex",
@@ -136,6 +121,8 @@ export function ContractsHeader({
                 alignItems: "center",
                 gap: 12,
                 flexWrap: "wrap",
+                background: token.colorBgContainer,
+                borderRadius: token.borderRadiusLG,
             }}
         >
             <div>
@@ -143,7 +130,7 @@ export function ContractsHeader({
                     Gestion des contrats
                 </Typography.Title>
                 <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    Suivi des contrats en cours, bientot expires et expires
+                    Vue carte/liste, recherche et actions sur chaque contrat
                 </Typography.Text>
             </div>
             <Space>
@@ -154,88 +141,135 @@ export function ContractsHeader({
                 <Button type="primary" icon={<PlusOutlined />} onClick={onCreate}>
                     Nouveau contrat
                 </Button>
+                <Flex>
+                    <Button
+                        icon={<AppstoreOutlined />}
+                        type={viewMode === "grid" ? "primary" : "default"}
+                        onClick={() => onViewModeChange("grid")}
+                        style={{ borderRadius: "6px 0 0 6px" }}
+                    />
+                    <Button
+                        icon={<UnorderedListOutlined />}
+                        type={viewMode === "list" ? "primary" : "default"}
+                        onClick={() => onViewModeChange("list")}
+                        style={{ borderRadius: "0 6px 6px 0", marginLeft: -1 }}
+                    />
+                </Flex>
             </Space>
         </div>
     );
 }
 
-export function ContractsStatsCards({
-    total,
-    active,
-    expiringSoon,
-    expired,
-}: {
-    total: number;
-    active: number;
-    expiringSoon: number;
-    expired: number;
-}) {
+export function ContractsStatsCards({ stats }: { stats: ContractSearchStats }) {
+    const { token } = theme.useToken();
+
+    const items = [
+        {
+            title: "Total contrats",
+            value: stats.total,
+            icon: <FileTextOutlined />,
+            color: token.colorPrimary,
+        },
+        {
+            title: "En cours",
+            value: stats.active,
+            icon: <CheckCircleOutlined />,
+            color: token.colorSuccess,
+        },
+        {
+            title: "Bientot expires",
+            value: stats.expiring_soon,
+            icon: <WarningOutlined />,
+            color: token.colorWarning,
+        },
+        {
+            title: "Expires",
+            value: stats.expired,
+            icon: <CalendarOutlined />,
+            color: token.colorError,
+        },
+    ];
+
     return (
         <Row gutter={12}>
-            <Col span={6}>
-                <Card>
-                    <Statistic title="Total contrats" value={total} />
-                </Card>
-            </Col>
-            <Col span={6}>
-                <Card>
-                    <Statistic title="En cours" value={active} />
-                </Card>
-            </Col>
-            <Col span={6}>
-                <Card>
-                    <Statistic title="Bientot expires" value={expiringSoon} />
-                </Card>
-            </Col>
-            <Col span={6}>
-                <Card>
-                    <Statistic title="Expires" value={expired} />
-                </Card>
-            </Col>
+            {items.map((item) => (
+                <Col key={item.title} xs={24} sm={12} lg={6}>
+                    <Card styles={{ body: { padding: "20px 24px" } }}>
+                        <Flex align="center" gap={16}>
+                            <Avatar
+                                size={44}
+                                icon={item.icon}
+                                style={{
+                                    backgroundColor: `${item.color}22`,
+                                    color: item.color,
+                                }}
+                            />
+                            <Statistic
+                                title={item.title}
+                                value={item.value}
+                                valueStyle={{
+                                    fontSize: 24,
+                                    fontWeight: 800,
+                                    color: item.color,
+                                }}
+                            />
+                        </Flex>
+                    </Card>
+                </Col>
+            ))}
         </Row>
     );
 }
 
 export function ContractsFilters({
     search,
-    setSearch,
-    statusFilter,
-    setStatusFilter,
-    typeFilter,
-    setTypeFilter,
+    onSearchChange,
+    status,
+    onStatusChange,
+    contractType,
+    onContractTypeChange,
+    pageSize,
+    onPageSizeChange,
     typeOptions,
 }: {
     search: string;
-    setSearch: (value: string) => void;
-    statusFilter: StatusFilter;
-    setStatusFilter: (value: StatusFilter) => void;
-    typeFilter: number | "all";
-    setTypeFilter: (value: number | "all") => void;
+    onSearchChange: (value: string) => void;
+    status: string;
+    onStatusChange: (value: string) => void;
+    contractType: number | "all";
+    onContractTypeChange: (value: number | "all") => void;
+    pageSize: number;
+    onPageSizeChange: (value: number) => void;
     typeOptions: { value: number | "all"; label: string }[];
 }) {
     const { token } = theme.useToken();
+    const pageSizeOptions = [5, 10, 20, 50, 100, 150, 500].map((v) => ({
+        value: v,
+        label: `${v}`,
+    }));
 
     return (
         <div
             style={{
                 padding: "12px 24px",
-                background: token.colorBgContainer,
                 borderBottom: `1px solid ${token.colorBorderSecondary}`,
+                background: token.colorBgContainer,
+                borderRadius: token.borderRadiusLG,
             }}
         >
             <Flex gap={12} wrap>
                 <Input
-                    prefix={<SearchOutlined style={{ color: token.colorTextTertiary }} />}
+                    prefix={<SearchOutlined style={{ color: token.colorTextPlaceholder }} />}
                     allowClear
                     placeholder="Rechercher utilisateur/email/type..."
                     style={{ width: 320 }}
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(e) => onSearchChange(e.target.value)}
                 />
-                <Select<StatusFilter>
-                    value={statusFilter}
+                <Select
+                    value={status}
                     style={{ width: 220 }}
-                    onChange={setStatusFilter}
+                    onChange={onStatusChange}
                     options={[
                         { value: "all", label: "Tous les statuts" },
                         { value: "active", label: "En cours" },
@@ -244,10 +278,16 @@ export function ContractsFilters({
                     ]}
                 />
                 <Select<number | "all">
-                    value={typeFilter}
+                    value={contractType}
                     style={{ width: 260 }}
-                    onChange={setTypeFilter}
+                    onChange={onContractTypeChange}
                     options={typeOptions}
+                />
+                <Select<number>
+                    value={pageSize}
+                    style={{ width: 120 }}
+                    onChange={onPageSizeChange}
+                    options={pageSizeOptions}
                 />
             </Flex>
         </div>

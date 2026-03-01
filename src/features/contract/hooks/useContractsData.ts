@@ -1,14 +1,13 @@
-// ./features/contracts/contract/hooks/useContractsData.ts
-
 import { useCallback, useState } from "react";
 import { message } from "antd";
 import type { AxiosError } from "axios";
 
 import type {
     Contract,
+    ContractFilters,
+    ContractSearchStats,
     CreateContractPayload,
     UpdateContractPayload,
-    ContractFilters,
 } from "../types/contract.types";
 
 import * as contractsService from "../services/contracts.service";
@@ -26,15 +25,32 @@ function getErrorMessage(err: unknown, fallback: string): string {
     return fallback;
 }
 
+const EMPTY_STATS: ContractSearchStats = {
+    total: 0,
+    active: 0,
+    expiring_soon: 0,
+    expired: 0,
+};
+
 export function useContractsData() {
     const [contracts, setContracts] = useState<Contract[]>([]);
+    const [stats, setStats] = useState<ContractSearchStats>(EMPTY_STATS);
     const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [total, setTotal] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
 
     const fetchContracts = useCallback(async (filters?: ContractFilters) => {
         setLoading(true);
         try {
-            const res = await contractsService.getContracts(filters);
-            setContracts(res);
+            const res = await contractsService.searchContracts(filters);
+            setContracts(res.data);
+            setStats(res.stats ?? EMPTY_STATS);
+            setTotal(res.total ?? 0);
+            setPage(res.page ?? 1);
+            setPageSize(res.page_size ?? 10);
+            setTotalPages(res.total_pages ?? 1);
         } catch (err) {
             message.error(getErrorMessage(err, "Erreur chargement contrats"));
         } finally {
@@ -43,50 +59,36 @@ export function useContractsData() {
     }, []);
 
     const createContract = useCallback(
-        async (payload: CreateContractPayload, refetchFilters?: ContractFilters) => {
-            try {
-                await contractsService.createContract(payload);
-                message.success("Contrat créé");
-                await fetchContracts(refetchFilters);
-            } catch (err) {
-                message.error(getErrorMessage(err, "Erreur création contrat"));
-            }
+        async (payload: CreateContractPayload) => {
+            await contractsService.createContract(payload);
         },
-        [fetchContracts]
+        []
     );
 
-    const updateContract = useCallback(
-        async (id: number, payload: UpdateContractPayload, refetchFilters?: ContractFilters) => {
-            try {
-                await contractsService.updateContract(id, payload);
-                message.success("Contrat mis à jour");
-                await fetchContracts(refetchFilters);
-            } catch (err) {
-                message.error(getErrorMessage(err, "Erreur mise à jour contrat"));
-            }
-        },
-        [fetchContracts]
-    );
+    const updateContract = useCallback(async (id: number, payload: UpdateContractPayload) => {
+        await contractsService.updateContract(id, payload);
+    }, []);
 
-    const deleteContract = useCallback(
-        async (id: number, refetchFilters?: ContractFilters) => {
-            try {
-                await contractsService.deleteContract(id);
-                message.success("Contrat supprimé");
-                await fetchContracts(refetchFilters);
-            } catch (err) {
-                message.error(getErrorMessage(err, "Erreur suppression contrat"));
-            }
-        },
-        [fetchContracts]
-    );
+    const deleteContract = useCallback(async (id: number) => {
+        await contractsService.deleteContract(id);
+    }, []);
+
+    const exportPdf = useCallback(async (id: number) => {
+        await contractsService.exportContractPdf(id);
+    }, []);
 
     return {
         contracts,
+        stats,
         loading,
+        page,
+        pageSize,
+        total,
+        totalPages,
         fetchContracts,
         createContract,
         updateContract,
         deleteContract,
+        exportPdf,
     };
 }

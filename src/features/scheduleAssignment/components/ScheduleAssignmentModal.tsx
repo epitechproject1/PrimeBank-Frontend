@@ -66,7 +66,7 @@ export function ScheduleAssignmentModal({
     useEffect(() => {
         if (!open) return;
         fetchWeekPatterns();
-        fetchContracts();
+        fetchContracts({ page_size: 500 });
     }, [open, fetchWeekPatterns, fetchContracts]);
 
     useEffect(() => {
