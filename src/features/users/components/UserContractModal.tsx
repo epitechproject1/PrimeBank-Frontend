@@ -25,7 +25,6 @@ interface UserContractModalProps {
     onClose: () => void;
     user: User | null;
     contract?: Contract | null;
-    loading?: boolean;
     onAddContract: () => void;
 }
 
@@ -34,7 +33,6 @@ export function UserContractModal({
     onClose,
     user,
     contract,
-    loading = false,
     onAddContract,
 }: UserContractModalProps) {
     if (!user) {
@@ -60,7 +58,7 @@ export function UserContractModal({
                 </div>
 
                 {contract ? (
-                    <Descriptions column={1} size="small" bordered loading={loading}>
+                    <Descriptions column={1} size="small" bordered>
                         <Descriptions.Item label="Type de contrat">
                             {contract.contract_type_detail?.name ?? `Type #${contract.contract_type}`}
                         </Descriptions.Item>

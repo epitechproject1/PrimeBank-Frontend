@@ -13,8 +13,9 @@ import { createContract as createContractRequest } from "../../contract/services
 import { createContractType as createContractTypeRequest } from "../../contract_types/services/contract_type.service";
 import { useContractsData } from "../../contract/hooks/useContractsData";
 import { useContractTypesData } from "../../contract_types/hooks/useContracts";
+import type { Contract } from "../../contract/types/contract.types";
 
-function getLatestUserContract(userId: number, contracts: { user: number; start_date: string }[]) {
+function getLatestUserContract(userId: number, contracts: Contract[]): Contract | null {
     return [...contracts]
         .filter((contract) => contract.user === userId)
         .sort(
@@ -33,7 +34,7 @@ export function useUsersModals() {
     const [creatingContractType, setCreatingContractType] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
 
-    const { contracts, loading: contractsLoading, fetchContracts } = useContractsData();
+    const { contracts, fetchContracts } = useContractsData();
     const {
         contractTypes,
         loading: loadingContractTypes,
@@ -128,7 +129,6 @@ export function useUsersModals() {
                 onClose={() => setContractOpen(false)}
                 user={selectedUser}
                 contract={contract}
-                loading={contractsLoading}
                 onAddContract={openContractForm}
             />
             <ContractFormModal
