@@ -11,6 +11,7 @@ type UserFormValues = {
     email: string;
     phone_number?: string;
     password?: string;
+    confirm_password?: string;
     role: "admin" | "manager" | "user";
 };
 
@@ -27,7 +28,15 @@ export default function UserForm({ open, onClose, onSubmit, user, loading }: Pro
     const isEditing = !!user;
 
     const handleFinish = (values: UserFormValues) => {
-        onSubmit(values);
+        const payload = {
+            first_name: values.first_name,
+            last_name: values.last_name,
+            email: values.email,
+            phone_number: values.phone_number,
+            password: values.password,
+            role: values.role,
+        };
+        onSubmit(payload);
         form.resetFields();
     };
 
@@ -101,13 +110,52 @@ export default function UserForm({ open, onClose, onSubmit, user, loading }: Pro
                 </Form.Item>
 
                 {!isEditing && (
-                    <Form.Item
-                        name="password"
-                        label="Mot de passe"
-                        rules={[{ required: true, message: "Le mot de passe est requis" }]}
-                    >
-                        <Input.Password placeholder="********" />
-                    </Form.Item>
+                    <>
+                        <Form.Item
+                            name="password"
+                            label="Mot de passe"
+                            extra="Minimum 8 caracteres avec majuscule, minuscule, chiffre et caractere special."
+                            rules={[
+                                { required: true, message: "Le mot de passe est requis" },
+                                {
+                                    min: 8,
+                                    message: "Le mot de passe doit contenir au moins 8 caracteres",
+                                },
+                                {
+                                    pattern:
+                                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).+$/,
+                                    message:
+                                        "Le mot de passe doit contenir une majuscule, une minuscule, un chiffre et un caractere special",
+                                },
+                            ]}
+                        >
+                            <Input.Password placeholder="********" />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="confirm_password"
+                            label="Confirmer le mot de passe"
+                            dependencies={["password"]}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "La confirmation du mot de passe est requise",
+                                },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || getFieldValue("password") === value) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(
+                                            new Error("Les mots de passe ne correspondent pas")
+                                        );
+                                    },
+                                }),
+                            ]}
+                        >
+                            <Input.Password placeholder="********" />
+                        </Form.Item>
+                    </>
                 )}
             </Form>
         </Modal>

@@ -7,6 +7,7 @@
     CalendarOutlined,
     ThunderboltOutlined,
     AppstoreOutlined,
+    FileTextOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 
@@ -41,6 +42,12 @@ export const SIDEBAR_ITEMS: AppMenuItem[] = [
         key: "/users",
         icon: <UsergroupAddOutlined />,
         label: "Utilisateurs",
+        adminOnly: true,
+    },
+    {
+        key: "/contracts",
+        icon: <FileTextOutlined />,
+        label: "Contrats",
         adminOnly: true,
     },
     {

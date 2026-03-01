@@ -21,9 +21,7 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
 
     const menuItems = isAdmin
         ? SIDEBAR_ITEMS
-        : SIDEBAR_ITEMS.filter(
-              (item) => item?.key !== "/users" && item?.key !== "planning-group"
-          );
+        : SIDEBAR_ITEMS.filter((item) => !item?.adminOnly);
 
     // Ouvre automatiquement le groupe Planning si on est sur une route /planning/*
     const openKeys = !collapsed && location.pathname.startsWith("/planning")

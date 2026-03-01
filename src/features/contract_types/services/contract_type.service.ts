@@ -8,7 +8,7 @@ import {
     UpdateContractTypePayload
 } from "../types/contract_type.types.ts";
 
-const ENDPOINT = "/contract/";
+const ENDPOINT = "/contract-types/";
 
 // LIST
 export async function getContractTypes(filters?: ContractTypeFilters): Promise<ContractType[]> {
