@@ -89,7 +89,7 @@ export function PermissionsModal({ open, onClose, onSubmit }: PermissionsModalPr
                 <Form.Item
                     name="type_permission"
                     label="Type de permission"
-                    rules={[{ required: true, message: "Le type est requis" }]}
+                    rules={[{ required: true, message: "Le types est requis" }]}
                 >
                     <Input placeholder="ex: ACCES_COMPTES" />
                 </Form.Item>

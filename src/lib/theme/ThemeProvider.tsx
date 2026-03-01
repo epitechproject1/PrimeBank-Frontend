@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ConfigProvider, App as AntdApp, theme as antdTheme } from "antd";
-// 👇 Important : On importe le contexte et le type depuis le fichier voisin
+// 👇 Important : On importe le contexte et le types depuis le fichier voisin
 import { ThemeContext, ThemeMode } from "./ThemeContext";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {

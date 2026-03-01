@@ -1,4 +1,4 @@
-﻿import { Empty, Button, Table } from "antd";
+import { Empty, Button, Table, Pagination, Flex } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { User } from "../types/user.type";
 import { UsersGridView } from "./UsersGridView";
@@ -17,6 +17,10 @@ interface UsersContentProps {
     onAdd: () => void;
     screens: Partial<Record<string, boolean>>;
     onOpenContract: (user: User) => void;
+    page: number;
+    pageSize: number;
+    total: number;
+    onPageChange: (page: number) => void;
 }
 
 export function UsersContent({
@@ -32,6 +36,10 @@ export function UsersContent({
     onAdd,
     screens,
     onOpenContract,
+    page,
+    pageSize,
+    total,
+    onPageChange,
 }: UsersContentProps) {
     if (!loading && filtered.length === 0) {
         return (
@@ -52,29 +60,51 @@ export function UsersContent({
 
     if (viewMode === "grid") {
         return (
-            <UsersGridView
-                users={filtered}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onToggleStatus={onToggleStatus}
-                isToggling={isToggling}
-                screens={screens}
-                onOpenContract={onOpenContract}
-            />
+            <Flex vertical gap={16}>
+                <UsersGridView
+                    users={filtered}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onToggleStatus={onToggleStatus}
+                    isToggling={isToggling}
+                    screens={screens}
+                    onOpenContract={onOpenContract}
+                />
+                <Flex justify="end">
+                    <Pagination
+                        current={page}
+                        pageSize={pageSize}
+                        total={total}
+                        showSizeChanger={false}
+                        onChange={onPageChange}
+                    />
+                </Flex>
+            </Flex>
         );
     }
 
     return (
-        <Table<User>
-            dataSource={filtered}
-            columns={columns}
-            rowKey="id"
-            pagination={{ pageSize: 10, showSizeChanger: false }}
-            locale={{ emptyText: <Empty description="Aucun utilisateur" /> }}
-            scroll={{ x: true }}
-            onRow={(record) => ({
-                onClick: () => onOpenContract(record),
-            })}
-        />
+        <Flex vertical gap={16}>
+            <Table<User>
+                dataSource={filtered}
+                columns={columns}
+                rowKey="id"
+                pagination={false}
+                locale={{ emptyText: <Empty description="Aucun utilisateur" /> }}
+                scroll={{ x: true }}
+                onRow={(record) => ({
+                    onClick: () => onOpenContract(record),
+                })}
+            />
+            <Flex justify="end">
+                <Pagination
+                    current={page}
+                    pageSize={pageSize}
+                    total={total}
+                    showSizeChanger={false}
+                    onChange={onPageChange}
+                />
+            </Flex>
+        </Flex>
     );
 }

@@ -15,7 +15,7 @@ const { useBreakpoint } = Grid;
 export default function UsersPage() {
     const screens = useBreakpoint();
     const { token } = theme.useToken();
-    const { filters, setFilter } = useUsersSearchParams();
+    const { filters, setFilter, setFilters } = useUsersSearchParams();
     const state = useUsersPageState(filters);
     const modals = useUsersModals();
 
@@ -51,8 +51,21 @@ export default function UsersPage() {
 
                 <UsersToolbar
                     search={filters.q || ""}
-                    onSearchChange={(value) => setFilter("q", value || undefined)}
-                    onRefresh={state.refresh}
+                    pageSize={filters.page_size || 10}
+                    onSearchChange={(value) => {
+                        setFilters({ q: value || undefined, page: 1 });
+                    }}
+                    onPageSizeChange={(value) => {
+                        setFilters({ page_size: value, page: 1 });
+                    }}
+                    onRefresh={() => {
+                        setFilters({
+                            q: undefined,
+                            page: 1,
+                            page_size: 10,
+                        });
+                        state.refresh();
+                    }}
                     loading={state.isLoading}
                     viewMode={state.viewMode}
                     onViewModeChange={state.setViewMode}
@@ -76,6 +89,10 @@ export default function UsersPage() {
                         onAdd={state.openAdd}
                         screens={screens}
                         onOpenContract={modals.openContract}
+                        page={filters.page || state.page || 1}
+                        pageSize={filters.page_size || state.pageSize || 10}
+                        total={state.total}
+                        onPageChange={(nextPage) => setFilter("page", nextPage)}
                     />
                 </Spin>
             </Flex>

@@ -22,6 +22,7 @@ export function DashboardLayout() {
             />
 
             <Layout>
+
                 <DashboardHeader
                     collapsed={collapsed}
                     toggleCollapse={() => setCollapsed(!collapsed)}
@@ -37,7 +38,6 @@ export function DashboardLayout() {
                 }}>
 
                     <Outlet />
-
                 </Content>
             </Layout>
         </Layout>

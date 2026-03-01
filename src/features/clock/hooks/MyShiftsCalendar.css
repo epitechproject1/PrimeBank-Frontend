@@ -1,0 +1,169 @@
+/* src/features/shift/components/MyShiftsCalendar.css */
+
+/* ─── wrapper ─────────────────────────────────────────────────────────────── */
+.shifts-calendar-wrapper {
+    height: calc(100vh - 180px);
+    min-height: 560px;
+    border-radius: var(--fc-radius, 12px);
+    overflow: hidden;
+    background: var(--fc-bg, #fff);
+    box-shadow: var(--fc-shadow, 0 1px 4px rgba(0,0,0,.08));
+}
+
+/* ─── toolbar ─────────────────────────────────────────────────────────────── */
+.shifts-calendar-wrapper .fc-toolbar {
+    padding: 14px 20px 10px;
+    background: var(--fc-bg, #fff);
+    border-bottom: 1px solid var(--fc-border, #f0f0f0);
+    margin-bottom: 0 !important;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.shifts-calendar-wrapper .fc-toolbar-title {
+    font-size: 15px !important;
+    font-weight: 700;
+    color: var(--fc-text, #111);
+    text-transform: capitalize;
+}
+
+.shifts-calendar-wrapper .fc-button {
+    background: transparent !important;
+    border: 1px solid var(--fc-border, #d9d9d9) !important;
+    border-radius: 8px !important;
+    color: var(--fc-text, #333) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    padding: 4px 12px !important;
+    height: 32px !important;
+    box-shadow: none !important;
+    transition: all 0.15s ease !important;
+}
+
+.shifts-calendar-wrapper .fc-button:hover {
+    background: var(--fc-primary-light, #e6f4ff) !important;
+    border-color: var(--fc-primary, #1677ff) !important;
+    color: var(--fc-primary, #1677ff) !important;
+}
+
+.shifts-calendar-wrapper .fc-button-active,
+.shifts-calendar-wrapper .fc-button:not(:disabled):active {
+    background: var(--fc-primary-light, #e6f4ff) !important;
+    border-color: var(--fc-primary, #1677ff) !important;
+    color: var(--fc-primary, #1677ff) !important;
+}
+
+.shifts-calendar-wrapper .fc-today-button {
+    background: var(--fc-primary, #1677ff) !important;
+    border-color: var(--fc-primary, #1677ff) !important;
+    color: #fff !important;
+}
+
+.shifts-calendar-wrapper .fc-today-button:hover {
+    opacity: 0.88;
+}
+
+/* ─── grid ────────────────────────────────────────────────────────────────── */
+.shifts-calendar-wrapper .fc-col-header-cell {
+    background: var(--fc-bg-elevated, #fafafa);
+    border-bottom: 1px solid var(--fc-border, #f0f0f0) !important;
+    padding: 8px 0 !important;
+}
+
+.shifts-calendar-wrapper .fc-col-header-cell-cushion {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fc-text-secondary, #666);
+    text-decoration: none !important;
+    text-transform: capitalize;
+}
+
+.shifts-calendar-wrapper .fc-col-header-cell.fc-day-today .fc-col-header-cell-cushion {
+    color: var(--fc-primary, #1677ff);
+}
+
+.shifts-calendar-wrapper .fc-timegrid-slot-label {
+    font-size: 11px;
+    color: var(--fc-text-tertiary, #bfbfbf);
+    font-variant-numeric: tabular-nums;
+}
+
+.shifts-calendar-wrapper .fc-timegrid-col.fc-day-today {
+    background: var(--fc-today-bg, rgba(22,119,255,0.04)) !important;
+}
+
+.shifts-calendar-wrapper .fc-scrollgrid {
+    border: none !important;
+}
+
+.shifts-calendar-wrapper .fc-scrollgrid td,
+.shifts-calendar-wrapper .fc-scrollgrid th {
+    border-color: var(--fc-border, #f0f0f0) !important;
+}
+
+/* ─── now indicator ───────────────────────────────────────────────────────── */
+.shifts-calendar-wrapper .fc-timegrid-now-indicator-line {
+    border-color: var(--fc-primary, #1677ff) !important;
+    border-width: 2px !important;
+}
+
+.shifts-calendar-wrapper .fc-timegrid-now-indicator-arrow {
+    border-top-color: var(--fc-primary, #1677ff) !important;
+    border-bottom-color: var(--fc-primary, #1677ff) !important;
+}
+
+/* ─── events ──────────────────────────────────────────────────────────────── */
+.shifts-calendar-wrapper .fc-shift-event {
+    border-radius: 8px !important;
+    border-width: 1.5px !important;
+    border-left-width: 3px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 3px 6px !important;
+    transition: filter 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+/* today shifts → clickable, elevated */
+.shifts-calendar-wrapper .fc-shift-today {
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.10) !important;
+}
+
+.shifts-calendar-wrapper .fc-shift-today:hover {
+    filter: brightness(0.96);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,.14) !important;
+}
+
+/* past / future → read-only look */
+.shifts-calendar-wrapper .fc-shift-past {
+    cursor: default !important;
+    opacity: 0.6;
+}
+
+.shifts-calendar-wrapper .fc-shift-future {
+    cursor: default !important;
+}
+
+/* ─── event content ───────────────────────────────────────────────────────── */
+.fc-shift-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    overflow: hidden;
+}
+
+.fc-shift-content .fc-shift-title {
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fc-shift-content .fc-shift-badge {
+    font-size: 10px;
+    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

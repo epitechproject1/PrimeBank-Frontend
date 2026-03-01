@@ -86,7 +86,7 @@ export function ScheduleAssignmentForm({
             <Form.Item
                 label="Semaine type"
                 name="week_pattern"
-                rules={[{ required: true, message: "Veuillez sélectionner une semaine type" }]}
+                rules={[{ required: true, message: "Veuillez sélectionner une semaine types" }]}
             >
                 <Select
                     showSearch

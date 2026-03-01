@@ -1,4 +1,4 @@
-// ./features/contract_types/contract-type/services/contractTypes.service.ts
+// ./features/contract_types/contract-types/services/contractTypes.service.ts
 
 import { apiClient } from "../../../lib/api_client/apiClient";
 import {
@@ -8,7 +8,7 @@ import {
     UpdateContractTypePayload
 } from "../types/contract_type.types.ts";
 
-const ENDPOINT = "/contract/";
+const ENDPOINT = "/contract-types/";
 
 // LIST
 export async function getContractTypes(filters?: ContractTypeFilters): Promise<ContractType[]> {

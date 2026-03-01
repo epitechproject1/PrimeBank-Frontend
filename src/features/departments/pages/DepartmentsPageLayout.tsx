@@ -100,6 +100,7 @@ function TopCard({
             <DepartmentsHeader onAdd={onAdd} screens={screens} canAdd={canAdd} />
 
             <div style={{ marginTop: 16 }}>
+
                 <DepartmentsStats
                     role={mapRole(currentUser.role)}
                     colors={{

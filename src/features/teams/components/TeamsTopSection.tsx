@@ -32,6 +32,7 @@ export function TeamsTopSection({
             style={{
                 background: token.colorBgContainer,
                 borderRadius: 18,
+
                 padding: 18,
                 border: `1px solid ${token.colorBorderSecondary}`,
                 boxShadow: "0 10px 30px rgba(0,0,0,0.07)",

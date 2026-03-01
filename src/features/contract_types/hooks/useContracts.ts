@@ -1,4 +1,4 @@
-// ./features/contract_types/contract-type/hooks/useContractTypesData.ts
+// ./features/contract_types/contract-types/hooks/useContractTypesData.ts
 
 import { useCallback, useState } from "react";
 import { message } from "antd";
@@ -58,7 +58,7 @@ export function useContractTypesData() {
                 message.success("Type de contrat créé");
                 await fetchContractTypes(refetchFilters);
             } catch (err) {
-                message.error(getErrorMessage(err, "Erreur création type de contrat"));
+                message.error(getErrorMessage(err, "Erreur création types de contrat"));
             }
         },
         [fetchContractTypes]
@@ -74,7 +74,7 @@ export function useContractTypesData() {
                 message.success("Type de contrat mis à jour");
                 await fetchContractTypes(refetchFilters);
             } catch (err) {
-                message.error(getErrorMessage(err, "Erreur mise à jour type de contrat"));
+                message.error(getErrorMessage(err, "Erreur mise à jour types de contrat"));
             }
         },
         [fetchContractTypes]
@@ -90,7 +90,7 @@ export function useContractTypesData() {
                 message.success("Type de contrat supprimé");
                 await fetchContractTypes(refetchFilters);
             } catch (err) {
-                message.error(getErrorMessage(err, "Erreur suppression type de contrat"));
+                message.error(getErrorMessage(err, "Erreur suppression types de contrat"));
             }
         },
         [fetchContractTypes]

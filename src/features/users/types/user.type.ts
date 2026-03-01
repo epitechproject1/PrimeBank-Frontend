@@ -5,7 +5,7 @@ export interface UserProfile {
     last_name: string;
     role?: string; // Si tu as un rôle
 }
-// src/features/users/types/user.type.ts
+// src/features/users/types/user.types.ts
 
 export interface User {
     id: string;
