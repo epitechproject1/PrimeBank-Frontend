@@ -48,7 +48,7 @@ export function TimeSlotForm({ form, prefillWeekday, onSubmit }: Props) {
             <Form.Item
                 name="slot_type"
                 label="Type de créneau"
-                rules={[{ required: true, message: "Choisissez un type" }]}
+                rules={[{ required: true, message: "Choisissez un types" }]}
             >
                 <Select
                     options={SLOT_TYPE_OPTIONS}

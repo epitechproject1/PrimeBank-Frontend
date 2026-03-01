@@ -48,7 +48,7 @@ export function ContractFormModal({
                 <Form.Item
                     name="contract_type"
                     label="Type de contrat"
-                    rules={[{ required: true, message: "Le type est requis" }]}
+                    rules={[{ required: true, message: "Le types est requis" }]}
                 >
                     <Select placeholder="Selectionner un type de contrat" loading={loadingTypes}>
                         {contractTypes.map((type) => (
@@ -89,7 +89,7 @@ export function ContractFormModal({
 
                                     if (selectedType?.requires_end_date && !value) {
                                         return Promise.reject(
-                                            new Error("Date de fin requise pour ce type de contrat")
+                                            new Error("Date de fin requise pour ce types de contrat")
                                         );
                                     }
 

@@ -7,7 +7,7 @@ import {
     UpdateShiftPayload,
     ShiftFilters,
 } from "../types/shift.types";
-import {PaginatedResponse} from "../../week-pattern/services/weekPatterns.service.ts";
+import { PaginatedResponse } from "../../week-pattern/services/weekPatterns.service.ts";
 
 const ENDPOINT = "/shifts/";
 
@@ -15,6 +15,15 @@ export async function getShifts(
     filters: ShiftFilters = {}
 ): Promise<PaginatedResponse<Shift>> {
     const { data } = await apiClient.get(ENDPOINT, { params: filters });
+    return data;
+}
+
+export async function getMyShifts(
+    filters: ShiftFilters = {}
+): Promise<PaginatedResponse<Shift>> {
+    const { data } = await apiClient.get(`${ENDPOINT}me/`, {
+        params: filters,
+    });
     return data;
 }
 

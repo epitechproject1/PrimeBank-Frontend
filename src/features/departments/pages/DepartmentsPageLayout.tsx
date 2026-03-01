@@ -84,16 +84,7 @@ function TopCard({
 }) {
 
     return (
-        <div
-            style={{
-                background: "rgba(255,255,255,0.9)",
-                borderRadius: 18,
-                padding: 18,
-                border: "1px solid rgba(0,0,0,0.06)",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-                backdropFilter: "blur(10px)",
-            }}
-        >
+        <div>
             <DepartmentsHeader
                 onAdd={onAdd}
                 screens={screens}
@@ -101,7 +92,7 @@ function TopCard({
                 canAdd={canAdd}
             />
 
-            <div style={{ marginTop: 16 }}>
+            <div>
                 {/* ✅ Plus de props manuelles — le composant fetche lui-même via /departments/stats/ */}
                 <DepartmentsStats
                     role={mapRole(currentUser.role)}

@@ -103,8 +103,8 @@ export function TeamsPageLayout({
     const onDelete = canManage ? handleDelete : undefined;
 
     return (
-        <Flex vertical style={{ minHeight: "100vh", padding: screens.md ? "24px 32px" : "14px" }}>
-            <div style={{ maxWidth: 1400, width: "100%", margin: "0 auto" }}>
+        <Flex>
+            <div>
                 <TeamsTopSection
                     screens={screens}
                     primaryColor={token.colorPrimary}

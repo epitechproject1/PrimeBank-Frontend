@@ -1,4 +1,4 @@
-// ./features/contract_types/contract-type/services/contractTypes.service.ts
+// ./features/contract_types/contract-types/services/contractTypes.service.ts
 
 import { apiClient } from "../../../lib/api_client/apiClient";
 import {

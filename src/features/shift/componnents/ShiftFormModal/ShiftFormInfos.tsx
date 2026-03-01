@@ -26,7 +26,7 @@ export function ShiftFormInfos({ isCreate }: { isCreate: boolean }) {
             <Form.Item
                 name="shift_type"
                 label="Type de shift"
-                rules={[{ required: true, message: "Le type est requis" }]}
+                rules={[{ required: true, message: "Le types est requis" }]}
             >
                 <Select
                     placeholder="Sélectionner un type"

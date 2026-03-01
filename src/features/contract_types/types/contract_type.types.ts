@@ -1,4 +1,4 @@
-// ./features/contract_types/contract-type/types/contractType.types.ts
+// ./features/contract_types/contract-types/types/contractType.types.ts
 
 // ==============================
 // MODEL

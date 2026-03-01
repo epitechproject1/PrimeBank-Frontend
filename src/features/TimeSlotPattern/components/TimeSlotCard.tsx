@@ -74,7 +74,7 @@ export function TimeSlotCard({ slot, onEdit, onDelete, onDuplicate }: Props) {
                     </Text>
                 </div>
 
-                {/* Tag type */}
+                {/* Tag types */}
                 <Tag
                     style={{
                         margin: 0,

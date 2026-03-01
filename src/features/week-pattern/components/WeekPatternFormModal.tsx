@@ -31,7 +31,7 @@ export function WeekPatternFormModal({
             open={open}
             onCancel={onCancel}
             footer={null}
-            title={editing ? "Modifier la semaine type" : "Créer une semaine type"}
+            title={editing ? "Modifier la semaine types" : "Créer une semaine types"}
             destroyOnClose
         >
             <Space direction="vertical" size={16} style={{ width: "100%" }}>
