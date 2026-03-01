@@ -44,6 +44,10 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
             style={{
                 background: token.colorBgContainer,
                 borderRight: `1px solid ${token.colorBorderSecondary}`,
+                position: "sticky",
+                top: 0,
+                height: "100vh",
+                overflow: "hidden",
             }}
         >
             {/* Logo */}
@@ -76,14 +80,16 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
                 )}
             </div>
 
-            <Menu
-                mode="inline"
-                selectedKeys={[location.pathname]}
-                defaultOpenKeys={openKeys}
-                items={menuItems}
-                onClick={handleMenuClick}
-                style={{ borderRight: 0, marginTop: 16 }}
-            />
+            <div style={{ height: "calc(100vh - 64px)", overflowY: "auto" }}>
+                <Menu
+                    mode="inline"
+                    selectedKeys={[location.pathname]}
+                    defaultOpenKeys={openKeys}
+                    items={menuItems}
+                    onClick={handleMenuClick}
+                    style={{ borderRight: 0, marginTop: 16 }}
+                />
+            </div>
         </Sider>
     );
 }

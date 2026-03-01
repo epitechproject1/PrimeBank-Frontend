@@ -3,6 +3,8 @@ import type { User } from "../features/users/types/user.type";
 
 export type UserSearchFilters = {
     q?: string;
+    page?: number;
+    page_size?: number;
     role?: "ADMIN" | "MANAGER" | "USER";
     email?: string;
     is_active?: boolean;
@@ -17,11 +19,16 @@ export type UserSearchResponse = {
     data: User[];
     total: number;
     query: string;
+    page?: number;
+    page_size?: number;
+    total_pages?: number;
 };
 
 function buildParams(filters: UserSearchFilters) {
     const params: Record<string, string> = {};
     if (filters.q) params.q = filters.q;
+    if (filters.page) params.page = String(filters.page);
+    if (filters.page_size) params.page_size = String(filters.page_size);
     if (filters.role) params.role = filters.role;
     if (filters.email) params.email = filters.email;
     if (filters.is_active !== undefined) params.is_active = String(filters.is_active);
