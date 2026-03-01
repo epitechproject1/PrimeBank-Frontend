@@ -19,9 +19,14 @@ export function DashboardSidebar({ collapsed, setCollapsed }: Props) {
     const user = userStorage.getUser();
     const isAdmin = isAdminRole(user?.role);
 
-    const menuItems = isAdmin
+    const menuItems = (isAdmin
         ? SIDEBAR_ITEMS
-        : SIDEBAR_ITEMS.filter((item) => !item?.adminOnly);
+        : SIDEBAR_ITEMS.filter((item) => !item?.adminOnly)
+    ).map((item) =>
+        !isAdmin && item?.key === "/contracts"
+            ? { ...item, label: "Mon contrat" }
+            : item
+    );
 
     // Ouvre automatiquement le groupe Planning si on est sur une route /planning/*
     const openKeys = !collapsed && location.pathname.startsWith("/planning")

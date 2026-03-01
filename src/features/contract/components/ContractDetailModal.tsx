@@ -20,6 +20,7 @@ type Props = {
     onDelete: (contractId: number) => Promise<void>;
     onExportPdf: (contractId: number) => void;
     deleting?: boolean;
+    canManage?: boolean;
 };
 
 export function ContractDetailModal({
@@ -30,6 +31,7 @@ export function ContractDetailModal({
     onDelete,
     onExportPdf,
     deleting = false,
+    canManage = true,
 }: Props) {
     if (!contract) {
         return null;
@@ -69,18 +71,22 @@ export function ContractDetailModal({
 
             <Space style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
                 <Button onClick={() => onExportPdf(contract.id)}>Exporter PDF</Button>
-                <Button type="primary" onClick={() => onEdit(contract)}>
-                    Modifier
-                </Button>
-                <Popconfirm
-                    title="Supprimer ce contrat ?"
-                    okText="Supprimer"
-                    cancelText="Annuler"
-                    onConfirm={async () => onDelete(contract.id)}
-                    okButtonProps={{ danger: true, loading: deleting }}
-                >
-                    <Button danger>Supprimer</Button>
-                </Popconfirm>
+                {canManage && (
+                    <Button type="primary" onClick={() => onEdit(contract)}>
+                        Modifier
+                    </Button>
+                )}
+                {canManage && (
+                    <Popconfirm
+                        title="Supprimer ce contrat ?"
+                        okText="Supprimer"
+                        cancelText="Annuler"
+                        onConfirm={async () => onDelete(contract.id)}
+                        okButtonProps={{ danger: true, loading: deleting }}
+                    >
+                        <Button danger>Supprimer</Button>
+                    </Popconfirm>
+                )}
             </Space>
         </Modal>
     );

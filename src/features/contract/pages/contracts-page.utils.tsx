@@ -102,12 +102,14 @@ export function ContractsHeader({
     onCreateType,
     viewMode,
     onViewModeChange,
+    canManage = true,
 }: {
     onRefresh: () => void;
     onCreate: () => void;
     onCreateType: () => void;
     viewMode: "grid" | "list";
     onViewModeChange: (mode: "grid" | "list") => void;
+    canManage?: boolean;
 }) {
     const { token } = theme.useToken();
 
@@ -137,10 +139,12 @@ export function ContractsHeader({
                 <Button icon={<ReloadOutlined />} onClick={onRefresh}>
                     Rafraichir
                 </Button>
-                <Button onClick={onCreateType}>Nouveau type</Button>
-                <Button type="primary" icon={<PlusOutlined />} onClick={onCreate}>
-                    Nouveau contrat
-                </Button>
+                {canManage && <Button onClick={onCreateType}>Nouveau type</Button>}
+                {canManage && (
+                    <Button type="primary" icon={<PlusOutlined />} onClick={onCreate}>
+                        Nouveau contrat
+                    </Button>
+                )}
                 <Flex>
                     <Button
                         icon={<AppstoreOutlined />}
@@ -231,6 +235,7 @@ export function ContractsFilters({
     pageSize,
     onPageSizeChange,
     typeOptions,
+    canManage = true,
 }: {
     search: string;
     onSearchChange: (value: string) => void;
@@ -241,6 +246,7 @@ export function ContractsFilters({
     pageSize: number;
     onPageSizeChange: (value: number) => void;
     typeOptions: { value: number | "all"; label: string }[];
+    canManage?: boolean;
 }) {
     const { token } = theme.useToken();
     const pageSizeOptions = [5, 10, 20, 50, 100, 150, 500].map((v) => ({
@@ -277,12 +283,14 @@ export function ContractsFilters({
                         { value: "expired", label: "Expires" },
                     ]}
                 />
-                <Select<number | "all">
-                    value={contractType}
-                    style={{ width: 260 }}
-                    onChange={onContractTypeChange}
-                    options={typeOptions}
-                />
+                {canManage && (
+                    <Select<number | "all">
+                        value={contractType}
+                        style={{ width: 260 }}
+                        onChange={onContractTypeChange}
+                        options={typeOptions}
+                    />
+                )}
                 <Select<number>
                     value={pageSize}
                     style={{ width: 120 }}

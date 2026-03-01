@@ -48,7 +48,6 @@ export const SIDEBAR_ITEMS: AppMenuItem[] = [
         key: "/contracts",
         icon: <FileTextOutlined />,
         label: "Contrats",
-        adminOnly: true,
     },
     {
         key: "/teams",

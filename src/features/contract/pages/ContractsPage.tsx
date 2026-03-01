@@ -7,6 +7,8 @@ import { useContractTypesData } from "../../contract_types/hooks/useContracts";
 import type { User } from "../../users/types/user.type";
 import { userService } from "../../users/services/user.service";
 import { normalizeApiError } from "../../../lib/api_client/apiError";
+import { userStorage } from "../../../lib/storage/userStorage";
+import { isAdminRole } from "../../../lib/auth/role";
 import {
     ContractCreateModal,
     type ContractCreateValues,
@@ -25,6 +27,8 @@ type ContractStatusFilter = "all" | "active" | "expiring_soon" | "expired";
 export function ContractsPage() {
     const { token } = theme.useToken();
     const screens = Grid.useBreakpoint();
+    const currentUser = userStorage.getUser();
+    const canManage = isAdminRole(currentUser?.role);
     const [messageApi, contextHolder] = message.useMessage();
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [openCreateContract, setOpenCreateContract] = useState(false);
@@ -65,12 +69,14 @@ export function ContractsPage() {
     const typeOptions = useMemo(
         () => [
             { value: "all" as const, label: "Tous les types" },
-            ...contractTypes.map((type) => ({
-                value: type.id,
-                label: `${type.name} (${type.code})`,
-            })),
+            ...(canManage
+                ? contractTypes.map((type) => ({
+                      value: type.id,
+                      label: `${type.name} (${type.code})`,
+                  }))
+                : []),
         ],
-        [contractTypes]
+        [canManage, contractTypes]
     );
 
     const columns = useMemo(
@@ -83,10 +89,12 @@ export function ContractsPage() {
     );
 
     useEffect(() => {
+        if (!canManage) return;
         void fetchContractTypes();
-    }, [fetchContractTypes]);
+    }, [canManage, fetchContractTypes]);
 
     useEffect(() => {
+        if (!canManage) return;
         let active = true;
         const run = async () => {
             setLoadingUsers(true);
@@ -103,7 +111,7 @@ export function ContractsPage() {
         return () => {
             active = false;
         };
-    }, [messageApi]);
+    }, [canManage, messageApi]);
 
     useEffect(() => {
         void fetchContracts({
@@ -124,6 +132,7 @@ export function ContractsPage() {
     };
 
     const handleCreateOrUpdate = async (values: ContractCreateValues) => {
+        if (!canManage) return;
         setCreatingContract(true);
         try {
             const payload = {
@@ -160,6 +169,7 @@ export function ContractsPage() {
     };
 
     const handleDeleteContract = async (contractId: number) => {
+        if (!canManage) return;
         setDeletingContract(true);
         try {
             await deleteContract(contractId);
@@ -194,6 +204,7 @@ export function ContractsPage() {
     };
 
     const handleCreateContractType = async (values: ContractTypeFormValues) => {
+        if (!canManage) return;
         setCreatingType(true);
         try {
             await createContractType({
@@ -231,6 +242,7 @@ export function ContractsPage() {
                     onCreateType={() => setOpenCreateType(true)}
                     viewMode={viewMode}
                     onViewModeChange={setViewMode}
+                    canManage={canManage}
                 />
 
                 <ContractsStatsCards stats={stats} />
@@ -257,6 +269,7 @@ export function ContractsPage() {
                         setPage(1);
                     }}
                     typeOptions={typeOptions}
+                    canManage={canManage}
                 />
 
                 <Card>
@@ -299,7 +312,7 @@ export function ContractsPage() {
             </Flex>
 
             <ContractCreateModal
-                open={openCreateContract}
+                open={canManage && openCreateContract}
                 onClose={() => {
                     setOpenCreateContract(false);
                     setEditingContract(null);
@@ -315,7 +328,7 @@ export function ContractsPage() {
             />
 
             <ContractTypeFormModal
-                open={openCreateType}
+                open={canManage && openCreateType}
                 onClose={() => setOpenCreateType(false)}
                 onSubmit={(values) => void handleCreateContractType(values)}
                 submitting={creatingType}
@@ -332,6 +345,7 @@ export function ContractsPage() {
                 onDelete={handleDeleteContract}
                 onExportPdf={(id) => void handleExportPdf(id)}
                 deleting={deletingContract}
+                canManage={canManage}
             />
         </>
     );

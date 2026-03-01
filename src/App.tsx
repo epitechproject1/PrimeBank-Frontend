@@ -35,8 +35,9 @@ function App() {
 
                     <Route element={<RequireAdmin />}>
                         <Route path="/users" element={<UsersPage />} />
-                        <Route path="/contracts" element={<ContractsPage />} />
                     </Route>
+
+                    <Route path="/contracts" element={<ContractsPage />} />
 
                     {/* ── PLANNING — routes dédiées ── */}
                     <Route element={<RequireAdmin />}>
