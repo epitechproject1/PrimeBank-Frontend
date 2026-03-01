@@ -8,12 +8,16 @@ import type { ShiftOverrideReasonCode } from "../../shiftOverride/types/shiftOve
 // ENUMS
 // ==============================
 
-/**
- * Doit correspondre EXACTEMENT aux valeurs backend.
- */
 export type ShiftType =
     | "WORK"
-    | "BREAK"
+    | "BREAK";
+
+export type ClockStatus =
+    | "NOT_STARTED"
+    | "CLOCK_IN_PENDING"
+    | "IN_PROGRESS"
+    | "CLOCK_OUT_PENDING"
+    | "COMPLETED";
 
 // ==============================
 // MODEL
@@ -30,14 +34,10 @@ export interface Shift {
     assignment_detail?: ScheduleAssignment;
 
     // ───────── DATE ─────────
-    /**
-     * Format: YYYY-MM-DD
-     */
+    /** Format: YYYY-MM-DD */
     date: string;
 
-    /**
-     * Format: HH:mm:ss
-     */
+    /** Format: HH:mm:ss */
     start_time: string | null;
     end_time: string | null;
 
@@ -45,22 +45,23 @@ export interface Shift {
     shift_type: ShiftType;
     shift_type_display: string;
 
+    // ───────── CLOCK STATUS ─────────
+    /**
+     * Statut de pointage calculé par le backend.
+     * Peut être absent si l'endpoint ne le retourne pas encore.
+     */
+    clock_status?: ClockStatus;
+
     // ───────── OVERRIDE STATE ─────────
     overridden: boolean;
 
-    /**
-     * true si override cancelled
-     */
+    /** true si override cancelled */
     cancelled?: boolean;
 
-    /**
-     * code enum venant du backend
-     */
+    /** code enum venant du backend */
     override_reason?: ShiftOverrideReasonCode | null;
 
-    /**
-     * commentaire override
-     */
+    /** commentaire override */
     override_note?: string | null;
 
     // ───────── META ─────────
@@ -75,19 +76,14 @@ export interface CreateShiftPayload {
     user: number;
     assignment: number;
 
-    /**
-     * Format: YYYY-MM-DD
-     */
+    /** Format: YYYY-MM-DD */
     date: string;
 
-    /**
-     * Format: HH:mm:ss
-     */
+    /** Format: HH:mm:ss */
     start_time?: string | null;
     end_time?: string | null;
 
     shift_type: ShiftType;
-
     overridden?: boolean;
 }
 

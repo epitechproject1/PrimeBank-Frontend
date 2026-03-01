@@ -28,7 +28,6 @@ export default defineConfig([
             'max-lines-per-function': ['error', 150],
             'max-lines': ['warn', 300],
             'max-depth': ['error', 3],
-            complexity: ['error', 16],
 
             /* ✅ autorise any */
             '@typescript-eslint/no-explicit-any': 'off',

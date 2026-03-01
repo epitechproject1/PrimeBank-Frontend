@@ -51,7 +51,7 @@ export function useWeekPatternsData() {
         async (payload: CreateWeekPatternPayload) => {
             try {
                 await weekPatternService.createWeekPattern(payload);
-                message.success("Semaine type créée");
+                message.success("Semaine types créée");
                 await fetchWeekPatterns();
             } catch (err) {
                 message.error(getErrorMessage(err, "Erreur création"));
@@ -86,7 +86,7 @@ export function useWeekPatternsData() {
                 message.success("Semaine supprimée");
                 await fetchWeekPatterns();
             } catch {
-                message.error("Impossible de supprimer cette semaine type déja associer");
+                message.error("Impossible de supprimer cette semaine types déja associer");
             }
         },
         [fetchWeekPatterns]
