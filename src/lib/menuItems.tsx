@@ -7,7 +7,7 @@
     ThunderboltOutlined,
     AppstoreOutlined,
     FileTextOutlined,
-    BarChartOutlined,
+    // BarChartOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 
@@ -25,11 +25,11 @@ export const SIDEBAR_ITEMS: AppMenuItem[] = [
     },
 
     // ───────────────────────── KPI
-    {
-        key: "/kpi",
-        icon: <BarChartOutlined />,
-        label: "Statistiques",
-    },
+    // {
+    //     key: "/kpi",
+    //     icon: <BarChartOutlined />,
+    //     label: "Statistiques",
+    // },
 
     // ───────────────────────── USER PLANNING
     {
