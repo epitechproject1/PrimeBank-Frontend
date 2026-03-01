@@ -1,9 +1,10 @@
 import React from "react";
-import { Flex, Typography, Tag, Button, Tooltip, Popconfirm } from "antd";
+import { Flex, Typography, Tag, Button, Tooltip, Popconfirm, theme } from "antd";
 import { EditOutlined, DeleteOutlined, BankOutlined } from "@ant-design/icons";
 import type { TeamType } from "../../types/teams.type";
 
 const { Title, Text } = Typography;
+const { useToken } = theme;
 
 type Props = {
     team: TeamType;
@@ -11,7 +12,6 @@ type Props = {
     initials: string;
     name: string;
     canOpen: boolean;
-
     onEdit?: (team: TeamType) => void;
     onDelete?: (id: number) => void;
 };
@@ -21,9 +21,9 @@ function stop(e: React.MouseEvent) {
 }
 
 export function TeamsGridCardHeader({ team, pinned, initials, name, canOpen, onEdit, onDelete }: Props) {
-    const bg = pinned
-        ? "linear-gradient(135deg, rgba(22,119,255,0.13), rgba(22,119,255,0.04))"
-        : "linear-gradient(135deg, rgba(22,119,255,0.10), rgba(22,119,255,0.02))";
+    const { token } = useToken();
+
+    const bg = pinned ? token.colorPrimaryBgHover : token.colorPrimaryBg;
 
     return (
         <div style={{ padding: 16, background: bg }}>
@@ -36,11 +36,11 @@ export function TeamsGridCardHeader({ team, pinned, initials, name, canOpen, onE
                             borderRadius: "50%",
                             display: "grid",
                             placeItems: "center",
-                            background: "#1677ff",
-                            color: "white",
+                            background: token.colorPrimary,
+                            color: "#fff",
                             fontWeight: 700,
                             fontSize: 18,
-                            boxShadow: "0 6px 18px rgba(22,119,255,0.25)",
+                            boxShadow: "0 6px 18px rgba(22,119,255,0.30)",
                             flexShrink: 0,
                         }}
                     >
@@ -51,7 +51,7 @@ export function TeamsGridCardHeader({ team, pinned, initials, name, canOpen, onE
                         <Flex align="center" gap={8} style={{ minWidth: 0 }}>
                             <Title
                                 level={5}
-                                style={{ margin: 0, lineHeight: 1.2, maxWidth: 220 }}
+                                style={{ margin: 0, lineHeight: 1.2, maxWidth: 220, color: token.colorText }}
                                 ellipsis={{ tooltip: name }}
                             >
                                 {name}
@@ -62,7 +62,7 @@ export function TeamsGridCardHeader({ team, pinned, initials, name, canOpen, onE
                             {canOpen ? "Cliquer sur la carte pour voir les détails" : "Accès non autorisé"}
                         </Text>
 
-                        {team.department ? (
+                        {team.department && (
                             <div style={{ marginTop: 6 }}>
                                 <Tag
                                     icon={<BankOutlined />}
@@ -80,27 +80,23 @@ export function TeamsGridCardHeader({ team, pinned, initials, name, canOpen, onE
                                     {team.department.name ?? `Dept #${team.department.id}`}
                                 </Tag>
                             </div>
-                        ) : null}
+                        )}
                     </div>
                 </Flex>
 
                 <Flex className="team-card-actions" gap={6} onClick={stop}>
-                    {onEdit ? (
+                    {onEdit && (
                         <Tooltip title="Modifier">
                             <Button
                                 type="text"
                                 size="small"
                                 icon={<EditOutlined />}
-                                onClick={(e) => {
-                                    stop(e);
-                                    onEdit(team);
-                                }}
-                                style={{ color: "#111827" }}
+                                onClick={(e) => { stop(e); onEdit(team); }}
                             />
                         </Tooltip>
-                    ) : null}
+                    )}
 
-                    {onDelete ? (
+                    {onDelete && (
                         <Popconfirm
                             title="Supprimer cette équipe ?"
                             description="Cette action est irréversible."
@@ -113,7 +109,7 @@ export function TeamsGridCardHeader({ team, pinned, initials, name, canOpen, onE
                                 <Button danger type="text" size="small" icon={<DeleteOutlined />} onClick={stop} />
                             </Tooltip>
                         </Popconfirm>
-                    ) : null}
+                    )}
                 </Flex>
             </Flex>
         </div>

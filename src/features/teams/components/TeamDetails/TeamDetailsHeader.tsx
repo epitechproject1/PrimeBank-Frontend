@@ -1,33 +1,29 @@
-import { Avatar, Button, Flex, Tag, Typography } from "antd";
+import { Avatar, Button, Flex, Tag, Typography, theme } from "antd";
 import { BankOutlined, EditOutlined, TeamOutlined } from "@ant-design/icons";
 import type { TeamType } from "../../types/teams.type";
 import { AVATAR_COLORS, TAG_COLORS, getInitials } from "../../utils/teams-constants";
 
 const { Title, Paragraph } = Typography;
+const { useToken } = theme;
 
 type Props = {
     team: TeamType;
     colorIndex: number;
-
     onEditClick?: () => void;
     canEdit?: boolean;
 };
 
-export function TeamDetailsHeader({
-                                      team,
-                                      colorIndex,
-                                      onEditClick,
-                                      canEdit = false,
-                                  }: Props) {
+export function TeamDetailsHeader({ team, colorIndex, onEditClick, canEdit = false }: Props) {
+    const { token } = useToken();
     const avatarColor = AVATAR_COLORS[colorIndex % AVATAR_COLORS.length];
     const tagColor = TAG_COLORS[colorIndex % TAG_COLORS.length];
 
     return (
         <div
             style={{
-                background: `linear-gradient(135deg, ${avatarColor}25 0%, ${avatarColor}10 100%)`,
+                background: `linear-gradient(135deg, ${avatarColor}22 0%, ${avatarColor}0a 100%)`,
                 padding: "32px 32px 24px",
-                borderBottom: "1px solid #f0f0f0",
+                borderBottom: `1px solid ${token.colorBorderSecondary}`,
             }}
         >
             <Flex gap={20} align="flex-start">
@@ -39,14 +35,14 @@ export function TeamDetailsHeader({
                         fontSize: 32,
                         flexShrink: 0,
                         boxShadow: `0 8px 24px ${avatarColor}50`,
-                        border: "4px solid white",
+                        border: `4px solid ${token.colorBgContainer}`,
                     }}
                 >
                     {getInitials(team.name)}
                 </Avatar>
 
                 <Flex vertical style={{ flex: 1, minWidth: 0 }}>
-                    <Title level={3} style={{ margin: 0, marginBottom: 8 }}>
+                    <Title level={3} style={{ margin: 0, marginBottom: 8, color: token.colorText }}>
                         {team.name}
                     </Title>
 

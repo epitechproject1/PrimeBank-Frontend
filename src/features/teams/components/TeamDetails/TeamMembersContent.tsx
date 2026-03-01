@@ -1,6 +1,8 @@
-import { Empty, List } from "antd";
+import { Empty, List, theme } from "antd";
 import type { TeamMember, TeamType } from "../../types/teams.type";
 import { TeamMemberRow } from "./TeamMemberRow";
+
+const { useToken } = theme;
 
 type Props = {
     team: TeamType;
@@ -25,6 +27,8 @@ export function TeamMembersContent({
                                        debouncedQ,
                                        pageSize,
                                    }: Props) {
+    const { token } = useToken();
+
     const emptyDescription = debouncedQ
         ? `Aucun membre trouvé pour "${debouncedQ}"`
         : "Aucun membre dans cette équipe";
@@ -36,7 +40,7 @@ export function TeamMembersContent({
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                 style={{
                     padding: "32px 0",
-                    border: "1px solid #f0f0f0",
+                    border: `1px solid ${token.colorBorderSecondary}`,
                     borderRadius: 12,
                 }}
             />
@@ -48,7 +52,7 @@ export function TeamMembersContent({
             loading={loading}
             dataSource={items}
             style={{
-                border: "1px solid #f0f0f0",
+                border: `1px solid ${token.colorBorderSecondary}`,
                 borderRadius: 12,
                 overflow: "auto",
             }}

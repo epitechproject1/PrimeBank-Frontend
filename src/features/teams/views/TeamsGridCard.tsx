@@ -1,18 +1,18 @@
-import { Card, Col } from "antd";
+import { Card, Col, theme } from "antd";
 import type { TeamType } from "../types/teams.type";
 
 import { TeamsGridCardHeader } from "./card/TeamsGridCardHeader";
 import { TeamsGridCardBody } from "./card/TeamsGridCardBody";
 import { TeamsGridCardFooter } from "./card/TeamsGridCardFooter";
 
+const { useToken } = theme;
+
 type Props = {
     team: TeamType;
     index: number;
     pinned?: boolean;
-
     onView: (team: TeamType, index: number) => void;
     canViewDetails: (team: TeamType) => boolean;
-
     onEdit?: (team: TeamType) => void;
     onDelete?: (id: number) => void;
 };
@@ -20,7 +20,6 @@ type Props = {
 function getInitials(name?: string) {
     const s = (name ?? "").trim().replace(/\s+/g, " ");
     if (!s) return "--";
-
     const parts = s.split(" ").filter(Boolean);
     const a = parts[0]?.[0] ?? "";
     const b = parts[1]?.[0] ?? parts[0]?.[1] ?? "";
@@ -34,15 +33,24 @@ function getLeaderName(team: TeamType) {
 }
 
 export function TeamsGridCard({ team, index, pinned, onView, canViewDetails, onEdit, onDelete }: Props) {
+    const { token } = useToken();
+
     const name = (team.name ?? "").trim() || "-";
     const initials = getInitials(name);
     const leaderName = getLeaderName(team);
     const membersCount = team.members_count ?? 0;
-
     const canOpen = canViewDetails(team);
 
-    const baseShadow = pinned ? "0 10px 26px rgba(22,119,255,0.10)" : "0 10px 26px rgba(0,0,0,0.06)";
-    const hoverShadow = pinned ? "0 18px 52px rgba(22,119,255,0.15)" : "0 18px 52px rgba(0,0,0,0.10)";
+    const baseShadow = pinned
+        ? "0 10px 26px rgba(22,119,255,0.10)"
+        : "0 4px 16px rgba(0,0,0,0.06)";
+    const hoverShadow = pinned
+        ? "0 18px 52px rgba(22,119,255,0.18)"
+        : "0 12px 36px rgba(0,0,0,0.14)";
+
+    const border = pinned
+        ? `1.5px solid ${token.colorPrimaryBorder}`
+        : `1px solid ${token.colorBorderSecondary}`;
 
     return (
         <Col xs={24} sm={12} lg={8}>
@@ -53,18 +61,16 @@ export function TeamsGridCard({ team, index, pinned, onView, canViewDetails, onE
                     width: "100%",
                     borderRadius: 18,
                     overflow: "hidden",
-                    border: pinned ? "1.5px solid rgba(22,119,255,0.35)" : "1px solid rgba(0,0,0,0.06)",
+                    border,
                     boxShadow: baseShadow,
                     transition: "all 220ms ease",
-                    background: "rgba(255,255,255,0.92)",
+                    background: token.colorBgContainer,
                     height: "100%",
                     cursor: canOpen ? "pointer" : "default",
                     opacity: canOpen ? 1 : 0.92,
                 }}
                 styles={{ body: { padding: 0 } }}
-                onClick={() => {
-                    if (canOpen) onView(team, index);
-                }}
+                onClick={() => { if (canOpen) onView(team, index); }}
                 onMouseEnter={(e) => {
                     e.currentTarget.style.transform = "translateY(-6px)";
                     e.currentTarget.style.boxShadow = hoverShadow;
@@ -83,9 +89,7 @@ export function TeamsGridCard({ team, index, pinned, onView, canViewDetails, onE
                     onEdit={onEdit}
                     onDelete={onDelete}
                 />
-
                 <TeamsGridCardBody team={team} />
-
                 <TeamsGridCardFooter leaderName={leaderName} membersCount={membersCount} />
             </Card>
         </Col>

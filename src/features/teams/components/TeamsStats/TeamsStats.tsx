@@ -1,5 +1,7 @@
-import { Flex, Card, Avatar, Statistic } from "antd";
+import { Flex, Card, Avatar, Statistic, theme } from "antd";
 import { TeamOutlined, BankOutlined, CalendarOutlined } from "@ant-design/icons";
+
+const { useToken } = theme;
 
 interface TeamsStatsProps {
     totalTeams: number;
@@ -18,6 +20,8 @@ export function TeamsStats({
                                thisMonthCount,
                                colors,
                            }: TeamsStatsProps) {
+    const { token } = useToken();
+
     const stats = [
         {
             title: "Total équipes",
@@ -44,7 +48,14 @@ export function TeamsStats({
             {stats.map((stat, i) => (
                 <Card
                     key={i}
-                    style={{ flex: 1, minWidth: 160 }}
+                    style={{
+                        flex: 1,
+                        minWidth: 160,
+                        background: token.colorBgContainer,
+                        border: `1px solid ${stat.color}33`,
+                        borderRadius: 12,
+                        boxShadow: `0 2px 12px ${stat.color}18`,
+                    }}
                     styles={{ body: { padding: "20px 24px" } }}
                 >
                     <Flex align="center" gap={16}>
@@ -52,12 +63,16 @@ export function TeamsStats({
                             size={44}
                             icon={stat.icon}
                             style={{
-                                backgroundColor: `${stat.color}22`,
+                                backgroundColor: `${stat.color}1a`,
                                 color: stat.color,
                             }}
                         />
                         <Statistic
-                            title={stat.title}
+                            title={
+                                <span style={{ fontSize: 12, color: token.colorTextSecondary }}>
+                                    {stat.title}
+                                </span>
+                            }
                             value={stat.value}
                             valueStyle={{
                                 fontSize: 26,

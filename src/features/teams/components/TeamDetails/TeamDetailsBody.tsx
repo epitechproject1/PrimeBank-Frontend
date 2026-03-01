@@ -1,4 +1,4 @@
-import { Typography } from "antd";
+import { Typography, theme } from "antd";
 import { TeamOutlined } from "@ant-design/icons";
 import { useMemo, useState, useCallback } from "react";
 
@@ -8,6 +8,7 @@ import { TeamMembersList } from "./TeamMembersList";
 import { TeamDetailsInfo } from "./TeamDetailsInfo";
 
 const { Text } = Typography;
+const { useToken } = theme;
 
 interface Props {
     team: TeamType;
@@ -27,6 +28,7 @@ function getTeamMembers(team: TeamType): TeamMember[] {
 }
 
 export function TeamDetailsBody({ team, colorIndex }: Props) {
+    const { token } = useToken();
     const leaderName = useMemo(() => getLeaderName(team), [team]);
     const members = useMemo(() => getTeamMembers(team), [team]);
 
@@ -42,13 +44,18 @@ export function TeamDetailsBody({ team, colorIndex }: Props) {
     }, []);
 
     return (
-        <div style={{ padding: "22px 26px 26px", background: "#fff" }}>
+        <div
+            style={{
+                padding: "22px 26px 26px",
+                background: token.colorBgContainer,
+            }}
+        >
             <TeamDetailsStats team={team} members={members} leaderName={leaderName} />
 
             <TeamDetailsInfo team={team} />
 
-            <Text strong style={{ display: "block", marginBottom: 10 }}>
-                <TeamOutlined /> Membres de l’équipe ({displayedMembersCount})
+            <Text strong style={{ display: "block", marginBottom: 10, color: token.colorText }}>
+                <TeamOutlined /> Membres de l'équipe ({displayedMembersCount})
             </Text>
 
             <TeamMembersList

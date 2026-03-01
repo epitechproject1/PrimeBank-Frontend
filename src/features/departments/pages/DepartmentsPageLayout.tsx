@@ -1,11 +1,13 @@
 import React from "react";
-import { Card, Empty, Flex, Spin, Grid } from "antd";
+import { Card, Empty, Flex, Spin, Grid, theme } from "antd";
 import type { DepartmentType, DepartmentStats, DepartmentOrdering } from "../types/departments.type";
 
 import { DepartmentsStats } from "../components/DepartmentsStats/DepartmentsStats";
 import { DepartmentsToolbar } from "../components/DepartmentsToolbar/DepartmentsToolbar";
 import { DepartmentsContent } from "../components/DepartmentsContent/DepartmentsContent";
 import { DepartmentsHeader } from "../views/DepartmentsHeader";
+
+const { useToken } = theme;
 
 type ViewMode = "grid" | "list";
 type Screens = ReturnType<typeof Grid.useBreakpoint>;
@@ -61,6 +63,7 @@ type Props = {
     currentUser: CurrentUserLite;
 };
 
+
 function PageShell({ screens, children }: { screens: Screens; children: React.ReactNode }) {
     return (
         <Flex vertical style={{ minHeight: "100vh", padding: screens.md ? "24px 32px" : "14px" }}>
@@ -69,40 +72,38 @@ function PageShell({ screens, children }: { screens: Screens; children: React.Re
     );
 }
 
+
 function TopCard({
                      screens,
-                     primaryColor,
                      onAdd,
                      canAdd,
                      currentUser,
                  }: {
     screens: Screens;
-    primaryColor: string;
     onAdd: () => void;
     canAdd: boolean;
     currentUser: CurrentUserLite;
 }) {
+    const { token } = useToken();
 
     return (
         <div
             style={{
-                background: "rgba(255,255,255,0.9)",
+                background: token.colorBgContainer,
                 borderRadius: 18,
                 padding: 18,
-                border: "1px solid rgba(0,0,0,0.06)",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+                border: `1px solid ${token.colorBorderSecondary}`,
+                boxShadow: `0 10px 30px rgba(0,0,0,0.07)`,
                 backdropFilter: "blur(10px)",
             }}
         >
             <DepartmentsHeader
                 onAdd={onAdd}
                 screens={screens}
-                primaryColor={primaryColor}
                 canAdd={canAdd}
             />
 
             <div style={{ marginTop: 16 }}>
-                {/* ✅ Plus de props manuelles — le composant fetche lui-même via /departments/stats/ */}
                 <DepartmentsStats
                     role={mapRole(currentUser.role)}
                     colors={{
@@ -118,6 +119,7 @@ function TopCard({
         </div>
     );
 }
+
 
 function ToolbarSection({
                             search,
@@ -145,7 +147,6 @@ function ToolbarSection({
     currentUser: CurrentUserLite;
 }) {
     const role = currentUser.role;
-
     const canExportCsv = role === "ADMIN" || role === "MANAGER";
     const canExportPdf = role === "ADMIN" || role === "MANAGER";
     const canImport = role === "ADMIN";
@@ -170,6 +171,7 @@ function ToolbarSection({
         </div>
     );
 }
+
 
 function ContentSection({
                             spinning,
@@ -196,11 +198,20 @@ function ContentSection({
     onPageChange: (p: number, ps: number) => void;
     currentUser: CurrentUserLite;
 }) {
+    const { token } = useToken();
+
     return (
         <Spin spinning={spinning} style={{ width: "100%" }}>
             <div style={{ marginTop: 10 }}>
                 {!spinning && departments.length === 0 ? (
-                    <Card styles={{ body: { padding: 24 } }} style={{ borderRadius: 12 }}>
+                    <Card
+                        styles={{ body: { padding: 24 } }}
+                        style={{
+                            borderRadius: 12,
+                            background: token.colorBgContainer,
+                            border: `1px solid ${token.colorBorderSecondary}`,
+                        }}
+                    >
                         <Empty description="Aucun département trouvé." />
                     </Card>
                 ) : (
@@ -223,10 +234,10 @@ function ContentSection({
     );
 }
 
+
 export function DepartmentsPageLayout(props: Props) {
     const {
         screens,
-        primaryColor,
         departments,
         loading,
         searching,
@@ -254,10 +265,8 @@ export function DepartmentsPageLayout(props: Props) {
 
     return (
         <PageShell screens={screens}>
-            {/* ✅ On passe currentUser à TopCard qui le transmet à DepartmentsStats */}
             <TopCard
                 screens={screens}
-                primaryColor={primaryColor}
                 onAdd={onAdd}
                 canAdd={canAdd}
                 currentUser={currentUser}

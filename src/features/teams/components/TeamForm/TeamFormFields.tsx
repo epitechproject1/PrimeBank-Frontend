@@ -1,4 +1,4 @@
-import  { useCallback } from "react";
+import { useCallback } from "react";
 import { Form, Input, Select, Modal } from "antd";
 import type { FormInstance, RuleObject } from "antd/es/form";
 import type { DefaultOptionType } from "antd/es/select";
@@ -111,7 +111,11 @@ function TeamFormItems({
                 />
             </Form.Item>
 
-            <Form.Item name="owner_id" label="Responsable" rules={[{ required: true, message: "Responsable obligatoire" }]}>
+            <Form.Item
+                name="owner_id"
+                label="Responsable"
+                rules={[{ required: true, message: "Responsable obligatoire" }]}
+            >
                 <Select
                     showSearch
                     options={userOptions}
@@ -121,7 +125,11 @@ function TeamFormItems({
                 />
             </Form.Item>
 
-            <Form.Item name="department_id" label="Département" rules={[{ required: true, message: "Département obligatoire" }]}>
+            <Form.Item
+                name="department_id"
+                label="Département"
+                rules={[{ required: true, message: "Département obligatoire" }]}
+            >
                 <Select
                     showSearch
                     loading={loadingOptions}
@@ -159,7 +167,12 @@ export function TeamFormFields({ form, loadingOptions, userOptions, deptOptions 
 
     return (
         <Form form={form} layout="vertical" onValuesChange={onValuesChange}>
-            <TeamFormItems form={form} loadingOptions={loadingOptions} userOptions={userOptions} deptOptions={deptOptions} />
+            <TeamFormItems
+                form={form}
+                loadingOptions={loadingOptions}
+                userOptions={userOptions}
+                deptOptions={deptOptions}
+            />
         </Form>
     );
 }

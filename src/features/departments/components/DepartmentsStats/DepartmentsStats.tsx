@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Flex, Card, Avatar, Statistic, Skeleton, Alert } from "antd";
+import { Flex, Card, Avatar, Statistic, Skeleton, Alert, theme } from "antd";
 import {
     ApartmentOutlined,
     CheckCircleOutlined,
@@ -8,6 +8,8 @@ import {
     CalendarOutlined,
 } from "@ant-design/icons";
 import { apiClient } from "../../../../lib/api_client/apiClient.ts";
+
+const { useToken } = theme;
 
 type UserRole = "ADMIN" | "MANAGER" | "EMPLOYEE";
 
@@ -60,7 +62,11 @@ async function fetchDepartmentStats(): Promise<StatsApiResponse> {
     return res.data;
 }
 
-function buildStats(role: UserRole, colors: DepartmentsStatsProps["colors"], d: StatsApiResponse | null): StatItem[] {
+function buildStats(
+    role: UserRole,
+    colors: DepartmentsStatsProps["colors"],
+    d: StatsApiResponse | null
+): StatItem[] {
     const c = colors ?? DEFAULT_COLORS;
 
     if (role === "EMPLOYEE") return [];
@@ -118,14 +124,20 @@ function buildStats(role: UserRole, colors: DepartmentsStatsProps["colors"], d: 
 
 
 function KpiCard({ stat, loading, index }: { stat: StatItem; loading: boolean; index: number }) {
+    const { token } = useToken();
+
+    const baseShadow = `0 2px 12px ${stat.color}18`;
+    const hoverShadow = `0 8px 24px ${stat.color}30`;
+
     return (
         <Card
             style={{
                 flex: 1,
                 minWidth: 180,
                 borderRadius: 12,
-                border: `1px solid ${stat.color}22`,
-                boxShadow: `0 2px 12px ${stat.color}18`,
+                border: `1px solid ${stat.color}33`,
+                boxShadow: baseShadow,
+                background: token.colorBgContainer,
                 transition: "transform 0.2s ease, box-shadow 0.2s ease",
                 animationDelay: `${index * 80}ms`,
                 animationFillMode: "both",
@@ -134,11 +146,11 @@ function KpiCard({ stat, loading, index }: { stat: StatItem; loading: boolean; i
             hoverable
             onMouseEnter={(e) => {
                 (e.currentTarget as HTMLDivElement).style.transform = "translateY(-3px)";
-                (e.currentTarget as HTMLDivElement).style.boxShadow = `0 8px 24px ${stat.color}30`;
+                (e.currentTarget as HTMLDivElement).style.boxShadow = hoverShadow;
             }}
             onMouseLeave={(e) => {
                 (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-                (e.currentTarget as HTMLDivElement).style.boxShadow = `0 2px 12px ${stat.color}18`;
+                (e.currentTarget as HTMLDivElement).style.boxShadow = baseShadow;
             }}
         >
             <Flex align="center" gap={16}>
@@ -146,7 +158,7 @@ function KpiCard({ stat, loading, index }: { stat: StatItem; loading: boolean; i
                     size={48}
                     icon={stat.icon}
                     style={{
-                        backgroundColor: `${stat.color}18`,
+                        backgroundColor: `${stat.color}1a`,
                         color: stat.color,
                         flexShrink: 0,
                         fontSize: 20,
@@ -165,13 +177,13 @@ function KpiCard({ stat, loading, index }: { stat: StatItem; loading: boolean; i
                                 style={{
                                     fontSize: 12,
                                     fontWeight: 500,
-                                    color: "#8c8c8c",
+                                    color: token.colorTextSecondary,
                                     letterSpacing: "0.02em",
                                     textTransform: "uppercase",
                                 }}
                             >
-                {stat.title}
-              </span>
+                                {stat.title}
+                            </span>
                         }
                         value={stat.value}
                         suffix={stat.suffix}

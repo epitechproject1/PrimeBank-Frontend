@@ -1,6 +1,8 @@
-import { Grid } from "antd";
+import { Grid, theme } from "antd";
 import { TeamsStats } from "./TeamsStats/TeamsStats.tsx";
 import { TeamsHeader } from "../views/TeamsHeader";
+
+const { useToken } = theme;
 
 type Screens = ReturnType<typeof Grid.useBreakpoint>;
 
@@ -23,14 +25,16 @@ export function TeamsTopSection({
                                     thisMonthCount,
                                     onAdd,
                                 }: Props) {
+    const { token } = useToken();
+
     return (
         <div
             style={{
-                background: "rgba(255,255,255,0.9)",
+                background: token.colorBgContainer,
                 borderRadius: 18,
                 padding: 18,
-                border: "1px solid rgba(0,0,0,0.06)",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+                border: `1px solid ${token.colorBorderSecondary}`,
+                boxShadow: "0 10px 30px rgba(0,0,0,0.07)",
                 backdropFilter: "blur(10px)",
             }}
         >

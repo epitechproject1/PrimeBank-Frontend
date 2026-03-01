@@ -76,3 +76,16 @@ export type ApiSearchResponse<T> = {
     total_pages: number;
     query: string;
 };
+export type TeamsByDepartmentRow = {
+    department__id: number | null;
+    department__name: string | null;
+    count: number;
+};
+export type TeamStats = {
+    total_teams: number;
+    departments_count: number;
+    this_month_count: number;
+    user_teams_count: number;
+    teams_by_department: TeamsByDepartmentRow[];
+    timestamp: string;
+};

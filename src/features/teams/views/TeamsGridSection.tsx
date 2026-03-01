@@ -1,10 +1,11 @@
-import { Typography } from "antd";
+import { Typography, theme } from "antd";
 import { PushpinFilled } from "@ant-design/icons";
 
 import type { TeamType } from "../types/teams.type";
 import { TeamsGridView } from "./TeamsGridView";
 
 const { Title } = Typography;
+const { useToken } = theme;
 
 type Props = {
     teams: TeamType[];
@@ -14,13 +15,9 @@ type Props = {
     canViewDetails: (team: TeamType) => boolean;
 };
 
-export function TeamsGridSection({
-                                     teams,
-                                     onView,
-                                     onEdit,
-                                     onDelete,
-                                     canViewDetails,
-                                 }: Props) {
+export function TeamsGridSection({ teams, onView, onEdit, onDelete, canViewDetails }: Props) {
+    const { token } = useToken();
+
     const pinned = teams.filter((t) => (t.is_pinned ?? 0) === 1);
     const others = teams.filter((t) => (t.is_pinned ?? 0) !== 1);
 
@@ -29,22 +26,22 @@ export function TeamsGridSection({
             {pinned.length > 0 && (
                 <div>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                        <PushpinFilled style={{ color: "#1677ff", fontSize: 16 }} />
-                        <Title level={5} style={{ margin: 0, color: "#1677ff" }}>
+                        <PushpinFilled style={{ color: token.colorPrimary, fontSize: 16 }} />
+                        <Title level={5} style={{ margin: 0, color: token.colorPrimary }}>
                             Mes équipes
                         </Title>
                         <span
                             style={{
-                                background: "rgba(22,119,255,0.10)",
-                                color: "#1677ff",
+                                background: token.colorPrimaryBg,
+                                color: token.colorPrimary,
                                 borderRadius: 20,
                                 padding: "1px 10px",
                                 fontSize: 13,
                                 fontWeight: 600,
                             }}
                         >
-              {pinned.length}
-            </span>
+                            {pinned.length}
+                        </span>
                     </div>
 
                     <TeamsGridView
@@ -62,21 +59,21 @@ export function TeamsGridSection({
                 <div>
                     {pinned.length > 0 && (
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                            <Title level={5} style={{ margin: 0, color: "#595959" }}>
+                            <Title level={5} style={{ margin: 0, color: token.colorTextSecondary }}>
                                 Toutes les équipes
                             </Title>
                             <span
                                 style={{
-                                    background: "rgba(0,0,0,0.06)",
-                                    color: "#595959",
+                                    background: token.colorFillSecondary,
+                                    color: token.colorTextSecondary,
                                     borderRadius: 20,
                                     padding: "1px 10px",
                                     fontSize: 13,
                                     fontWeight: 600,
                                 }}
                             >
-                {others.length}
-              </span>
+                                {others.length}
+                            </span>
                         </div>
                     )}
 

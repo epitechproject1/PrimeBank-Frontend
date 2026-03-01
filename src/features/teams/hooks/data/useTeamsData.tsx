@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { message } from "antd";
-import { teamService } from "../../services/teams.service.ts";
-import type { TeamType, TeamFilters } from "../../types/teams.type.ts";
+import { teamService } from "../../services/teams.service";
+import type { TeamType, TeamFilters } from "../../types/teams.type";
 
 type ApiListResponse<T> = {
     data: T[];
@@ -18,8 +18,10 @@ interface UseTeamsDataReturn {
     setOrdering: (v: TeamFilters["ordering"]) => void;
 
     fetchTeams: (filters?: TeamFilters) => Promise<void>;
-    handleSaved: (team: TeamType, isEdit: boolean) => void;
+    handleSaved: () => Promise<void>;
     handleDelete: (id: number) => Promise<void>;
+
+    getTeamDetails: (id: number) => Promise<TeamType>;
 }
 
 export function useTeamsData(): UseTeamsDataReturn {
@@ -36,7 +38,7 @@ export function useTeamsData(): UseTeamsDataReturn {
             try {
                 const payload = (await teamService.getAll({
                     ...(filters ?? {}),
-                    ordering: (filters?.ordering ?? ordering),
+                    ordering: filters?.ordering ?? ordering,
                 })) as unknown as ApiListResponse<TeamType>;
 
                 setTeams(Array.isArray(payload?.data) ? payload.data : []);
@@ -59,7 +61,6 @@ export function useTeamsData(): UseTeamsDataReturn {
         await fetchTeams({ ordering });
     }, [fetchTeams, ordering]);
 
-
     const handleDelete = useCallback(
         async (id: number) => {
             setSaving(true);
@@ -77,5 +78,19 @@ export function useTeamsData(): UseTeamsDataReturn {
         [messageApi]
     );
 
-    return { teams, loading, saving, ordering, setOrdering, fetchTeams, handleSaved, handleDelete };
+    const getTeamDetails = useCallback(async (id: number) => {
+        return await teamService.getById(id);
+    }, []);
+
+    return {
+        teams,
+        loading,
+        saving,
+        ordering,
+        setOrdering,
+        fetchTeams,
+        handleSaved,
+        handleDelete,
+        getTeamDetails,
+    };
 }
