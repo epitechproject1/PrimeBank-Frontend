@@ -10,40 +10,32 @@ const { Content } = Layout;
 export function DashboardLayout() {
     const [collapsed, setCollapsed] = useState(false);
 
-    // Hooks Ant Design et Thème
     const { token } = theme.useToken();
     const { mode } = useThemeMode();
 
     return (
         <Layout style={{ minHeight: "100vh" }}>
 
-            {/* Sidebar (Menu de gauche) */}
             <DashboardSidebar
                 collapsed={collapsed}
                 setCollapsed={setCollapsed}
             />
 
             <Layout>
-                {/* Header (Barre du haut) */}
                 <DashboardHeader
                     collapsed={collapsed}
                     toggleCollapse={() => setCollapsed(!collapsed)}
                 />
 
-                {/* Content (Zone principale qui change selon la route) */}
                 <Content style={{
                     background: token.colorBgContainer,
                     borderRadius: token.borderRadiusLG,
-                    // Ombre légère uniquement en mode clair pour le relief
                     boxShadow: mode === 'light'
                         ? '0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02)'
                         : 'none',
-                    transition: 'all 0.2s', // Transition douce lors du changement de thème
+                    transition: 'all 0.2s',
                 }}>
 
-                    {/* 🚨 C'est ici que s'afficheront tes pages enfants
-                        (ex: DashboardHome, AccountsPage, etc.)
-                    */}
                     <Outlet />
 
                 </Content>
