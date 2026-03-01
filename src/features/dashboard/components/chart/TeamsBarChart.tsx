@@ -8,7 +8,7 @@ import {
     Tooltip as ReTooltip,
     ResponsiveContainer,
 } from "recharts";
-import { CustomTooltip } from "./CustomTooltip";
+import { CustomTooltip } from "../CustomTooltip.tsx";
 
 const { Text } = Typography;
 const { useToken } = theme;
