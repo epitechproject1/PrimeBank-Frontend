@@ -57,7 +57,6 @@ export function TeamFormModal({ open, editTeam, onClose, onSaved }: TeamFormModa
 
         return list.map((d) => {
             const labelText = d.name ?? d.title ?? d.label ?? d.code ?? `Département #${d.id}`;
-
             return {
                 value: d.id,
                 label: <span>{String(labelText)}</span>,
@@ -70,12 +69,24 @@ export function TeamFormModal({ open, editTeam, onClose, onSaved }: TeamFormModa
         if (!open) return;
 
         if (editTeam) {
+            const ownerId = editTeam.owner?.id;
+
+            const membersIds =
+                editTeam.members?.map((m) => m.id) ??
+                (editTeam as unknown as { members_preview?: { id: number }[] }).members_preview?.map(
+                    (m) => m.id
+                ) ??
+                [];
+
+            const fixedMembers =
+                ownerId && !membersIds.includes(ownerId) ? [...membersIds, ownerId] : membersIds;
+
             form.setFieldsValue({
-                name: editTeam.name,
+                name: editTeam.name ?? "",
                 description: editTeam.description ?? undefined,
-                owner_id: editTeam.owner?.id as number,
-                department_id: editTeam.department?.id as number,
-                members_ids: editTeam.members?.map((m) => m.id) ?? [],
+                owner_id: ownerId ?? undefined,
+                department_id: editTeam.department?.id ?? undefined,
+                members_ids: fixedMembers,
             });
         } else {
             form.resetFields();

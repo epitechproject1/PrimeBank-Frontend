@@ -7,7 +7,7 @@ import type {
     ApiPaginatedResponse,
     ApiSearchResponse,
     DepartmentStats,
-    DepartmentOrdering,
+    DepartmentOrdering, DepartmentStatsBreakdownRow,
 } from "../types/departments.type";
 import type { TeamLite } from "../hooks/page/useDepartmentsPage";
 
@@ -146,6 +146,12 @@ export const departmentService = {
             headers: { "Content-Type": "multipart/form-data" },
         });
 
+        return data;
+    },
+    statsBreakdown: async (): Promise<DepartmentStatsBreakdownRow[]> => {
+        const { data } = await apiClient.get<DepartmentStatsBreakdownRow[]>(
+            "/departments/stats-breakdown/"
+        );
         return data;
     },
 };

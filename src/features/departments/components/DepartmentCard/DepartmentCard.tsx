@@ -1,9 +1,10 @@
-import { Card, Typography } from "antd";
+import { Card, Typography, theme } from "antd";
 import type { DepartmentType } from "../../types/departments.type";
 import { DepartmentHeader } from "./DepartmentHeader";
 import { DepartmentFooter } from "./DepartmentFooter";
 
 const { Text } = Typography;
+const { useToken } = theme;
 
 type Props = {
     department: DepartmentType;
@@ -35,6 +36,8 @@ export function DepartmentCard({
                                    canDelete,
                                    variant = "default",
                                }: Props) {
+    const { token } = useToken();
+
     const name = (department.name ?? "").trim() || "-";
     const initials = getInitials(name);
     const directorName = getDirectorName(department);
@@ -44,16 +47,16 @@ export function DepartmentCard({
     const isHighlight = variant === "highlight";
 
     const border = isHighlight
-        ? "1px solid rgba(22,119,255,0.35)"
-        : "1px solid rgba(0,0,0,0.08)";
+        ? `1px solid ${token.colorPrimaryBorder}`
+        : `1px solid ${token.colorBorderSecondary}`;
 
     const shadow = isHighlight
-        ? "0 10px 26px rgba(22,119,255,0.10)"
-        : "0 10px 26px rgba(0,0,0,0.06)";
+        ? `0 10px 26px rgba(22,119,255,0.12)`
+        : `0 4px 16px rgba(0,0,0,0.06)`;
 
     const hoverShadow = isHighlight
-        ? "0 18px 52px rgba(22,119,255,0.18)"
-        : "0 18px 52px rgba(0,0,0,0.10)";
+        ? `0 18px 52px rgba(22,119,255,0.22)`
+        : `0 12px 36px rgba(0,0,0,0.14)`;
 
     return (
         <Card
@@ -67,7 +70,7 @@ export function DepartmentCard({
                 cursor: canOpen ? "pointer" : "default",
                 border,
                 boxShadow: shadow,
-                background: "rgba(255,255,255,0.95)",
+                background: token.colorBgContainer,
                 transition: "all 220ms ease",
             }}
             onMouseEnter={(e) => {
@@ -89,9 +92,15 @@ export function DepartmentCard({
                 onDelete={() => onDelete(department.id)}
             />
 
-            <div style={{ height: 1, background: "rgba(0,0,0,0.06)" }} />
+            <div style={{ height: 1, background: token.colorBorderSecondary }} />
 
-            <div style={{ padding: 16, minHeight: 56, background: "#fff" }}>
+            <div
+                style={{
+                    padding: 16,
+                    minHeight: 56,
+                    background: token.colorBgContainer,
+                }}
+            >
                 <Text type={department.description ? undefined : "secondary"}>
                     {department.description || "Aucune description."}
                 </Text>

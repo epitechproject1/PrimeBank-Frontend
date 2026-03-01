@@ -8,7 +8,7 @@ import type {
     ApiSearchResponse,
     ApiPaginatedResponse,
     TeamMember,
-    TeamMembersParams,
+    TeamMembersParams, TeamStats,
 } from "../types/teams.type.ts";
 
 export type TeamsFilters = {
@@ -47,7 +47,6 @@ function normalizeList<T>(raw: unknown): ApiListResponse<T> {
     return { data: items, total, query: r.query };
 }
 
-/** Déclenche le téléchargement d'un Blob dans le navigateur */
 function downloadBlob(blob: Blob, filename: string): void {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -148,7 +147,6 @@ export const teamService = {
         return data;
     },
 
-    // ─── Export ───────────────────────────────────────────────────────────────
 
     exportCsv: async (filters?: TeamsFilters, filename = "teams.csv"): Promise<Blob> => {
         const { data, headers } = await apiClient.get("/teams/export/csv/", {
@@ -170,7 +168,6 @@ export const teamService = {
         return data;
     },
 
-    // ─── Import ───────────────────────────────────────────────────────────────
 
     importCsv: async (file: File): Promise<ImportCsvResult> => {
         validateCsvFile(file);
@@ -195,5 +192,10 @@ export const teamService = {
             }
             throw err;
         }
+    },
+
+    stats: async (): Promise<TeamStats> => {
+        const { data } = await apiClient.get<TeamStats>("/teams/stats/");
+        return data;
     },
 };

@@ -126,7 +126,7 @@ async function callOnSaved(onSaved: OnSaved, team: TeamType): Promise<void> {
 export function useTeamFormSubmit(args: {
     form: FormInstance<TeamFormValues>;
     editTeam?: TeamType | null;
-    onSaved: OnSaved;     // ✅ FIX ICI
+    onSaved: OnSaved;
     onClose: () => void;
 }) {
     const { form, editTeam, onSaved, onClose } = args;

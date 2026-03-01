@@ -1,19 +1,18 @@
-import { Modal } from "antd";
+import { Modal, theme } from "antd";
 import { useCallback } from "react";
 
 import type { TeamType } from "../../types/teams.type";
 import { TeamDetailsHeader } from "./TeamDetailsHeader";
 import { TeamDetailsBody } from "./TeamDetailsBody";
 
+const { useToken } = theme;
+
 interface TeamDetailsModalProps {
     open: boolean;
     team: TeamType | null;
     onClose: () => void;
-
     onEdit?: (team: TeamType) => void;
-
     canEdit?: boolean;
-
     colorIndex: number;
     loading?: boolean;
 }
@@ -27,11 +26,10 @@ export function TeamDetailsModal({
                                      colorIndex,
                                      loading = false,
                                  }: TeamDetailsModalProps) {
-    const handleEdit = useCallback(() => {
-        if (!team) return;
-        if (!canEdit) return;
-        if (!onEdit) return;
+    const { token } = useToken();
 
+    const handleEdit = useCallback(() => {
+        if (!team || !canEdit || !onEdit) return;
         onEdit(team);
         onClose();
     }, [team, canEdit, onEdit, onClose]);
@@ -51,7 +49,7 @@ export function TeamDetailsModal({
                     maxHeight: "84vh",
                     overflowY: "auto",
                     overflowX: "hidden",
-                    background: "#fff",
+                    background: token.colorBgContainer,
                     borderRadius: 16,
                 },
             }}
@@ -64,7 +62,6 @@ export function TeamDetailsModal({
                         canEdit={canEdit}
                         onEditClick={canEdit ? handleEdit : undefined}
                     />
-
                     <TeamDetailsBody team={team} colorIndex={colorIndex} />
                 </>
             )}

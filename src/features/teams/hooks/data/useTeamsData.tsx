@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { message } from "antd";
-import { teamService } from "../../services/teams.service.ts";
-import type { TeamType, TeamFilters } from "../../types/teams.type.ts";
+import { teamService } from "../../services/teams.service";
+import type { TeamType, TeamFilters } from "../../types/teams.type";
 
-type ApiListResponse<T> = {
-    data: T[];
+type ApiListPayload = {
+    data: TeamType[];
     total: number;
     query?: string;
 };
@@ -13,37 +13,71 @@ interface UseTeamsDataReturn {
     teams: TeamType[];
     loading: boolean;
     saving: boolean;
+    thisMonth: number;
 
     ordering: TeamFilters["ordering"];
     setOrdering: (v: TeamFilters["ordering"]) => void;
 
     fetchTeams: (filters?: TeamFilters) => Promise<void>;
-    handleSaved: (team: TeamType, isEdit: boolean) => void;
+    handleSaved: () => Promise<void>;
     handleDelete: (id: number) => Promise<void>;
+
+    getTeamDetails: (id: number) => Promise<TeamType>;
+}
+
+function calcThisMonthLocal(list: TeamType[]): number {
+    const now = new Date();
+    return list.filter((t) => {
+        const raw = (t as any).created_at
+            ?? (t as any).createdAt
+            ?? (t as any).date_joined
+            ?? (t as any).created;
+        if (!raw) return false;
+        const d = new Date(raw);
+        if (isNaN(d.getTime())) return false;
+        return (
+            d.getFullYear() === now.getFullYear() &&
+            d.getMonth()    === now.getMonth()
+        );
+    }).length;
+}
+
+async function tryGetThisMonthFromStats(): Promise<number | null> {
+    try {
+        const stats = await (teamService as any).stats?.();
+        const count = stats?.this_month_count;
+        return count != null && !isNaN(Number(count)) ? Number(count) : null;
+    } catch {
+        return null;
+    }
 }
 
 export function useTeamsData(): UseTeamsDataReturn {
-    const [teams, setTeams] = useState<TeamType[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [messageApi] = message.useMessage();
-
-    const [ordering, setOrdering] = useState<TeamFilters["ordering"]>("-created_at");
+    const [teams, setTeams]         = useState<TeamType[]>([]);
+    const [loading, setLoading]     = useState(true);
+    const [saving, setSaving]       = useState(false);
+    const [thisMonth, setThisMonth] = useState(0);
+    const [messageApi]              = message.useMessage();
+    const [ordering, setOrdering]   = useState<TeamFilters["ordering"]>("-created_at");
 
     const fetchTeams = useCallback(
         async (filters?: TeamFilters) => {
             setLoading(true);
             try {
-                const payload = (await teamService.getAll({
+                const raw = await teamService.getAll({
                     ...(filters ?? {}),
-                    ordering: (filters?.ordering ?? ordering),
-                })) as unknown as ApiListResponse<TeamType>;
+                    ordering: filters?.ordering ?? ordering,
+                }) as unknown as ApiListPayload;
 
-                setTeams(Array.isArray(payload?.data) ? payload.data : []);
+                const list = Array.isArray(raw?.data) ? raw.data : [];
+                setTeams(list);
+
+                const fromStats = await tryGetThisMonthFromStats();
+                setThisMonth(fromStats ?? calcThisMonthLocal(list));
             } catch (error) {
-                const err = error as Error;
-                messageApi.error(err?.message ?? "Erreur lors du chargement");
+                messageApi.error((error as Error)?.message ?? "Erreur lors du chargement");
                 setTeams([]);
+                setThisMonth(0);
             } finally {
                 setLoading(false);
             }
@@ -59,17 +93,19 @@ export function useTeamsData(): UseTeamsDataReturn {
         await fetchTeams({ ordering });
     }, [fetchTeams, ordering]);
 
-
     const handleDelete = useCallback(
         async (id: number) => {
             setSaving(true);
             try {
                 await teamService.delete(id);
-                setTeams((prev) => prev.filter((t) => t.id !== id));
+                setTeams((prev) => {
+                    const next = prev.filter((t) => t.id !== id);
+                    setThisMonth(calcThisMonthLocal(next));
+                    return next;
+                });
                 messageApi.success("Équipe supprimée");
             } catch (error) {
-                const err = error as Error;
-                messageApi.error(err?.message ?? "Erreur lors de la suppression");
+                messageApi.error((error as Error)?.message ?? "Erreur lors de la suppression");
             } finally {
                 setSaving(false);
             }
@@ -77,5 +113,14 @@ export function useTeamsData(): UseTeamsDataReturn {
         [messageApi]
     );
 
-    return { teams, loading, saving, ordering, setOrdering, fetchTeams, handleSaved, handleDelete };
+    const getTeamDetails = useCallback(
+        async (id: number) => teamService.getById(id),
+        []
+    );
+
+    return {
+        teams, loading, saving, thisMonth,
+        ordering, setOrdering,
+        fetchTeams, handleSaved, handleDelete, getTeamDetails,
+    };
 }

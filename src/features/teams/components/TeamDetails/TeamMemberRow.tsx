@@ -1,9 +1,10 @@
-import { Avatar, List, Space, Tag, Typography } from "antd";
+import { Avatar, List, Space, Tag, Typography, theme } from "antd";
 import { MailOutlined, PhoneOutlined } from "@ant-design/icons";
 import type { TeamMember, TeamType } from "../../types/teams.type";
 import { AVATAR_COLORS, getInitials } from "../../utils/teams-constants";
 
 const { Text } = Typography;
+const { useToken } = theme;
 
 function getMemberLabel(m: TeamMember): string {
     const first = (m.first_name ?? "").trim();
@@ -24,26 +25,16 @@ type Props = {
     colorIndex: number;
 };
 
-export function TeamMemberRow({
-                                  member,
-                                  index,
-                                  team,
-                                  colorIndex,
-                              }: Props) {
+export function TeamMemberRow({ member, index, team, colorIndex }: Props) {
+    const { token } = useToken();
     const label = getMemberLabel(member);
-    const avatarColor =
-        AVATAR_COLORS[(colorIndex + index) % AVATAR_COLORS.length];
+    const avatarColor = AVATAR_COLORS[(colorIndex + index) % AVATAR_COLORS.length];
+    const phone = "phone" in member ? (member as { phone?: string }).phone : undefined;
 
-    const phone =
-        "phone" in member ? (member as { phone?: string }).phone : undefined;
+    const rowBg = index % 2 === 0 ? token.colorFillQuaternary : token.colorBgContainer;
 
     return (
-        <List.Item
-            style={{
-                padding: "12px 16px",
-                background: index % 2 === 0 ? "#fafafa" : "#fff",
-            }}
-        >
+        <List.Item style={{ padding: "12px 16px", background: rowBg }}>
             <List.Item.Meta
                 avatar={
                     <Avatar style={{ backgroundColor: avatarColor }}>
@@ -56,11 +47,7 @@ export function TeamMemberRow({
                         {member.id === team.owner?.id && (
                             <Tag
                                 color="blue"
-                                style={{
-                                    fontSize: 11,
-                                    padding: "0 6px",
-                                    borderRadius: 4,
-                                }}
+                                style={{ fontSize: 11, padding: "0 6px", borderRadius: 4 }}
                             >
                                 Responsable
                             </Tag>
@@ -77,7 +64,6 @@ export function TeamMemberRow({
                                 </Text>
                             </Space>
                         )}
-
                         {phone && (
                             <Space size={6}>
                                 <PhoneOutlined style={{ fontSize: 12 }} />

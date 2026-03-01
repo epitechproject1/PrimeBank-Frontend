@@ -9,32 +9,34 @@ const { Content } = Layout;
 
 export function DashboardLayout() {
     const [collapsed, setCollapsed] = useState(false);
+
     const { token } = theme.useToken();
     const { mode } = useThemeMode();
 
     return (
-        <Layout style={{ minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
-            <DashboardSidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+        <Layout style={{ minHeight: "100vh" }}>
 
-            <Layout style={{ overflow: "hidden" }}>
+            <DashboardSidebar
+                collapsed={collapsed}
+                setCollapsed={setCollapsed}
+            />
+
+            <Layout>
+
                 <DashboardHeader
                     collapsed={collapsed}
                     toggleCollapse={() => setCollapsed(!collapsed)}
                 />
 
-                <Content
-                    style={{
-                        background: token.colorBgContainer,
-                        borderRadius: token.borderRadiusLG,
-                        boxShadow:
-                            mode === "light"
-                                ? "0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02)"
-                                : "none",
-                        transition: "all 0.2s",
-                        overflowY: "auto",
-                        height: "calc(100vh - 64px)",
-                    }}
-                >
+                <Content style={{
+                    background: token.colorBgContainer,
+                    borderRadius: token.borderRadiusLG,
+                    boxShadow: mode === 'light'
+                        ? '0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02)'
+                        : 'none',
+                    transition: 'all 0.2s',
+                }}>
+
                     <Outlet />
                 </Content>
             </Layout>

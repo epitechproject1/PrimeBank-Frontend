@@ -1,20 +1,45 @@
 import React from "react";
-import { Flex, Input, Button, Space, Tooltip, Typography, Select } from "antd";
+import { Input, Button, Select, Space, Tooltip, Typography, message } from "antd";
 import type { InputProps } from "antd";
 import {
     SearchOutlined,
     ReloadOutlined,
     AppstoreOutlined,
     UnorderedListOutlined,
+    DownloadOutlined,
+    FilePdfOutlined,
+    UploadOutlined,
 } from "@ant-design/icons";
 
 import type { DepartmentOrdering } from "../../types/departments.type";
-import { ExportCsvButton, ExportPdfButton, ImportCsvButton } from "./toolbar.actions";
 import type { DeptFilters } from "./toolbar.utils";
+import { showApiError } from "./toolbar.utils";
+import { departmentService } from "../../services/departments.service";
+import { DepartmentsImportModal } from "../DepartmentsImportModal/DepartmentsImportModal";
 
 const { Text } = Typography;
 
-const ORDERING_OPTIONS: { label: string; value: DepartmentOrdering }[] = [
+interface DepartmentsToolbarProps {
+    search: string;
+    onSearchChange: (value: string) => void;
+    onSearchClear: () => void;
+    onRefresh: () => void;
+    loading: boolean;
+    searching: boolean;
+    viewMode: "grid" | "list";
+    onViewModeChange: (mode: "grid" | "list") => void;
+    ordering: DepartmentOrdering;
+    onOrderingChange: (v: DepartmentOrdering) => void;
+
+    canExportCsv?: boolean;
+    canExportPdf?: boolean;
+    canImport?: boolean;
+}
+
+const H = 38;
+const DEFAULT_ORDERING: DepartmentOrdering = "-created_at";
+
+const ORDERING_OPTIONS: { value: DepartmentOrdering; label: string }[] = [
     { value: "-created_at", label: "Récent → Ancien" },
     { value: "created_at", label: "Ancien → Récent" },
     { value: "-updated_at", label: "Modifié récemment" },
@@ -27,177 +52,95 @@ const ORDERING_OPTIONS: { label: string; value: DepartmentOrdering }[] = [
     { value: "employees_count", label: "Moins d'employés" },
 ];
 
-export interface DepartmentsToolbarProps {
-    search: string;
-    onSearchChange: (value: string) => void;
-    onSearchClear: () => void;
-    onRefresh: () => void;
-    loading: boolean;
-    searching: boolean;
-    viewMode: "grid" | "list";
-    onViewModeChange: (mode: "grid" | "list") => void;
-    ordering: DepartmentOrdering;
-    onOrderingChange: (ordering: DepartmentOrdering) => void;
-
-    canExportCsv: boolean;
-    canExportPdf: boolean;
-    canImport: boolean;
-}
-
-const H = 40;
-
-const toolbarContainerStyle: React.CSSProperties = {
-    position: "sticky",
-    top: 12,
-    zIndex: 20,
-    marginBottom: 18,
-    borderRadius: 16,
-    padding: "10px 14px",
-    background: "rgba(255,255,255,0.9)",
-    border: "1px solid rgba(0,0,0,0.07)",
-    backdropFilter: "blur(12px)",
-    boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
-};
-
 const inputStyle: React.CSSProperties = {
     height: H,
-    borderRadius: 10,
-    background: "#f8f8f8",
-    border: "1px solid rgba(0,0,0,0.08)",
+    borderRadius: 8,
     fontSize: 14,
-    boxShadow: "none",
 };
 
-const squareBtnStyle: React.CSSProperties = {
+const iconBtnStyle: React.CSSProperties = {
     height: H,
     width: H,
-    borderRadius: 10,
-    border: "1px solid rgba(0,0,0,0.08)",
-    background: "#f8f8f8",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    borderRadius: 8,
     flexShrink: 0,
 };
 
-const dividerStyle: React.CSSProperties = {
-    width: 1,
-    height: 24,
-    background: "rgba(0,0,0,0.08)",
-    flexShrink: 0,
-};
 
-function ToolbarContainer({ children }: { children: React.ReactNode }) {
-    return <div style={toolbarContainerStyle}>{children}</div>;
-}
-
-function SearchInput({
-                         value,
-                         onChangeValue,
-                         onClear,
+function SearchBlock({
+                         search,
+                         onSearchChange,
+                         onSearchClear,
                      }: {
-    value: string;
-    onChangeValue: (v: string) => void;
-    onClear: () => void;
+    search: string;
+    onSearchChange: (v: string) => void;
+    onSearchClear: () => void;
 }) {
-    const handleChange: InputProps["onChange"] = (e) => {
+    const handleInputChange: InputProps["onChange"] = (e) => {
         const v = e.target.value;
-        onChangeValue(v);
-        if (v.trim() === "") onClear();
+        onSearchChange(v);
+        if (v.trim() === "") onSearchClear();
     };
 
     return (
         <div style={{ flex: 1, minWidth: 0 }}>
             <Input
-                value={value}
-                onChange={handleChange}
-                placeholder="Rechercher un département…"
-                prefix={<SearchOutlined style={{ color: "#bfbfbf", fontSize: 15 }} />}
-                allowClear={{
-                    clearIcon: (
-                        <span onClick={onClear} style={{ cursor: "pointer", display: "inline-flex" }}>
-              ×
-            </span>
-                    ),
-                }}
+                value={search}
+                onChange={handleInputChange}
+                allowClear
+                placeholder="Rechercher un département..."
+                prefix={<SearchOutlined style={{ color: "#bfbfbf" }} />}
                 style={inputStyle}
             />
         </div>
     );
 }
 
-function OrderingSelect({
-                            value,
-                            onChange,
-                        }: {
-    value: DepartmentOrdering;
-    onChange: (v: DepartmentOrdering) => void;
+function OrderingBlock({
+                           ordering,
+                           onOrderingChange,
+                       }: {
+    ordering: DepartmentOrdering;
+    onOrderingChange: (v: DepartmentOrdering) => void;
 }) {
+    const selectedOrdering = (ordering ?? DEFAULT_ORDERING) as DepartmentOrdering;
+
     return (
-        <Select<DepartmentOrdering>
-            value={value}
-            onChange={onChange}
+        <Select
+            value={selectedOrdering}
+            onChange={onOrderingChange}
+            style={{ width: 180, height: H, flexShrink: 0 }}
             options={ORDERING_OPTIONS}
-            style={{ height: H, minWidth: 150, flexShrink: 0 }}
-            styles={{ popup: { root: { borderRadius: 10 } } }}
-            variant="outlined"
         />
     );
 }
 
-function RefreshButton({ onRefresh, loading }: { onRefresh: () => void; loading: boolean }) {
-    return (
-        <Tooltip title="Rafraîchir">
-            <Button onClick={onRefresh} loading={loading} icon={<ReloadOutlined />} style={squareBtnStyle} />
-        </Tooltip>
-    );
-}
-
-function ViewModeToggle({
-                            viewMode,
-                            onChange,
-                        }: {
+function ViewModeBlock({
+                           viewMode,
+                           onViewModeChange,
+                       }: {
     viewMode: "grid" | "list";
-    onChange: (m: "grid" | "list") => void;
+    onViewModeChange: (m: "grid" | "list") => void;
 }) {
     return (
-        <Space.Compact style={{ flexShrink: 0 }}>
-            <Tooltip title="Vue grille">
-                <Button
-                    icon={<AppstoreOutlined />}
-                    type={viewMode === "grid" ? "primary" : "default"}
-                    onClick={() => onChange("grid")}
-                    style={{
-                        height: H,
-                        width: H,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "10px 0 0 10px",
-                    }}
-                />
-            </Tooltip>
-            <Tooltip title="Vue liste">
-                <Button
-                    icon={<UnorderedListOutlined />}
-                    type={viewMode === "list" ? "primary" : "default"}
-                    onClick={() => onChange("list")}
-                    style={{
-                        height: H,
-                        width: H,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "0 10px 10px 0",
-                    }}
-                />
-            </Tooltip>
+        <Space.Compact>
+            <Button
+                icon={<AppstoreOutlined />}
+                type={viewMode === "grid" ? "primary" : "default"}
+                onClick={() => onViewModeChange("grid")}
+                style={{ height: H }}
+            />
+            <Button
+                icon={<UnorderedListOutlined />}
+                type={viewMode === "list" ? "primary" : "default"}
+                onClick={() => onViewModeChange("list")}
+                style={{ height: H }}
+            />
         </Space.Compact>
     );
 }
 
-function SearchingHint({ show }: { show: boolean }) {
-    if (!show) return null;
+function SearchingHint({ searching }: { searching: boolean }) {
+    if (!searching) return null;
     return (
         <div style={{ marginTop: 6, paddingLeft: 2 }}>
             <Text type="secondary" style={{ fontSize: 12 }}>
@@ -206,6 +149,7 @@ function SearchingHint({ show }: { show: boolean }) {
         </div>
     );
 }
+
 
 export function DepartmentsToolbar({
                                        search,
@@ -218,10 +162,14 @@ export function DepartmentsToolbar({
                                        onViewModeChange,
                                        ordering,
                                        onOrderingChange,
-                                       canExportCsv,
-                                       canExportPdf,
-                                       canImport,
+
+                                       canExportCsv = true,
+                                       canExportPdf = true,
+                                       canImport = true,
                                    }: DepartmentsToolbarProps) {
+    const [importOpen, setImportOpen] = React.useState(false);
+    const [importLoading, setImportLoading] = React.useState(false);
+
     const filters: DeptFilters = React.useMemo(
         () => ({
             q: search?.trim() ? search.trim() : undefined,
@@ -230,25 +178,89 @@ export function DepartmentsToolbar({
         [search, ordering]
     );
 
+    const onExportCsv = async () => {
+        try {
+            await departmentService.exportCsv(filters);
+            message.success("Export CSV téléchargé.");
+        } catch (e: unknown) {
+            await showApiError(e, "Vous n'avez pas le droit d'exporter selon votre poste.");
+        }
+    };
+
+    const onExportPdf = async () => {
+        try {
+            await departmentService.exportPdf(filters);
+            message.success("Export PDF téléchargé.");
+        } catch (e: unknown) {
+            await showApiError(e, "Vous n'avez pas le droit d'exporter selon votre poste.");
+        }
+    };
+
+    const handleImport = async (file: File) => {
+        setImportLoading(true);
+        try {
+            const res = await departmentService.importCsv(file);
+
+            const info = `Créés: ${res.created} | Mis à jour: ${res.updated} | Ignorés: ${res.skipped}`;
+            if (res.errors?.length) message.warning(`${info} — ${res.errors.length} erreurs.`);
+            else message.success(info);
+
+            onRefresh();
+            setImportOpen(false);
+        } catch (e: unknown) {
+            await showApiError(e, "Vous n'avez pas le droit d'importer selon votre poste.");
+        } finally {
+            setImportLoading(false);
+        }
+    };
+
     return (
-        <ToolbarContainer>
-            <Flex gap={10} align="center" style={{ width: "100%" }}>
-                <SearchInput value={search} onChangeValue={onSearchChange} onClear={onSearchClear} />
+        <div style={{ marginBottom: 20 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <SearchBlock search={search} onSearchChange={onSearchChange} onSearchClear={onSearchClear} />
 
-                <OrderingSelect value={ordering} onChange={onOrderingChange} />
+                <OrderingBlock ordering={ordering} onOrderingChange={onOrderingChange} />
 
-                <div style={dividerStyle} />
+                {/* ActionsBlock (copie Teams mais logique departments) */}
+                <Tooltip title="Rafraîchir">
+                    <Button onClick={onRefresh} loading={loading} icon={<ReloadOutlined />} style={iconBtnStyle} />
+                </Tooltip>
 
-                <RefreshButton onRefresh={onRefresh} loading={loading} />
+                {canExportCsv && (
+                    <Tooltip title="Exporter CSV">
+                        <Button icon={<DownloadOutlined />} onClick={onExportCsv} style={iconBtnStyle} />
+                    </Tooltip>
+                )}
 
-                {canExportCsv && <ExportCsvButton disabled={loading} filters={filters} />}
-                {canExportPdf && <ExportPdfButton disabled={loading} filters={filters} />}
-                {canImport && <ImportCsvButton disabled={loading} onDone={onRefresh} />}
+                {canExportPdf && (
+                    <Tooltip title="Exporter PDF">
+                        <Button icon={<FilePdfOutlined />} onClick={onExportPdf} style={iconBtnStyle} />
+                    </Tooltip>
+                )}
 
-                <ViewModeToggle viewMode={viewMode} onChange={onViewModeChange} />
-            </Flex>
+                {canImport && (
+                    <Tooltip title="Importer CSV">
+                        <Button
+                            icon={<UploadOutlined />}
+                            onClick={() => setImportOpen(true)}
+                            style={iconBtnStyle}
+                            disabled={loading}
+                        />
+                    </Tooltip>
+                )}
 
-            <SearchingHint show={searching} />
-        </ToolbarContainer>
+                <ViewModeBlock viewMode={viewMode} onViewModeChange={onViewModeChange} />
+            </div>
+
+            <SearchingHint searching={searching} />
+
+            {/* Modal EXACT Teams */}
+            <DepartmentsImportModal
+                open={importOpen}
+                loading={importLoading}
+                onClose={() => setImportOpen(false)}
+                onImport={handleImport}
+            />
+        </div>
     );
 }

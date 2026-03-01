@@ -10,6 +10,7 @@ export type DepartmentType = {
     employees_count?: number;
     teams_count?: number;
     is_pinned?: number;
+
     created_at: string;
     updated_at: string;
 };
@@ -23,12 +24,15 @@ export type CreateDepartmentPayload = {
 
 export type UpdateDepartmentPayload = Partial<CreateDepartmentPayload>;
 
+
 export type DepartmentStats = {
     total_departments: number;
+    active_count: number;
+    director_count: number;
     total_employees: number;
     avg_per_department: number;
-    this_month_count?: number;
-    timestamp?: string;
+    this_month_count: number;
+    timestamp: string;
 };
 
 export type ApiListResponse<T> = {
@@ -54,8 +58,20 @@ export type ApiSearchResponse<T> = {
 };
 
 export type DepartmentOrdering =
-    | "name" | "-name"
-    | "created_at" | "-created_at"
-    | "updated_at" | "-updated_at"
-    | "teams_count" | "-teams_count"
-    | "employees_count" | "-employees_count";
+    | "name"
+    | "-name"
+    | "created_at"
+    | "-created_at"
+    | "updated_at"
+    | "-updated_at"
+    | "teams_count"
+    | "-teams_count"
+    | "employees_count"
+    | "-employees_count";
+
+export type DepartmentStatsBreakdownRow = {
+    id: number;
+    name: string;
+    teams_count: number;
+    members_count: number;
+};

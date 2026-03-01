@@ -1,4 +1,4 @@
-import { Flex, Typography, Button, Tooltip, Popconfirm } from "antd";
+import { Flex, Typography, Button, Tooltip, Popconfirm, theme } from "antd";
 import {
     EditOutlined,
     DeleteOutlined,
@@ -7,6 +7,7 @@ import {
 } from "@ant-design/icons";
 
 const { Text, Title } = Typography;
+const { useToken } = theme;
 
 type Props = {
     name: string;
@@ -17,6 +18,7 @@ type Props = {
     onEdit: () => void;
     onDelete: () => void;
 };
+
 function DepartmentAvatar({ initials }: { initials: string }) {
     return (
         <div
@@ -30,7 +32,7 @@ function DepartmentAvatar({ initials }: { initials: string }) {
                 color: "white",
                 fontWeight: 800,
                 fontSize: 18,
-                boxShadow: "0 10px 24px rgba(22,119,255,0.28)",
+                boxShadow: "0 10px 24px rgba(22,119,255,0.35)",
                 flexShrink: 0,
             }}
         >
@@ -38,14 +40,15 @@ function DepartmentAvatar({ initials }: { initials: string }) {
         </div>
     );
 }
-function DepartmentStatus({ isActive }: { isActive: boolean }) {
-    const icon = isActive ? (
-        <CheckCircleFilled style={{ color: "#52c41a" }} />
-    ) : (
-        <MinusCircleFilled style={{ color: "rgba(0,0,0,0.35)" }} />
-    );
 
-    const label = isActive ? "Actif" : "Inactif";
+function DepartmentStatus({ isActive }: { isActive: boolean }) {
+    const { token } = useToken();
+
+    const icon = isActive ? (
+        <CheckCircleFilled style={{ color: token.colorSuccess }} />
+    ) : (
+        <MinusCircleFilled style={{ color: token.colorTextDisabled }} />
+    );
 
     return (
         <span
@@ -53,16 +56,17 @@ function DepartmentStatus({ isActive }: { isActive: boolean }) {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                padding: "6px 10px",
+                padding: "4px 10px",
                 borderRadius: 999,
-                background: "rgba(0,0,0,0.04)",
+                background: token.colorFillTertiary,
                 fontSize: 12,
                 fontWeight: 500,
+                color: token.colorTextSecondary,
             }}
         >
-      {icon}
-            {label}
-    </span>
+            {icon}
+            {isActive ? "Actif" : "Inactif"}
+        </span>
     );
 }
 
@@ -126,12 +130,13 @@ export function DepartmentHeader({
                                      onEdit,
                                      onDelete,
                                  }: Props) {
+    const { token } = useToken();
+
     return (
         <div
             style={{
                 padding: 16,
-                background:
-                    "linear-gradient(135deg, rgba(22,119,255,0.12), rgba(22,119,255,0.03))",
+                background: token.colorPrimaryBg,
             }}
         >
             <Flex align="start" justify="space-between" gap={12}>
@@ -141,7 +146,7 @@ export function DepartmentHeader({
                     <div style={{ minWidth: 0 }}>
                         <Title
                             level={5}
-                            style={{ margin: 0, lineHeight: 1.2 }}
+                            style={{ margin: 0, lineHeight: 1.2, color: token.colorText }}
                             ellipsis={{ tooltip: name }}
                         >
                             {name}
